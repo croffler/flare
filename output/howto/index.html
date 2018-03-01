@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/>
+<link rel="stylesheet" href="../../css/bootstrap.css"/>
+<link rel="stylesheet" href="../../css/docs.css"/>
+<link rel="stylesheet" href="../../css/hugo-bootswatch.css"/>
+<title></title>
+</head>
+<body>
+<h1 >XAP Documentation Markdown</h1>
+<hr>
+
+
+
+<p>Cheat sheet for GigaSpaces Documentation</p>
+
+<h1 id="text">Text</h1>
+
+<table>
+<thead>
+<tr>
+<th><strong>Example</strong></th>
+<th><strong>Markdown</strong></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>This is an <em>emphasised</em> text.</td>
+<td>This is an *emphasised* text.</td>
+</tr>
+
+<tr>
+<td>This is a <strong>bold</strong> text.</td>
+<td>This is a **bold** text.</td>
+</tr>
+
+<tr>
+<td>This is a <code>monospaced</code> text</td>
+<td>This is a `monospaced` text</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="links">Links</h1>
+
+<table>
+<thead>
+<tr>
+<th><strong>Description</strong></th>
+<th><strong>Markdown</strong></th>
+<th><strong>Output</strong></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Link to external site</td>
+<td>[GigaSpaces](<a href="http://www.gigaspaces.com">http://www.gigaspaces.com</a>)</td>
+<td><a href="http://www.gigaspaces.com">GigaSpaces</a></td>
+</tr>
+
+<tr>
+<td>Link to page in same folder</td>
+<td>[Anchor](./anchor.html)</td>
+<td><a href="./anchor.html">Anchor</a></td>
+</tr>
+
+<tr>
+<td>Link to page in <code>xap</code> folder</td>
+<td>[SQL Query]({{%currentjavaurl%}}/sqlquery.html)</td>
+<td><a href="/xap/12.2/dev-java/query-sql.html">SQL Query</a></td>
+</tr>
+
+<tr>
+<td>Link to page in <code>xapnet</code> folder</td>
+<td>[SQL Query]({{%currentneturl%}}/sqlquery.html)</td>
+<td><a href="/xap/12.2/dev-dotnet/query-sql.html">SQL Query</a></td>
+</tr>
+
+<tr>
+<td>Link to page in latest <code>xap</code> folder</td>
+<td>[SQL Query]({{%latestjavaurl%}}/sqlquery.html)</td>
+<td><a href="/xap/12.2/dev-java/query-sql.html">SQL Query</a></td>
+</tr>
+
+<tr>
+<td>Link to page in latest <code>xapnet</code> folder</td>
+<td>[SQL Query]({{%latestneturl%}}/sqlquery.html)</td>
+<td><a href="/xap/12.2/dev-dotnet/query-sql.html">SQL Query</a></td>
+</tr>
+
+<tr>
+<td>Link to latest Java Tutorial page</td>
+<td>[Getting started]({{%lateststartedurl%}})</td>
+<td><a href="/xap/12.2/started">Getting Started</a></td>
+</tr>
+
+<tr>
+<td>Link to latest .NET Tutorial page</td>
+<td>[Getting started]({{%latestnettuturl%}})</td>
+<td><a href="/xap/12.2/dev-dotnet/xapnet-basics.html">Getting Started</a></td>
+</tr>
+
+<tr>
+<td>Link to latest Security page</td>
+<td>[Security]({{%latestsecurl%}})</td>
+<td><a href="/xap/12.2/security">Security</a></td>
+</tr>
+
+<tr>
+<td>Link to latest Admin page</td>
+<td>[Administration]({{%latestadmurl%}})</td>
+<td><a href="/xap/12.2/admin">Admin</a></td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="icons">Icons</h1>
+
+<table>
+<thead>
+<tr>
+<th><strong>Example</strong></th>
+<th><strong>Markdown</strong></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td><i class='fa fa-check-circle' style='color:#14892C;'></i>
+
+
+
+This is an OK icon</td>
+<td>{{%oksign%}} This is an OK icon</td>
+</tr>
+
+<tr>
+<td><i class='fa fa-info-circle' style='color:#3B73AF;'></i>
+
+
+
+This is an Info icon</td>
+<td>{{%infosign%}} This is an Info icon  }</td>
+</tr>
+
+<tr>
+<td><i class='fa fa-exclamation-triangle' style='color:#CF9E53;'></i>
+
+
+
+This is an Exclamation icon</td>
+<td>{{%exclamation%}} This is an Exclamation icon</td>
+</tr>
+
+<tr>
+<td><i class='fa fa-question-circle' style='color:#3B73AF;'></i>
+
+
+
+This is a Question icon</td>
+<td>{{%question%}} This is a Question icon</td>
+</tr>
+
+<tr>
+<td><i class='fa fa-plus-circle' style='color:#14892C;'></i> This is a Plus icon</td>
+<td>{{%plus%}} This is a Plus icon</td>
+</tr>
+
+<tr>
+<td><i class='fa fa-times-circle' style='color:#D04437;'></i>
+
+
+
+This is a Remove icon</td>
+<td>{{%remove%}} This is a Remove icon</td>
+</tr>
+
+<tr>
+<td><i class='fa fa-star'></i>
+
+
+
+This is a Star icon</td>
+<td>{{%star%}} This is a Star icon</td>
+</tr>
+
+<tr>
+<td><span class='fa-stack'><i class='fa fa-sun-o fa-stack-2x'></i><i class='fa fa-lightbulb-o fa-stack-1x'></i></span>
+
+
+
+This is a Lamp On icon</td>
+<td>{{%lampon%}} This is a Lamp On icon</td>
+</tr>
+
+<tr>
+<td> 
+<i class='fa fa-lightbulb-o'></i>
+
+
+
+This is a Lamp Off icon</td>
+<td>{{%lampoff%}} This is a Lamp Off icon</td>
+</tr>
+
+<tr>
+<td><a href="This"><i class='fa fa-download fa-lg'></i></a>
+
+
+</td>
+<td>{{%download  This is a download   icon %}}</td>
+</tr>
+
+<tr>
+<td><a href=""><i class='fa fa-file-pdf-o fa-lg'></i></a> This is a pdf icon</td>
+<td>{{%pdf%}} This is a pdf icon</td>
+</tr>
+
+<tr>
+<td><a href=""><i class='fa fa-file-archive-o fa-lg'></i></a>
+
+
+This is a zip icon</td>
+<td>{{%zip%}}  This is a zip icon</td>
+</tr>
+
+<tr>
+<td><i class='fa fa-folder-open fa-lg' style='color:#FACC2E;'></i>
+This is an open folder icon</td>
+<td>{{%folderopen%}} This is an open folder icon</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="layouts">Layouts</h1>
+
+<h2 id="table">Table</h2>
+
+<table>
+<thead>
+<tr>
+<th align="left">Header1</th>
+<th align="left">Header2</th>
+<th align="left">Header3</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">column1</td>
+<td align="left">column2</td>
+<td align="left">column3</td>
+</tr>
+</tbody>
+</table>
+
+<pre><code> | Header1 | Header2 | Header3 |
+|:--------|:--------|:--------|
+| column1 | column2 | column3 |
+</code></pre>
+
+<h2 id="tabbed-pane">Tabbed Pane</h2>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Foo  This is tab Foo" style="padding:10px"></div>
+<div title="Bar  This is tab Bar" style="padding:10px"></div>
+</div>
+
+
+
+
+
+
+<pre><code>{{% tabs %}}
+{{% tab &quot;Foo  This is tab Foo&quot; %}}
+{{% /tab %}}
+{{% tab &quot;Bar  This is tab Bar&quot; %}}
+{{% /tab %}}
+{{% /tabs %}}
+</code></pre>
+
+<h2 id="accordion">Accordion</h2>
+
+<div class="row"><div class="easyui-accordion" data-options="selected:'-1'" plain="true" style="margin-left:15px;margin-right:15px;height:auto;"><div title="accord0" style="padding:10px;"><pre><code class="language-java">private int age;
+private String name;
+</code></pre>
+</div>
+
+
+<div title="accord1" style="padding:10px;"><p>Some Text</p>
+</div>
+
+
+<div title="accordion3" style="padding:10px;"><p>More Text</p>
+</div>
+
+</div></div>
+
+
+
+<pre><code>{{% accordion %}}
+
+{{% accord title=&quot;accord0&quot; %}}
+Some Text 0
+{{% /accord %}}
+
+{{% accord title=&quot;accord1&quot; %}}
+Some Text 1
+{{% /accord %}}
+
+{{% accord title=&quot;accordion3&quot; %}}
+More Text 3
+{{% /accord %}}
+
+{{% /accordion %}}
+</code></pre>
+
+<h2 id="section">Section</h2>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:20%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/subject/index.png" alt="fifo-groups.png" /></p>
+</div>
+
+<div style='float:left;width:80%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>The polling event container is an implementation of the polling consumer pattern which uses the Space to receive events.
+A polling event operation is mainly used when simulating Queue semantics or when using the master-worker design pattern.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<pre><code>{{%section%/%}}
+{{%/* column width=&quot;20%&quot; %}}
+![fifo-groups.png](../../attachment_files/subject/index.png)
+{{% /column %}}
+
+{{%column width=&quot;80%&quot; %}}
+The polling event container is an implementation of the polling  ........
+{{% /column%}}
+{{% /section%}}
+</code></pre>
+
+<h1 id="macros">Macros</h1>
+
+<table>
+<thead>
+<tr>
+<th><strong>Description</strong></th>
+<th><strong>Macro</strong></th>
+<th><strong>Output</strong></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Latest XAP Release</td>
+<td>{{%latestxaprelease%}}</td>
+<td>12.2</td>
+</tr>
+
+<tr>
+<td>Latest XAP Release file name</td>
+<td>{{%version &ldquo;build-filename&rdquo;%}}</td>
+<td>gigaspaces-xap-12.2.1-ga-b18100.zip</td>
+</tr>
+
+<tr>
+<td>Latest XAP Release home dir</td>
+<td>{{%version &ldquo;gshome-directory&rdquo;%}}</td>
+<td>gigaspaces-xap-12.2.1-ga-b18100</td>
+</tr>
+
+<tr>
+<td>Latest Default Lookup Group</td>
+<td>{{%version &ldquo;default-lookup-group&rdquo;%}}</td>
+<td>xap-12.2.1</td>
+</tr>
+
+<tr>
+<td>Latest XAP Maven</td>
+<td>{{%version &ldquo;maven-version&rdquo;%}} 12.2.1</td>
+<td>12.2.1</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="jar-versions">Jar versions</h1>
+
+<table>
+<thead>
+<tr>
+<th><strong>Description</strong></th>
+<th><strong>Macro</strong></th>
+<th><strong>Output</strong></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>spring</td>
+<td>{{%version &ldquo;spring&rdquo;%}}</td>
+<td>4.1</td>
+</tr>
+
+<tr>
+<td>antlr4-runtime</td>
+<td>{{%version &ldquo;antlr4-runtime&rdquo;%}}</td>
+<td>4.0</td>
+</tr>
+
+<tr>
+<td>mongo-java-driver</td>
+<td>{{%version &ldquo;mongo-java-driver&rdquo;%}}</td>
+<td>3.2.0</td>
+</tr>
+
+<tr>
+<td>mongo-datasource</td>
+<td>{{%version &ldquo;mongo-datasource&rdquo;%}}</td>
+<td>10.0.0-SNAPSHOT</td>
+</tr>
+
+<tr>
+<td>openjpa</td>
+<td>{{%version &ldquo;openjpa&rdquo;%}}</td>
+<td>2.0.1</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="anchor">Anchor</h1>
+
+<p>Navigate to the anchor <a href="#hello">point</a></p>
+
+<pre><code>Navigate to the anchor [point](#hello)
+
+{{&lt;anchor hello&gt;}}
+</code></pre>
+
+<h1 id="custom-colors">Custom Colors</h1>
+
+<table>
+<thead>
+<tr>
+<th><strong>Markdown</strong></th>
+<th><strong>Example</strong></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>This text has {{% color blue%}}blue{{% /color %}}</td>
+<td>This text has <span style="color:blue">blue</span>
+
+</td>
+</tr>
+
+<tr>
+<td>This text has {{% bgcolor orange %}}orange background{{% /bgcolor %}}</td>
+<td>This text has 
+
+<span style='background-color:orange'>
+orange background
+</span>
+
+
+</td>
+</tr>
+
+<tr>
+<td>This is a line with a {{%wbr%}} word break</td>
+<td>This is a line with a  <br> word break</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="custom-text-size">Custom Text Size</h1>
+
+<table>
+<thead>
+<tr>
+<th><strong>Markdown</strong></th>
+<th><strong>Example</strong></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>{{% fontsize 10 %}}This is font 10{{% /fontsize %}}</td>
+<td><div style='font-size:10px'>
+This is font 10
+</div>
+
+
+</td>
+</tr>
+
+<tr>
+<td>{{% fontsize 20 %}}This is font 20{{% /fontsize %}}</td>
+<td><div style='font-size:20px'>
+This is font 20
+</div>
+
+
+</td>
+</tr>
+
+<tr>
+<td>{{% fontsize 30 %}}This is font 30{{% /fontsize %}}</td>
+<td><div style='font-size:30px'>
+This is font 30
+</div>
+
+
+</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="image-popup">Image Popup</h1>
+
+
+<div class="container">
+<div class="row">
+<div style="float:left;width:150px;height=140px; border-style:solid;border-color:#E5E4E2;border-radius:10px;padding:0px;position:relative;margin:0px;">
+<p>
+<a  class="example-image-link" href="../../attachment_files/qsg/class_diagram.png" data-toggle="lightbox" >
+<img src="../../attachment_files/qsg/class_diagram.png" class="img-responsive img-rounded">
+</a>
+</p>
+</div>
+</div>
+</div>
+
+
+
+<h4 id="markdown">Markdown</h4>
+
+<pre><code>{{% popup &quot;../../attachment_files/qsg/class_diagram.png&quot;  %}}
+</code></pre>
+
+<h1 id="youtube-video">Youtube Video</h1>
+
+<div class="row">
+<div style="float:left; width:170px;height=140px; padding-left:15px;padding-right:0px;position:relative;margin-left:0px;margin-right:0px;">
+<p><a href="http://www.youtube.com/watch?v=V7rbbmWo3JU" data-width="853" data-title="Multi Site Deployment" data-height="480" data-toggle="lightbox"> <img src="http://img.youtube.com/vi/V7rbbmWo3JU/0.jpg" class="img-responsive img-rounded">Multi Site Deployment</a></p>
+</div>
+</div>
+
+
+
+<h4 id="markdown-1">Markdown</h4>
+
+<pre><code>{{%youtube &quot;V7rbbmWo3JU&quot;  &quot;Multi Site Deployment&quot; %}}
+</code></pre>
+
+<h1 id="image-text">Image text</h1>
+
+<h2 id="left">Left</h2>
+
+<div class="row" style="margin-left:5px; margin-right:0px">
+<img src="../../attachment_files/subject/index.png" class="alignleft" alt="" title="" />
+<p>Lorem ipsum dolor sit amet, tellus magna tempus ultrices donec nisi, lorem varius. Lectus pharetra leo sit. Pede luctus leo, at ligula tortor ultricies aliquam, lorem hendrerit fringilla, posuere egestas potenti mauris viverra curabitur molestie, praesent nonummy porttitor malesuada cras. Venenatis vel, sed malesuada in posuere magna, ac ullamcorper tempus, lorem vitae sem nullam, porta litora laoreet. Pellentesque in mauris litora euismod sed sociis, quis phasellus habitant vestibulum nec at, senectus in id, id vitae suspendisse curabitur et sit. Donec vel ligula et aliquam commodo in, pede euismod vitae dictum nulla ornare suscipit. Vestibulum potenti vivamus ut nec praesent pede, ultricies ut eros vitae fermentum. Accumsan tempus interdum sociis, pellentesque ut tellus vel. Neque felis ullamcorper posuere luctus hendrerit amet. Arcu nulla et urna. Metus pellentesque erat interdum massa arcu vel, curabitur nibh tellus vitae augue. Nonummy duis quis nunc mauris, a phasellus veritatis tortor amet aliquam.</p>
+
+</div>
+
+
+<h4 id="markdown-2">Markdown</h4>
+
+<pre><code>{{% imageltext &quot;../../attachment_files/subject/index.png&quot; %}}
+Some text content
+{{% /imageltext  %}}
+</code></pre>
+
+<h2 id="right">Right</h2>
+
+<div class="row" style="margin-right:5px; margin-left:0px">
+<img src="../../attachment_files/subject/index.png" class="alignright" alt="" title="" />
+<p>Lorem ipsum dolor sit amet, tellus magna tempus ultrices donec nisi, lorem varius. Lectus pharetra leo sit. Pede luctus leo, at ligula tortor ultricies aliquam, lorem hendrerit fringilla, posuere egestas potenti mauris viverra curabitur molestie, praesent nonummy porttitor malesuada cras. Venenatis vel, sed malesuada in posuere magna, ac ullamcorper tempus, lorem vitae sem nullam, porta litora laoreet. Pellentesque in mauris litora euismod sed sociis, quis phasellus habitant vestibulum nec at, senectus in id, id vitae suspendisse curabitur et sit. Donec vel ligula et aliquam commodo in, pede euismod vitae dictum nulla ornare suscipit. Vestibulum potenti vivamus ut nec praesent pede, ultricies ut eros vitae fermentum. Accumsan tempus interdum sociis, pellentesque ut tellus vel. Neque felis ullamcorper posuere luctus hendrerit amet. Arcu nulla et urna. Metus pellentesque erat interdum massa arcu vel, curabitur nibh tellus vitae augue. Nonummy duis quis nunc mauris, a phasellus veritatis tortor amet aliquam.</p>
+
+</div>
+
+<h4 id="markdown-3">Markdown</h4>
+
+<pre><code>{{% imagertext &quot;../../attachment_files/subject/index.png&quot; %}}
+Some text content
+{{% /imagertext  %}}
+</code></pre>
+
+<h1 id="panels">Panels</h1>
+
+<table>
+<thead>
+<tr>
+<th>Description</th>
+<th>Markdown</th>
+<th>Output</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Simple panel</td>
+<td>{{%panel &ldquo;hello there&rdquo;%}}This is a simple panel{{% /panel %}}</td>
+<td>
+<div class='well' style='background:white'><b>hello there</b><br>This is a simple panel</div>
+
+</td>
+</tr>
+
+<tr>
+<td>Warning</td>
+<td>{{%warning &ldquo;Warning&hellip;..&rdquo;%}}&hellip; {{% /warning%}}</td>
+<td>
+<div class='bs-callout bs-callout-danger'>
+<b style="color:#d9534f">Warning.....</b><br>
+&hellip;</div>
+
+</td>
+</tr>
+
+<tr>
+<td>Info</td>
+<td>{{%info &ldquo;Info&hellip;..&rdquo;%}}&hellip; {{% /info%}}</td>
+<td>
+<div class='bs-callout bs-callout-info'>
+<b style="">Info.....</b><br>
+&hellip;</div>
+
+
+
+</td>
+</tr>
+
+<tr>
+<td>Note</td>
+<td>{{%note &ldquo;Note&hellip;..&rdquo;%}}&hellip; {{% /note%}}</td>
+<td>
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note.....</b><br>
+&hellip;</div>
+
+
+
+
+
+
+</td>
+</tr>
+
+<tr>
+<td>Tip</td>
+<td>{{%tip &ldquo;Tip&hellip;..&rdquo;%}}&hellip; {{% /tip%}}</td>
+<td>
+<div class='bs-callout bs-callout-success'>
+<b style="">Tip.....</b><br>
+&hellip;</div>
+
+
+
+
+
+
+
+
+
+</td>
+</tr>
+
+<tr>
+<td>Refer</td>
+<td>{{%refer%}}&hellip; {{% /refer%}}</td>
+<td><div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+&hellip;
+</div> </td>
+</tr>
+
+<tr>
+<td>VBar</td>
+<td>{{%vbar &ldquo;VBar&hellip;..&rdquo;%}}&hellip; {{% /vbar%}}</td>
+<td>
+<div class='bs-callout bs-callout-default'>
+<b style="">VBar.....</b><br>
+&hellip;</div>
+
+
+</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="landing-page-panel">Landing page panel</h3>
+
+<div class='well' style='background-color:#FAFAFA;border-color:#E5E4E2;border-radius:10px;border-style:solid;'><ul>
+<li><a href="/xap/11.0/dev-java/change-api.html">Overview</a><br>
+Change API overview.</li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+<h4 id="markdown-4">Markdown</h4>
+
+<pre><code>{{% fpanel %}}
+- [Overview](/xap/11.0/dev-java/change-api.html)&lt;br&gt;
+Change API overview.
+
+{{% /fpanel %}}
+</code></pre>
+
+<h1 id="links-1">Links</h1>
+
+<p>Testing docs link <a href="http://www.mulesoft.org">Event Processing</a> to see how this works.<br></p>
+
+<p>Testing external link <a href="http://www.mulesoft.org/" target="_blank" >Mule Site <i class='fa fa-external-link'></i></a> to see how this works.<br></p>
+
+<p>Testing github link <a href="http://www.mulesoft.org/" target="_blank" >GigaSpaces <i class="fa fa-github"></i> </a> to see how this works.</p>
+
+<p>Testing javadoc link  
+<a href="http://www.mulesoft.org/" target="_blank"  style="color:#BA4A00" >GigaSpaces</a>
+
+
+
+
+
+to see how this works.</p>
+
+</div>
+</div>
+</body>
+<script src="../../js/prism.js"></script>
+<script src="../../js/bootstrap.min.js"></script>
+<script src="../../js/jquery-1.11.js"></script>
+</html>

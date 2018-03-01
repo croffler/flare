@@ -1,0 +1,216 @@
+
+/*  CSS for TOC */
+.toc .nav > .active > a,.toc .nav > .active:hover > a, .toc .nav > .active :focus > a {
+border-left: 2px solid #428bca;
+border-right:none;
+}
+
+/* css for breadcrumbs */
+.breadcrumb {
+  padding: 8px 15px;
+  margin-bottom: 20px;
+  list-style: none;
+  background-color: white;
+  border-radius: 4px;
+}
+
+
+/* css for images They need to resize to its container
+*/
+img {
+max-height: 100%;
+max-width: 100%;
+object-fit: cover;
+}
+
+/* css for the left navigation tree */
+.leftbar{
+  overflow:auto;
+  height:1000px;
+  margin-left:-30px;
+  margin-top:0px;
+  position:fixed;
+  width:inherit;
+//  background:#f5f5f5;
+  border-right-size:1px;
+  border-right-style:solid;
+  border-right-color:#f5f5f5;
+  border-top-style:solid;
+  border-top-color:#f5f5f5;
+  border-bottom-style:solid;
+  border-bottom-color:#f5f5f5;
+}
+
+/********************/
+
+/*  This is the css for the shortcods
+
+This wrappes the text around an image
+
+imagertext
+imageltext
+
+*/
+
+
+img.alignright { float: right; margin: 0em 1em 0em 1em; }
+img.alignleft { float: left; margin: 0em 1em 0em 0; }
+img.aligncenter { display: block; margin-left: auto; margin-right: auto; }
+.alignright { float: right; }
+.alignleft { float: left; }
+.aligncenter { display: block; margin-left: auto; margin-right: auto; }
+
+
+
+/*   end toc */
+
+
+/* own theme stuff */
+
+body{
+    padding-top:50px;
+}
+footer{
+    padding-top:50px;
+}
+
+/* scroll top */
+
+.scrollToTop{
+    width:30px;
+    height:30px;
+    padding:5px; 
+    text-align:center; 
+    background: whiteSmoke;
+    font-weight: bold;
+    color: #444;
+    text-decoration: none;
+    position:fixed;
+    bottom:50px;
+    right:100px;
+    display:none;
+    background: url('/images/up-arrow.jpeg') no-repeat 0px 5px;
+}
+.scrollToTop:hover{
+    text-decoration:none;
+}
+
+
+
+/*
+ * Callouts
+ *
+ * Not quite alerts, but custom and helpful notes for folks reading the docs.
+ * Requires a base and modifier class.
+ */
+
+/* Common styles for all types */
+/*
+.bs-callout {
+  margin: 5px 0;
+  padding: 5px 5px 5px 5px;
+  border-left: 5px solid #eee;
+  display: inline-block;
+}
+.bs-callout h4 {
+  margin-top: 0;
+}
+.bs-callout p:last-child {
+  margin-bottom: 0;
+}
+.bs-callout code,
+.bs-callout .highlight {
+  background-color: #fff;
+}
+
+*/
+/* Variations */
+.bs-callout-success {
+  background-color: #F5FFF1;
+  border-color: #BAE099;
+}
+.bs-callout-danger {
+  background-color: #FEF9F8;
+  border-color: #000000;
+}
+.bs-callout-warning {
+  background-color: #FFFDF5;
+  border-color: #f1e7bc;
+}
+.bs-callout-info {
+  background-color: #F2FFFF;
+  border-color: #d0e3f0;
+}
+
+.bs-callout-primary {
+  background-color: #FBF9F7;
+  border-color: #FBF9F7;
+}
+
+
+.bs-callout {
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #eee;
+    border-left-width: 5px;
+    border-radius: 3px;
+}
+.bs-callout h4 {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+.bs-callout p:last-child {
+    margin-bottom: 0;
+}
+.bs-callout code {
+    border-radius: 3px;
+}
+.bs-callout+.bs-callout {
+    margin-top: -5px;
+}
+.bs-callout-default {
+    border-left-color: #777;
+}
+.bs-callout-default h4 {
+    color: #777;
+}
+.bs-callout-primary {
+    border-left-color: #A0522D;
+
+
+}
+.bs-callout-primary h4 {
+    color: #A0522D;
+
+
+}
+.bs-callout-success {
+    border-left-color: #5cb85c;
+
+}
+.bs-callout-success h4 {
+    color: #5cb85c;
+}
+.bs-callout-danger {
+    border-left-color: #d9534f;
+
+}
+.bs-callout-danger h4 {
+    color: #d9534f;
+}
+.bs-callout-warning {
+    border-left-color: #f0ad4e;
+
+
+}
+.bs-callout-warning h4 {
+    color: #f0ad4e;
+}
+.bs-callout-info {
+    border-left-color: #5bc0de;
+
+}
+.bs-callout-info h4 {
+    color: #5bc0de;
+}
+

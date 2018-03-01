@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/>
+<link rel="stylesheet" href="../../css/bootstrap.css"/>
+<link rel="stylesheet" href="../../css/docs.css"/>
+<link rel="stylesheet" href="../../css/hugo-bootswatch.css"/>
+<title></title>
+</head>
+<body>
+<h1 >Viewing Container Information</h1>
+<hr>
+
+
+
+<span style='background-color:yellow'>
+write intro for this topic
+</span>
+
+
+
+
+<p><br>
+<strong>To view the general Container details:</strong></p>
+
+<p><div class="easyui-tabs" plain="true" data-options=""><div title="Command Line Interface" style="padding:10px"><p><strong><em>List all Containers</em></strong><br></p>
+
+<p><em>Parameters:</em></p>
+
+<p><em>Example:</em></p>
+
+<pre><code class="language-bash">&lt;XAP-HOME&gt;/bin/xap container list
+</code></pre>
+
+<p><strong><em>List Container information</em></strong><br></p>
+
+<p><em>Parameters:</em></p>
+
+<ul>
+<li>containerId : The Id  of the Container.</li>
+</ul>
+
+<p><em>Example:</em></p>
+
+<pre><code class="language-bash">&lt;XAP-HOME&gt;/bin/xap container info  containerId
+</code></pre>
+</div>
+
+<div title="REST Manager API" style="padding:10px"><p><strong><em>List all Containers</em></strong><br></p>
+
+<p><em>Parameters:</em></p>
+
+<p><em>Example:</em></p>
+
+<pre><code class="language-bash">curl -X GET --header 'Accept: text/plain' 'http://localhost:8090/v1/containers'
+</code></pre>
+
+<p><strong><em>List Container information</em></strong><br></p>
+
+<p><em>Parameters:</em><br></p>
+
+<ul>
+<li>containerId : The Id  of the Container.</li>
+</ul>
+
+<p><em>Example:</em></p>
+
+<pre><code class="language-bash">curl -X GET --header 'Accept: text/plain' 'http://localhost:8090/v1/containers/conatinerId'
+</code></pre>
+</div>
+
+<div title="Web Management Console" style="padding:10px"><p>TBD</p>
+</div>
+
+<div title="GigaSpaces Management Console" style="padding:10px"><p>TBD</p>
+</div>
+
+<div title="Administration API" style="padding:10px"><p>TBD</p>
+</div>
+</div>
+
+
+
+
+</p>
+
+</div>
+</div>
+</body>
+<script src="../../js/prism.js"></script>
+<script src="../../js/bootstrap.min.js"></script>
+<script src="../../js/jquery-1.11.js"></script>
+</html>

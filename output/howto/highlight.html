@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/>
+<link rel="stylesheet" href="../../css/bootstrap.css"/>
+<link rel="stylesheet" href="../../css/docs.css"/>
+<link rel="stylesheet" href="../../css/hugo-bootswatch.css"/>
+<title></title>
+</head>
+<body>
+<h1 >Highlight</h1>
+<hr>
+
+
+
+<p><code>Hello there</code></p>
+
+<p><p>Use the mark element to <mark>highlight</mark> text.</p></p>
+
+<h1 id="code-java-highlight">Code Java Highlight</h1>
+
+<pre><code class="language-java">// Read an entry of type MyClass whose num property is greater than 500:
+MyClass result1 = gigaSpace.read(new SQLQuery&lt;MyClass&gt;(MyClass.class, &quot;num &gt; 500&quot;));
+
+// Take an entry of type MyClass whose num property is less than 500:
+MyClass result2 = gigaSpace.take(new SQLQuery&lt;MyClass&gt;(MyClass.class, &quot;num &lt; 500&quot;));
+
+MyClass[] results;
+// Read all entries of type MyClass whose num is between 1 and 100:
+results = gigaSpace.readMultiple(new SQLQuery&lt;MyClass&gt;(MyClass.class, &quot;num &gt;= 1 AND num &lt;= 100&quot;));
+
+// Read all entries of type MyClass who num is between 1 and 100 using BETWEEN syntax:
+results = gigaSpace.readMultiple(new SQLQuery&lt;MyClass&gt;(MyClass.class, &quot;num BETWEEN 1 AND 100&quot;));
+
+// Read all entries of type MyClass whose num is either 1, 2, or 3:
+results = gigaSpace.readMultiple(new SQLQuery&lt;MyClass&gt;(MyClass.class, &quot;num IN (1,2,3)&quot;));
+
+// Read all entries of type MyClass whose num is greater than 1,
+// and order the results by the name property:
+results = gigaSpace.readMultiple(new SQLQuery&lt;MyClass&gt;(MyClass.class, &quot;num &gt; 1 ORDER BY name&quot;));
+</code></pre>
+
+<h1 id="csharp">Csharp</h1>
+
+<pre><code class="language-java">namespace document
+{
+public class Program
+{
+public Program ()
+{
+// Create the Space
+ISpaceProxy spaceProxy = new EmbeddedSpaceFactory (&quot;mySpace&quot;).Create ();
+
+registerDocument (spaceProxy);
+
+PersonDoc doc1 = new PersonDoc ();
+doc1 [PersonDoc.PropertyTypeId] = &quot;1&quot;;
+doc1 [PersonDoc.PropertyFirstName] = &quot;John&quot;;
+doc1 [PersonDoc.PropertyLastName] = &quot;Fellner&quot;;
+
+spaceProxy.Write (doc1);
+
+EmployeeDoc doc2 = new EmployeeDoc ();
+doc2 [PersonDoc.PropertyTypeId] = &quot;2&quot;;
+doc2 [PersonDoc.PropertyFirstName] = &quot;John&quot;;
+doc2 [PersonDoc.PropertyLastName] = &quot;Walters&quot;;
+doc2 [EmployeeDoc.PropertyEmployeeNumber] = &quot;1234&quot;;
+
+spaceProxy.Write (doc2);
+
+SqlQuery&lt;PersonDoc&gt; query1 = new SqlQuery&lt;PersonDoc&gt; (
+PersonDoc.DocName, &quot;&quot;);
+
+PersonDoc[] result1 = spaceProxy.ReadMultiple&lt;PersonDoc&gt; (query1);
+
+// You should see two objects
+Console.WriteLine (result1.Length);
+
+SqlQuery&lt;EmployeeDoc&gt; query2 = new SqlQuery&lt;EmployeeDoc&gt; (
+EmployeeDoc.DocName, &quot;&quot;);
+
+EmployeeDoc[] result2 = spaceProxy.ReadMultiple&lt;EmployeeDoc&gt; (query2);
+
+// You should see one object
+Console.WriteLine (result2.Length);
+}
+}
+</code></pre>
+
+<h1 id="code-xml-highlight">Code XML Highlight</h1>
+
+<pre><code class="language-xml">&lt;beans&gt;
+&lt;os-core:embedded-space id=&quot;space&quot; name=&quot;mySpace&quot;&gt;
+&lt;os-core:properties&gt;
+&lt;props&gt;
+&lt;prop key=&quot;space-config.QueryProcessor.date_format&quot;&gt;yyyy-MM-dd HH:mm:ss&lt;/prop&gt;
+&lt;prop key=&quot;space-config.QueryProcessor.time_format&quot;&gt;HH:mm:ss&lt;/prop&gt;
+&lt;/props&gt;
+&lt;/os-core:properties&gt;
+&lt;/os-core:embedded-space&gt;
+&lt;/beans&gt;
+
+&lt;import resource=&quot;classpath*:/applicationContext-component.xml&quot; /&gt;
+&lt;import resource=&quot;classpath*:/applicationContext-component.xml&quot; /&gt;
+&lt;import resource=&quot;classpath*:/applicationContext-component.xml&quot; /&gt;
+</code></pre>
+
+<h1 id="property">Property</h1>
+
+<pre><code class="language-property">introscope.epagent.config.networkDataPort=8003
+</code></pre>
+
+<h1 id="yaml">YAML</h1>
+
+<pre><code class="language-yaml">RESOURCE_SEGMENT_1|...|RESOURCE_SEGMENT_N:METRIC_NAME
+</code></pre>
+
+<h1 id="bash">Bash</h1>
+
+<pre><code class="language-bash">&gt;cd /root
+&gt;chmod +x hello.*
+
+</code></pre>
+
+<h1 id="sql">Sql</h1>
+
+<pre><code class="language-sql">SELECT * FROM PERSON;
+
+</code></pre>
+
+</div>
+</div>
+</body>
+<script src="../../js/prism.js"></script>
+<script src="../../js/bootstrap.min.js"></script>
+<script src="../../js/jquery-1.11.js"></script>
+</html>

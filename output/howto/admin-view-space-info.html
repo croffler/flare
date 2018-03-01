@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/>
+<link rel="stylesheet" href="../../css/bootstrap.css"/>
+<link rel="stylesheet" href="../../css/docs.css"/>
+<link rel="stylesheet" href="../../css/hugo-bootswatch.css"/>
+<title></title>
+</head>
+<body>
+<h1 >Viewing Space Information</h1>
+<hr>
+
+
+
+<span style='background-color:yellow'>
+write intro for this topic
+</span>
+
+
+
+
+<p><strong>To view Space information:</strong></p>
+
+<p><div class="easyui-tabs" plain="true" data-options=""><div title="Command Line Interface" style="padding:10px"><p><strong><em>Display Space Information</em></strong></p>
+
+<p><em>Parameters:</em><br></p>
+
+<ul>
+<li>name : The name of the Space.</li>
+</ul>
+
+<p><em>Options:</em><br></p>
+
+<ul>
+<li>&mdash;operation-stats : Displays Space operations statistics, (read, write, take etc)  <br></li>
+<li>&mdash;type-stats      : Displays Space object information.</li>
+</ul>
+
+<p><em>Example:</em></p>
+
+<pre><code class="language-bash">&lt;XAP-HOME&gt;/bin/xap space info --type-stats mySpace
+</code></pre>
+
+<p><strong><em>Display Space instance information</em></strong></p>
+
+<p><em>Parameters:</em><br>
+instanceId : The id of the Space instance to use.</p>
+
+<p><em>Options:</em><br></p>
+
+<ul>
+<li>&mdash;operation-stats : Displays Space instance operations statistics, (read, write, take etc)  <br></li>
+<li>&mdash;type-stats      : Displays Space instance object information.<br></li>
+<li>&mdash;replication-stats: Display Space instance replication information.</li>
+</ul>
+
+<p><em>Example:</em></p>
+
+<pre><code class="language-bash">&lt;XAP-HOME&gt;/bin/xap space info-instances --replication-stats mySpace~1
+</code></pre>
+</div>
+
+<div title="REST Manager API" style="padding:10px"><p><strong><em>Display Space Information</em></strong></p>
+
+<p><em>Parameters:</em><br></p>
+
+<ul>
+<li>host URL: Host URL   where the REST Manager is running.<br></li>
+<li>name : The name of the Space.</li>
+</ul>
+
+<p>Displays Space operations statistics, (read, write, take etc)  <br></p>
+
+<p><em>Example:</em></p>
+
+<pre><code class="language-bash">curl -X GET --header 'Accept: application/json' 'http://localhost:8090/v1/spaces/mySpace/statistics/operations'
+</code></pre>
+
+<p><strong><em>Display Space instance information</em></strong></p>
+
+<p><em>Parameters:</em><br></p>
+
+<ul>
+<li>host URL: Host URL where the REST Manager is running.<br></li>
+<li>name : The name of the Space.<br></li>
+<li>instanceId : The id of the Space instance to use.</li>
+</ul>
+
+<p><em>Options:</em><br></p>
+
+<ul>
+<li>operations : Displays Space instance operations statistics, (read, write, take etc)  <br></li>
+<li>types     : Displays Space instance object information.<br></li>
+<li>replication: Display Space instance replication information.</li>
+</ul>
+
+<p><em>Examples:</em></p>
+
+<pre><code class="language-bash">curl -X GET --header 'Accept: application/json' 'http://localhost:8090/v1/spaces/mySpace/instances/mySpace~1/statistics/operations'
+curl -X GET --header 'Accept: text/plain' 'http://localhost:8090/v1/spaces/mySpace/instances/mySpace~1/statistics/replication'
+curl -X GET --header 'Accept: application/json' 'http://localhost:8090/v1/spaces/mySpace/instances/mySpace~1/statistics/types'
+</code></pre>
+</div>
+
+<div title="Web Management Console" style="padding:10px"><p>You can see the following details about Spaces in the lower pane of the Spaces view when the Configuration option is selected (default). The information is displayed for the Space instance that is highlighted in the table above.</p>
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<p>This information is also available in the Config tab of the associated Processing Unit.</p>
+</div>
+
+<table>
+<tr>
+<th>Item</th>
+<th>Description</th>
+</tr>
+<tr>
+<td colspan="2"><i>General</i></td>
+<td></td>
+</tr>
+<tr>
+<td>Space Schema</td>
+<td>Type of schema (default, mirror, or persistent).</td>
+</tr>
+<tr>
+<td>Secured</td>
+<td>Whether or not this Space is secured.</td>
+</tr>
+<tr>
+<td>Persistent</td>
+<td>Whether or not this Space is persistent.</td>
+</tr>
+<tr>
+<td>Clustered</td>
+<td>Whether or not this Space is part of a cluster.</td>
+</tr>
+<tr>
+<td>Clustered Schema</td>
+<td>(If applicable) The cluster topology (partitioned or replicated).</td>
+</tr>
+<tr>
+<td colspan="2"><i>Network & Environment</i></td>
+<td></td>
+</tr>
+<tr>
+<td>Home Directory</td>
+<td>Path where the deployment files are located.</td>
+</tr>
+<tr>
+<td>Host Name</td>
+<td>Name or IP address of the host machine.</td>
+</tr>
+<tr>
+<td>RMI Registry Port</td>
+<td>Port number for the RMI registry.</td>
+</tr>
+<tr>
+<td>JMX Service URL</td>
+<td>Full URL for hte JMX service.</td>
+</tr>
+<tr>
+<td colspan="2"><i>Memory Management</i></td>
+<td></td>
+</tr>
+<tr>
+<td>Cache Policy</td>
+<td>Defined cache policy (all in cache or LRU)</td>
+</tr>
+<tr>
+<td>LRU Eviction Batch Size</td>
+<td>(LRU only) How many of the oldest data objects to remove if eviction is based on available memory. </td>
+</tr>
+<tr>
+<td>Cache Size</td>
+<td>Amount of memory allocated to the cache.</td>
+</tr>
+<tr>
+<td>Memory Management State</td>
+<td>Whether the memory manager is enabled or disabled.</td>
+</tr>
+<tr>
+<td>High Watermark</td>
+<td>When the amount of used cache memory reaches this value (in %), the memory manager must take action (throw an exception or evict objects).</td>
+</tr>
+<tr>
+<td>Low Watermark</td>
+<td>When the amount of used cache memory reaches this value (in %),  the memory manager begins to monitor how much cache memory is left.</td>
+</tr>
+<tr>
+<td>Write Operation Rejection</td>
+<td>When the amount of used cache memory reaches this value (in %), the memory manager begins to block write operations. </td>
+</tr>
+<tr>
+<td>Write Operation Inspection</td>
+<td>When the amount of used cache memory reaches this value (in %), the memory manager begins to monitor write operations. </td>
+</tr>
+</table>
+
+<p>If you have a system with Memory Xtend, you can also see the following information about the blobstore:</p>
+
+<p><p>???</p>
+</div></p>
+
+<div title="GigaSpaces Management Console" style="padding:10px"><p>TBD</p>
+</div>
+
+<div title="Administration API" style="padding:10px"><p>TBD</p>
+</div>
+</div>
+
+
+
+
+</p>
+
+</div>
+</div>
+</body>
+<script src="../../js/prism.js"></script>
+<script src="../../js/bootstrap.min.js"></script>
+<script src="../../js/jquery-1.11.js"></script>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/>
+<link rel="stylesheet" href="../../css/bootstrap.css"/>
+<link rel="stylesheet" href="../../css/docs.css"/>
+<link rel="stylesheet" href="../../css/hugo-bootswatch.css"/>
+<title></title>
+</head>
+<body>
+<h1 >Table</h1>
+<hr>
+
+
+
+<h1 id="simple-markdown-table">Simple markdown table</h1>
+
+<table>
+<thead>
+<tr>
+<th>Keyname</th>
+<th>Required</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>type</td>
+<td>yes</td>
+<td>string</td>
+<td>The <a href="dsl-spec-node-types.html">node type</a> of this node template.</td>
+</tr>
+
+<tr>
+<td>properties</td>
+<td>no</td>
+<td>dict</td>
+<td>The properties of the node template matching its node type properties schema.</td>
+</tr>
+
+<tr>
+<td>instances</td>
+<td>no</td>
+<td>dict</td>
+<td>Instances configuration.</td>
+</tr>
+
+<tr>
+<td>interfaces</td>
+<td>no</td>
+<td>interfaces</td>
+<td>Used for mapping plugins to <a href="dsl-spec-interfaces.html">interfaces</a> operation or for specifying inputs for already mapped node type operations.</td>
+</tr>
+
+<tr>
+<td>relationships</td>
+<td>no</td>
+<td>relationships</td>
+<td>Used for specifying the <a href="dsl-spec-relationships.html">relationships</a> this node template has with other node templates.</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="without-header">Without header</h1>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>type</td>
+<td>yes</td>
+<td>string</td>
+<td>The <a href="dsl-spec-node-types.html">node type</a> of this node template.</td>
+</tr>
+
+<tr>
+<td>properties</td>
+<td>no</td>
+<td>dict</td>
+<td>The properties of the node template matching its node type properties schema.</td>
+</tr>
+
+<tr>
+<td>instances</td>
+<td>no</td>
+<td>dict</td>
+<td>Instances configuration.</td>
+</tr>
+
+<tr>
+<td>interfaces</td>
+<td>no</td>
+<td>interfaces</td>
+<td>Used for mapping plugins to <a href="dsl-spec-interfaces.html">interfaces</a> operation or for specifying inputs for already mapped node type operations.</td>
+</tr>
+
+<tr>
+<td>relationships</td>
+<td>no</td>
+<td>relationships</td>
+<td>Used for specifying the <a href="dsl-spec-relationships.html">relationships</a> this node template has with other node templates.</td>
+</tr>
+</tbody>
+</table>
+
+<table>
+<thead>
+<tr>
+<th align="left">Modifier and Type</th>
+<th align="left">Description</th>
+<th align="left">Default</th>
+<th align="left">Unit</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">T</td>
+<td align="left">POJO, SpaceDocument</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">timeout</td>
+<td align="left">Time to wait for the response</td>
+<td align="left">0</td>
+<td align="left">milliseconds</td>
+</tr>
+
+<tr>
+<td align="left">query</td>
+<td align="left"><a href="https://docs.gigaspaces.com/api/xap/12.2.0/java
+/com/gigaspaces/query/ISpaceQuery.html">ISpaceQuery</a></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left"><a href="https://docs.gigaspaces.com/api/xap/12.2.0/java
+/com/gigaspaces/async/AsyncFutureListener.html">AsyncFutureListener</a></td>
+<td align="left">Allows to register for a callback on an AsyncFuture to be notified when a result arrives</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left"><a href="https://docs.gigaspaces.com/api/xap/12.2.0/java
+/com/gigaspaces/client/ReadModifiers.html">ReadModifiers</a></td>
+<td align="left">Provides modifiers to customize the behavior of read operations</td>
+<td align="left">NONE</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</body>
+<script src="../../js/prism.js"></script>
+<script src="../../js/bootstrap.min.js"></script>
+<script src="../../js/jquery-1.11.js"></script>
+</html>

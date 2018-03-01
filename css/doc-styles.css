@@ -1,0 +1,296 @@
+h1 {
+  font-size: 22px;
+  line-height: 30px;
+}
+
+h2 {
+  font-size: 19px;
+  line-height: 30px;
+}
+
+h3 {
+  font-size: 15px;
+  line-height: 30px;
+}
+
+h4 {
+  font-size: 13px;
+  line-height: 30px;
+}
+
+h5 {
+  font-size: 12px;
+  line-height: 30px;
+}
+
+h6 {
+  font-size: 12px;
+  line-height: 30px;
+}
+
+/*
+Changed `` highlight to gray and text to black
+*/
+code {
+  padding: 2px 4px;
+  font-size: 90%;
+  color: black;
+  background-color: #ededed;
+  border-radius: 4px;
+}
+
+
+.navbar-default {
+
+# background-color: #f8f8f8;
+  background-color: #cdecf5;
+  border-color: #e7e7e7;
+}
+
+.gs-navbar-brand {
+    float: left;
+    height: 50px;
+    padding: 10px 15px;
+    font-size: 18px;
+    line-height: 20px;
+}
+
+html, body {
+    height: 100%;
+}
+
+h1, h2 {
+    padding-top: 118px; 
+    margin-top: -118px;
+}
+
+* {
+    margin: 0;
+}
+
+
+#wrap {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto 60px;
+}
+
+#home-content-container {
+    padding-top:10px;
+    min-height: 650px; 
+    padding-left: 0px
+}
+
+.push {
+    height: 60px;
+}
+
+#footer {
+    background-color: rgb(245, 245, 245);
+    position: relative;
+    height: 60px;
+    width: 100%;
+    clear:both;
+    z-index: 300; 
+} 
+
+
+.leftbar {
+    border-right-style: hidden;
+    border-top-style: hidden; 
+    border-bottom-style: hidden; 
+    height:80%;
+    margin-top: 60px;
+    padding-bottom: 70px;
+}
+
+#content {
+    margin-left: 0px;
+    margin-bottom: 100px;
+    padding-top: 50px;
+}
+
+#home-content {
+    margin-left: 0px;
+    margin-bottom: 100px;
+    margin-top: 50px;
+}
+
+
+#leftbar-div {
+    z-index: 200; 
+}
+
+@media (max-width: 1000px) {
+    #leftbar-div {
+        display: none;
+    }
+    #footer {
+        display: none;
+    }
+}
+
+@media (min-width: 1000px) {
+    #content {
+        border-left-style: solid;
+        border-left-color: rgb(245, 245, 245);
+        border-left-width: 1px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .navbar-right { 
+        display: none;
+    }
+
+    .leftbar {
+        margin-top: auto;
+        width: 150px; 
+
+    }
+
+    #content {
+        margin-top: auto;    
+    }
+
+    #home-content {
+        margin-top: auto;    
+    }    
+}
+
+
+
+#breadcrumbs {
+    padding-top: 15px;
+    width: 100%;
+    z-index: 100;
+    background-color: white;
+    position:relative;
+}
+
+.breadcrumb > li + li:before {
+  padding: 0 5px;
+  color: #ccc;
+  content: ">>\00a0";
+}
+
+.page-title {
+    background-color: white;
+    padding-top: 17px;
+    z-index: 200;
+}
+
+@media (min-width: 1200px) {
+    #breadcrumbs {
+        position: fixed;
+    }
+
+    .leftbar {
+        width: 200px; 
+    }
+
+    .page-title {
+        width: 709px;
+        /*position: fixed;*/
+    }
+    
+    .page-content {
+        /*padding-top: 76px;*/
+    }
+}
+
+@media (min-width: 1400px) {
+    .leftbar {
+        width: 230px; 
+    }
+
+    .container {
+        width: 1400px;
+    }
+
+    .page-title {
+        width: 862px;
+        /*position: fixed;*/
+    }
+}
+
+.breadcrumb {    
+    font-size: 15px;
+    font-weight: 500;
+    z-index: 1000;
+}
+
+.treeview {
+    width: 95%;
+}
+
+ul li.search-result{ 
+  border-bottom:solid 1px #e4e4e4; 
+  min-height:64px; 
+  padding:10px 0 20px 140px; 
+  line-height:18px;
+  background:url(../images/bgDocIcon.png) no-repeat scroll 0 23px ;
+  list-style-type:none;
+}
+
+@media (min-width: 768px) { 
+  .sb-fixed {
+    position: fixed;
+  } 
+}
+
+li.search-result em {
+  font-style: normal;
+  background-color: #FFFF00;
+}
+
+/*######overrides classes from bootstrap.css####*/
+.page-content .btn {
+    border-radius: 32px;
+    color: white;
+    pointer-events: none;
+}
+
+.page-content .btn-premium {
+    background-color: #F7941E;
+    border-color: #F7941E;
+}
+
+.page-content .btn-enterprise {
+    background-color: #EC008C;
+    border-color: #EC008C;
+}
+
+.page-content .btn-insight-edge {
+    background-color: #00C0F3;
+    border-color: #00C0F3;
+}
+
+.page-content .btn-open-source {
+    background-color: #BFD730;
+    border-color: #BFD730;
+}
+
+.page-content .btn-group-lg>.btn, .btn-lg {
+    font-size: 14px;
+    font-family: 'Rubik', sans-serif;
+}
+/*######End of overridides of classes from bootstrap.css####*/
+
+/*overrides class from hugo-bootswatch.css*/
+.breadcrumb {
+    padding: 0px;
+}
+
+
+.roundbox {
+ border: 2px solid #a1a1a1;
+ padding: 10px 40px;
+ background: white;
+ height: 100px;
+ border-radius: 25px;
+    display: flex;
+     justify-content: center;
+     align-items: center;
+}

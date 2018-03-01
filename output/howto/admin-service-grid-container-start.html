@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/>
+<link rel="stylesheet" href="../../css/bootstrap.css"/>
+<link rel="stylesheet" href="../../css/docs.css"/>
+<link rel="stylesheet" href="../../css/hugo-bootswatch.css"/>
+<title></title>
+</head>
+<body>
+<h1 >Starting a Container</h1>
+<hr>
+
+
+
+
+
+<span style='background-color:yellow'>
+write intro for this topic
+</span>
+
+
+
+
+<p><br></p>
+
+<h1 id="to-start-a-container">To start a Container</h1>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Command Line Interface" style="padding:10px"><p><em>Parameters:</em><br></p>
+
+<ul>
+<li>host : Name of the host unit to create the container.</li>
+</ul>
+
+<p><em>Options:</em><br></p>
+
+<ul>
+<li>&mdash;memory:&lt;memory&gt;:Container&rsquo;s JVM max memory.<br></li>
+<li>&mdash;zone=&lt;zone name&gt;:Container&rsquo;s zone.<br></li>
+<li>&mdash;property=&lt;String=String&gt;: Additional System properties.</li>
+</ul>
+
+<p><em>Example:</em><br></p>
+
+<pre><code class="language-bash">&lt;XAP-HOME&gt;/bin/xap container create myHost myContainer
+</code></pre>
+</div>
+
+<div title="REST Manager API" style="padding:10px"><p><em>Parameters:</em><br></p>
+
+<ul>
+<li>host: Name of the host unit to create the container.</li>
+</ul>
+
+<p><em>Options:</em><br></p>
+
+<ul>
+<li>memory : Container&rsquo;s JVM max memory.<br></li>
+<li>zone:Container&rsquo;s zone.<br></li>
+<li>vmArguments: Additional System properties.</li>
+</ul>
+
+<p><em>Example:</em><br></p>
+
+<pre><code class="language-bash">curl -X POST --header 'Content-Type: application/json' --header 'Accept: text/plain' -d '{ \ 
+&quot;host&quot;: &quot;string&quot;, \ 
+&quot;memory&quot;: &quot;string&quot;, \ 
+&quot;zone&quot;: &quot;string&quot;, \ 
+&quot;vmArguments&quot;: [ \ 
+&quot;string&quot; \ 
+] \ 
+}' 'http://localhost:8090/v1/containers'
+</code></pre>
+</div>
+
+<div title="Web Management Console" style="padding:10px"><p>TBD</p>
+</div>
+
+<div title="GigaSpaces Management Console" style="padding:10px"><p>TBD</p>
+</div>
+
+<div title="Administration API" style="padding:10px"><p>TBD</p>
+</div>
+</div>
+
+
+
+
+
+
+</div>
+</div>
+</body>
+<script src="../../js/prism.js"></script>
+<script src="../../js/bootstrap.min.js"></script>
+<script src="../../js/jquery-1.11.js"></script>
+</html>

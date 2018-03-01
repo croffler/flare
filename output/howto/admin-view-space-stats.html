@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/>
+<link rel="stylesheet" href="../../css/bootstrap.css"/>
+<link rel="stylesheet" href="../../css/docs.css"/>
+<link rel="stylesheet" href="../../css/hugo-bootswatch.css"/>
+<title></title>
+</head>
+<body>
+<h1 >Viewing Space Statistics</h1>
+<hr>
+
+
+
+<span style='background-color:yellow'>
+write intro for this topic
+</span>
+
+
+
+
+<p><br></p>
+
+<p><strong>To view Space Statistics:</strong></p>
+
+<p><div class="easyui-tabs" plain="true" data-options=""><div title="Command Line Interface" style="padding:10px"><p><strong><em>Display Space Statistics</em></strong></p>
+
+<p><em>Parameters:</em><br></p>
+
+<ul>
+<li>name : The name of the Space.</li>
+</ul>
+
+<p><em>Options:</em><br></p>
+
+<ul>
+<li>&mdash;operation-stats : Displays Space operations statistics, (read, write, take etc)  <br></li>
+<li>&mdash;type-stats      : Displays Space object information.</li>
+</ul>
+
+<p><em>Example:</em></p>
+
+<pre><code class="language-bash">&lt;XAP-HOME&gt;/bin/xap space info --type-stats mySpace
+</code></pre>
+
+<p><strong><em>Display Space Instance Statistics</em></strong></p>
+
+<p><em>Parameters:</em><br>
+instanceId : The id of the Space instance to use.</p>
+
+<p><em>Options:</em><br></p>
+
+<ul>
+<li>&mdash;operation-stats : Displays Space instance operations statistics, (read, write, take etc)  <br></li>
+<li>&mdash;type-stats      : Displays Space instance object information.<br></li>
+<li>&mdash;replication-stats: Display Space instance replication information.</li>
+</ul>
+
+<p><em>Example:</em></p>
+
+<pre><code class="language-bash">&lt;XAP-HOME&gt;/bin/xap space info-instances --replication-stats mySpace~1
+</code></pre>
+</div>
+
+<div title="REST Manager API" style="padding:10px"><p><strong><em>Display Space Statistics</em></strong></p>
+
+<p><em>Parameters:</em><br></p>
+
+<ul>
+<li>host URL: Host URL   where the REST Manager is running.<br></li>
+<li>name : The name of the Space.</li>
+</ul>
+
+<p>Displays Space operations statistics, (read, write, take etc)  <br></p>
+
+<p><em>Example:</em></p>
+
+<pre><code class="language-bash">curl -X GET --header 'Accept: application/json' 'http://localhost:8090/v1/spaces/mySpace/statistics/operations'
+</code></pre>
+
+<p><strong><em>Display Space Instance Statistics</em></strong></p>
+
+<p><em>Parameters:</em><br></p>
+
+<ul>
+<li>host URL: Host URL where the REST Manager is running.<br></li>
+<li>name : The name of the Space.<br></li>
+<li>instanceId : The id of the Space instance to use.</li>
+</ul>
+
+<p><em>Options:</em><br></p>
+
+<ul>
+<li>operations : Displays Space instance operations statistics, (read, write, take etc)  <br></li>
+<li>types     : Displays Space instance object information.<br></li>
+<li>replication: Display Space instance replication information.</li>
+</ul>
+
+<p><em>Examples:</em></p>
+
+<pre><code class="language-bash">curl -X GET --header 'Accept: application/json' 'http://localhost:8090/v1/spaces/mySpace/instances/mySpace~1/statistics/operations'
+curl -X GET --header 'Accept: text/plain' 'http://localhost:8090/v1/spaces/mySpace/instances/mySpace~1/statistics/replication'
+curl -X GET --header 'Accept: application/json' 'http://localhost:8090/v1/spaces/mySpace/instances/mySpace~1/statistics/types'
+</code></pre>
+</div>
+
+<div title="Web Management Console" style="padding:10px"><p>TBD</p>
+</div>
+
+<div title="GigaSpaces Management Console" style="padding:10px"><p>TBD</p>
+</div>
+
+<div title="Administration API" style="padding:10px"><p>TBD</p>
+</div>
+</div>
+
+
+
+
+</p>
+
+</div>
+</div>
+</body>
+<script src="../../js/prism.js"></script>
+<script src="../../js/bootstrap.min.js"></script>
+<script src="../../js/jquery-1.11.js"></script>
+</html>
