@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Nested Property Index</h1>
+<hr>
+
+
+<p>An index can be defined on a nested property to improve performance of nested queries - this is highly recommended.
+Nested properties indexing uses an additional <code>@SpaceIndex</code> attribute - <code>path()</code>.</p>
+
+<h2 id="the-spaceindex-path-attribute">The SpaceIndex.path() Attribute</h2>
+
+<p>The <code>path()</code> attribute represents the path of the property within the nested object.</p>
+
+<p>Below is an example of defining an index on a nested property:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Single Index Annotation " style="padding:10px"><pre><code class="language-java">@SpaceClass
+public class Person {
+private int id;
+private Info personalInfo;
+private String description;
+//getter and setter methods
+...
+
+// this defines and EXTENDED index on the personalInfo.socialSecurity property
+@SpaceIndex(path = &quot;socialSecurity&quot;, type = SpaceIndexType.EXTENDED)
+public Info getPersonalInfo() {
+return personalInfo;
+}
+}
+
+public static class Info implements Serializable {
+private String name;
+private Address address;
+private Date birthday;
+private long socialSecurity;
+private int _id;
+//getter and setter methods
+}
+
+public static class Address implements Serializable {
+private int zipCode;
+private String street;
+//getter and setter methods
+}
+</code></pre>
+</div>
+<div title="  Multiple Indexes Annotation " style="padding:10px"><pre><code class="language-java">@SpaceClass
+public static class Person {
+private int id;
+private Info personalInfo;
+private String description;
+private HashMap&lt;String, String&gt; map;
+
+//getter and setter methods
+...
+
+// this defines several indexes on the same personalInfo property
+@SpaceIndexes( { @SpaceIndex(path = &quot;socialSecurity&quot;, type = SpaceIndexType.EXTENDED),
+@SpaceIndex(path = &quot;address.zipCode&quot;, type = SpaceIndexType.BASIC)})
+public Info getPersonalInfo() {
+return personalInfo;
+}
+
+// this defines indexes on map keys
+@SpaceIndexes(  {@SpaceIndex(path=&quot;key1&quot; , type = SpaceIndexType.BASIC),
+@SpaceIndex(path=&quot;key2&quot; , type = SpaceIndexType.BASIC)})
+public HashMap&lt;String, String&gt; getMap() {
+return map;
+}
+public void setMap(HashMap&lt;String, String&gt; map) {
+this.map = map;
+}
+}
+
+public static class Info implements Serializable {
+private String name;
+private Address address;
+private Date birthday;
+private long socialSecurity;
+private int _id;
+//getter and setter methods
+}
+
+public static class Address implements Serializable {
+private int zipCode;
+private String street;
+//getter and setter methods
+}
+</code></pre>
+</div>
+<div title="  XML " style="padding:10px"><pre><code class="language-xml">&lt;gigaspaces-mapping&gt;
+&lt;class name=&quot;com.gigaspaces.examples.Person&quot;  &gt;
+&lt;property name=&quot;personalInfo&quot;&gt;
+&lt;index path=&quot;socialSecurity&quot; type = &quot;extended&quot;/&gt;
+&lt;index path=&quot;address.zipCode&quot; type = &quot;basic&quot;/&gt;
+&lt;/property&gt;
+&lt;/class&gt;
+&lt;/gigaspaces-mapping&gt;
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>The following is an example of query code that automatically triggers this index:</p>
+
+<pre><code class="language-java">SQLQuery&lt;Person&gt; query = new SQLQuery&lt;Person&gt;(Person.class,
+&quot;personalInfo.socialSecurity&lt;10000050L and personalInfo.socialSecurity&gt;=10000010L&quot;);
+</code></pre>
+
+<p><div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p><a href="./query-sql.html#Nested Properties">SQL Query Nested Properties</a></p>
+
+</div> </p>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Map based nested properties </b><br>
+<p>Note that the same indexing techniques above are also applicable to Map-based nested properties, which means that in the example above the <code>Info</code> and <code>Address</code> classes could be replaced with a <code>java.util.Map&lt;String,Object&gt;</code>, with the map keys representing the property names.</p>
+</div>
+
+
+
+
+
+
+
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Client-Side Caching</h1>
+<hr>
+
+
+<p>XAP supports client-side caching of Space data within the client application&rsquo;s JVM. When using client-side caching, the user essentially uses a two-layer cache architecture: The first layer is stored locally, within the client&rsquo;s JVM, and the second layer is stored within the remote master Space. The remote master Space may be used with any of the supported deployment topologies.</p>
+
+<p>The following caching options are available:</p>
+
+<ul>
+<li><a href="./local-cache.html">Local Cache</a> - A local cache allows the client application to cache recently used data at the client memory address, and have it updated automatically by the Space when that data changes.</li>
+<li><a href="./local-view.html">Local View</a> - A Local View allows the client application to cache specific data based on client&rsquo;s criteria at the client memory address, and have it updated automatically by the Space when that data changes.</li>
+</ul>
+
+<h1 id="additional-resources">Additional Resources</h1>
+
+<p>For a detailed description of the different caching scenarios, refer to <a href="../overview/caching-scenarios.html">Caching Scenarios</a> in the Product Overview.</p>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

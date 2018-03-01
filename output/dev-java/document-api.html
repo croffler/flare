@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Document API</h1>
+<hr>
+
+
+<p>Unlike POJOs, which force users to design a fixed data schema (in the form of a class definition) and adhere to it, a document is much more dynamic - users can add and remove properties at runtime as necessary. A Document always belongs to a certain type, represented by the class <code>SpaceTypeDescriptor</code>.</p>
+
+<p>Before a certain Document instance is written to the space, its type should be introduced to it. The type has a name and controls metadata such as identifier property, routing property and which properties are initially indexed (naturally, you can also index new properties at runtime after adding them to your documents).</p>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<p>The Type controls <strong>metadata</strong> - so only the metadata is part of the type. A document can introduce new properties at will.</p>
+</div>
+
+
+
+
+
+
+
+
+<p>Note that the Document type does not describe the properties themselves (except for the names of the ID and Routing properties). These are completely dynamic and each instance can have a different set of properties (although in most cases Document instances of the same type are likely to have identical or similar set of properties).</p>
+
+<h1 id="schema-evolution">Schema Evolution</h1>
+
+<p>Since a <code>SpaceDocument</code> is completely dynamic by nature, it is very easy to change or evolve your data model without ever taking down the Space. Simply change your application code to add additional properties or remove existing ones, and you&rsquo;re good to go. Even better, old and new versions can co-exist since the space does not enforce any restriction with regards to the property set of documents that belong to a certain type. This is a much more lightweight model in comparison to the classic POJO model, where a recompilation and in many cases a full space restart is required to change the data schema.</p>
+
+<p>If POJO model cannot be replaced with Document model, yet some level of schema evolution is desired within the POJO model, <a href="./dynamic-properties.html">Dynamic Properties</a> can be used.</p>
+
+<h1 id="type-definition">Type Definition</h1>
+
+<p>Before we start writing and reading <code>SpaceDocument</code> from the space, we need an <strong>initial</strong> schema definition of the document type.</p>
+
+<p>For example, suppose we&rsquo;re implementing an electronic commerce system, and decided we need a type called <strong>Product</strong> with the following properties:</p>
+
+<ul>
+<li>CatalogNumber : String</li>
+<li>Category : String</li>
+<li>Name : String</li>
+<li>Description : String</li>
+<li>Price : float</li>
+<li>Features : Nested document (for example: Manufacturer=Acme, RequiresAssembly=false, weight=7.5)</li>
+<li>Tags : Collection of Strings</li>
+<li>Reviews : Collection of nested documents</li>
+</ul>
+
+<p>We also decide that <strong>CatalogNumber</strong> will be a primary key, partitioning will be done by the <em>Category</em> property, and the properties <strong>Name</strong>, <strong>Price</strong> should be indexed since they participate in most of the queries executed. Remember, the type definition is for metadata only, so we&rsquo;re not concerned about <strong>Description</strong> and other such fields in the type definition, because Description isn&rsquo;t used for indexing or any other metadata.</p>
+
+<p>The following is an example of how to introduce a new document type:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Spring Namespace Configuration " style="padding:10px"><pre><code class="language-xml">&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;  &gt;
+&lt;os-core:space-type type-name=&quot;Product&quot; &gt;
+&lt;os-core:id property=&quot;CatalogNumber&quot;/&gt;
+&lt;os-core:routing property=&quot;Category&quot;/&gt;
+&lt;os-core:basic-index path=&quot;Name&quot;/&gt;
+&lt;os-core:extended-index path=&quot;Price&quot;/&gt;
+&lt;/os-core:space-type&gt;
+&lt;/os-core:embedded-space&gt;
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot;/&gt;
+</code></pre>
+</div>
+<div title="  Plain Spring XML " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.EmbeddedSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;property name=&quot;spaceTypes&quot; &gt;
+&lt;list&gt;
+&lt;ref bean=&quot;productType&quot;/&gt;
+&lt;/list&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+&lt;bean id=&quot;gigaSpace&quot; class=&quot;org.openspaces.core.GigaSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot;/&gt;
+&lt;/bean&gt;
+
+&lt;bean name=&quot;productType&quot;
+class=&quot;org.openspaces.core.config.GigaSpaceDocumentTypeDescriptorFactoryBean&quot;&gt;
+&lt;property name=&quot;typeName&quot; value=&quot;Product&quot;/&gt;
+&lt;property name=&quot;idProperty&quot;&gt;
+&lt;bean class=&quot;org.openspaces.core.config.SpaceIdProperty&quot;&gt;
+&lt;property name=&quot;propertyName&quot; value=&quot;CatalogNumber&quot;&gt;&lt;/property&gt;
+
+&lt;/bean&gt;
+&lt;/property&gt;
+&lt;property name=&quot;routingProperty&quot;&gt;
+&lt;bean class=&quot;org.openspaces.core.config.SpaceRoutingProperty&quot;&gt;
+&lt;property name=&quot;propertyName&quot; value=&quot;Category&quot;&gt;&lt;/property&gt;
+&lt;/bean&gt;
+&lt;/property&gt;
+&lt;property name=&quot;indexes&quot;&gt;
+&lt;list&gt;
+&lt;bean class=&quot;org.openspaces.core.config.BasicIndex&quot;&gt;
+&lt;property name=&quot;path&quot; value=&quot;Name&quot;&gt;&lt;/property&gt;
+&lt;/bean&gt;
+&lt;bean class=&quot;org.openspaces.core.config.ExtendedIndex&quot;&gt;
+&lt;property name=&quot;path&quot; value=&quot;Price&quot;&gt;&lt;/property&gt;
+&lt;/bean&gt;
+&lt;/list&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+<div title="  Code " style="padding:10px"><pre><code class="language-java">public void registerProductType(GigaSpace gigaspace) {
+// Create type descriptor:
+SpaceTypeDescriptor typeDescriptor = new SpaceTypeDescriptorBuilder(&quot;Product&quot;)
+.idProperty(&quot;CatalogNumber&quot;)
+.routingProperty(&quot;Category&quot;)
+.addPropertyIndex(&quot;Name&quot;, SpaceIndexType.BASIC)
+.addPropertyIndex(&quot;Price&quot;, SpaceIndexType.EXTENDED)
+.create();
+// Register type:
+gigaspace.getTypeManager().registerTypeDescriptor(typeDescriptor);
+}
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>Note that this code does not reflect the complete model - most of the properties does not need to be introduced to the schema. Only properties with special roles (ID, Routing) are part of the schema definition. These meta model <strong>settings cannot be changed</strong> without restarting the space or dropping the type, clearing all its instances and reintroducing it again.</p>
+
+<h1 id="creating-and-writing">Creating and Writing</h1>
+
+<p>To create a document create a <code>Map&lt;String,Object&gt;</code> with the requested properties, create a <code>SpaceDocument</code> object using the type name and properties, and write it to the space using the regular <code>GigaSpace</code> write method:</p>
+
+<pre><code class="language-java">public void writeProduct1(GigaSpace gigaspace) {
+// 1. Create the properties:
+Map&lt;String, Object&gt; properties = new HashMap&lt;String, Object&gt;();
+properties.put(&quot;CatalogNumber&quot;, &quot;hw-1234&quot;);
+properties.put(&quot;Category&quot;, &quot;Hardware&quot;);
+properties.put(&quot;Name&quot;, &quot;Anvil&quot;);
+properties.put(&quot;Price&quot;, 9.99f);
+properties.put(&quot;Tags&quot;, new String[] {&quot;heavy&quot;, &quot;anvil&quot;});
+
+Map&lt;String, Object&gt; features = new HashMap&lt;String, Object&gt;();
+features.put(&quot;Manufacturer&quot;, &quot;Acme&quot;);
+features.put(&quot;RequiresAssembly&quot;, false);
+features.put(&quot;Weight&quot;, 100);
+properties.put(&quot;Features&quot;, features);
+
+Map&lt;String, Object&gt; review1 = new HashMap&lt;String, Object&gt;();
+review1.put(&quot;Name&quot;, &quot;Wile E. Coyote&quot;);
+review1.put(&quot;Rate&quot;, 1);
+review1.put(&quot;Comments&quot;, &quot;Don't drop this on your toe, it will hurt.&quot;);
+Map&lt;String, Object&gt; review2 = new HashMap&lt;String, Object&gt;();
+review2.put(&quot;Name&quot;, &quot;Road Runner&quot;);
+review2.put(&quot;Rate&quot;, 5);
+review2.put(&quot;Comments&quot;, &quot;Beep Beep!&quot;);
+properties.put(&quot;Reviews&quot;, new Map[] {review1, review2});
+
+// 2. Create the document using the type name and properties:
+SpaceDocument document = new SpaceDocument(&quot;Product&quot;, properties);
+// 3. Write the document to the space:
+gigaspace.write(document);
+}
+</code></pre>
+
+<p>Another way is to use the <code>DocumentProperties</code> class provided, which extends HashMap to provide fluent coding:</p>
+
+<pre><code class="language-java">public void writeProduct2(GigaSpace gigaspace) {
+// 1. Create the properties:
+DocumentProperties properties = new DocumentProperties()
+.setProperty(&quot;CatalogNumber&quot;, &quot;av-9876&quot;)
+.setProperty(&quot;Category&quot;, &quot;Aviation&quot;)
+.setProperty(&quot;Name&quot;, &quot;Jet Propelled Pogo Stick&quot;)
+.setProperty(&quot;Price&quot;, 19.99f)
+.setProperty(&quot;Tags&quot;, new String[] {&quot;New&quot;, &quot;Cool&quot;, &quot;Pogo&quot;, &quot;Jet&quot;})
+.setProperty(&quot;Features&quot;, new DocumentProperties()
+.setProperty(&quot;Manufacturer&quot;, &quot;Acme&quot;)
+.setProperty(&quot;RequiresAssembly&quot;, true)
+.setProperty(&quot;NumberOfParts&quot;, 42))
+.setProperty(&quot;Reviews&quot;, new DocumentProperties[] {
+new DocumentProperties()
+.setProperty(&quot;Name&quot;, &quot;Wile E. Coyote&quot;)
+.setProperty(&quot;Rate&quot;, 1),
+new DocumentProperties()
+.setProperty(&quot;Name&quot;, &quot;Road Runner&quot;)
+.setProperty(&quot;Rate&quot;, 5)});
+
+// 2. Create the document using the type name and properties:
+SpaceDocument document = new SpaceDocument(&quot;Product&quot;, properties);
+// 3. Write the document to the space:
+gigaspace.write(document);
+}
+</code></pre>
+
+<p>You can map JSON to and from a SpaceDocument with any parser. Here is an example:</p>
+
+<pre><code class="language-java">package xap.sandbox.document;
+
+import java.io.IOException;
+import java.util.HashMap;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.openspaces.core.GigaSpace;
+import org.openspaces.core.GigaSpaceConfigurer;
+import org.openspaces.core.space.EmbeddedSpaceConfigurer;
+
+import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.metadata.SpaceTypeDescriptor;
+import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
+import com.gigaspaces.metadata.index.SpaceIndexType;
+import com.j_spaces.core.client.SQLQuery;
+
+public class ConvertJSONTODocument {
+
+@SuppressWarnings(&quot;unchecked&quot;)
+public static void main (String[] args) throws JsonGenerationException, JsonMappingException, IOException{
+
+GigaSpace gigaSpace = new GigaSpaceConfigurer(new EmbeddedSpaceConfigurer(&quot;mySpace&quot;)).gigaSpace();
+
+/****
+* We Need to Register a type by specifying a name, id, and routing field.
+* Routing is used to partition data across the grid, similar to a shard key 
+* This only needs to be done once 
+*/
+final String PRODUCT_TYPE_NAME = &quot;Product&quot;;
+
+SpaceTypeDescriptor typeDescriptor = new SpaceTypeDescriptorBuilder(PRODUCT_TYPE_NAME)
+.idProperty(&quot;id&quot;)
+.routingProperty(&quot;location&quot;)
+.addPropertyIndex(&quot;processed&quot;, SpaceIndexType.BASIC)
+.create();
+
+gigaSpace.getTypeManager().registerTypeDescriptor(typeDescriptor);
+
+/****
+* Example JSON payload containing the properties 
+* of the new Type. In this example we use jaxson object mapper.
+* You can use any parser you would like
+*/
+String jsonPayload = &quot;{\&quot;id\&quot;:1, \&quot;location\&quot;:\&quot;usa\&quot;, \&quot;processed\&quot;:false}&quot;;
+
+HashMap&lt;String,Object&gt; jsonProperties =
+new ObjectMapper().readValue(jsonPayload, HashMap.class);
+
+/****
+* Convert to a space document simply pass the hash map to the 
+* in to the SpaceDocument Constructor along with the document type name
+* from above
+*/
+SpaceDocument dataAsDocument = new SpaceDocument(PRODUCT_TYPE_NAME, jsonProperties);
+
+/***
+* Insert to the grid
+*/
+gigaSpace.write(dataAsDocument);
+
+/***
+* To confirm the result. Read the document from the grid
+*/
+SpaceDocument dataAsDocumentFromGrid = gigaSpace.read(new SQLQuery&lt;SpaceDocument&gt;(PRODUCT_TYPE_NAME, &quot;id = ?&quot;, 1));
+
+/***
+* Map the Object back to JSON
+*/
+String jsonFromGrid = new ObjectMapper().writeValueAsString(dataAsDocumentFromGrid);
+
+System.out.println(jsonFromGrid);
+}
+}
+</code></pre>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<ul>
+<li>The <code>GigaSpace.writeMultiple</code> method can be used to write a batch of documents.</li>
+<li>Update semantics are the same as POJO, except <strong>partial update</strong> that is not currently supported.</li>
+<li>Use only alphanumeric characters (a-z, A-Z, 0-9) and the underscore (&rsquo;_&lsquo;) to construct properties keys. Other characters might have a special behavior in GigaSpaces (for example: the dot (&lsquo;.&rsquo;) is used to distinguish nested paths).</li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+<h1 id="reading-and-removing">Reading and Removing</h1>
+
+<p>There are three types of document queries:</p>
+
+<h2 id="template-query">Template Query</h2>
+
+<p>This type of query uses a SpaceDocument with <em>type</em> and any other set of properties values as a template for the query
+For example: Read a document of type <strong>Product</strong> whose <strong>Name</strong> is <strong>Anvil</strong>:</p>
+
+<pre><code class="language-java">public SpaceDocument readProductByTemplate(GigaSpace gigaSpace) {
+// Create template:
+SpaceDocument template = new SpaceDocument(&quot;Product&quot;);
+template.setProperty(&quot;Name&quot;, &quot;Anvil&quot;);
+// Read:
+SpaceDocument result = gigaSpace.read(template);
+return result;
+}
+</code></pre>
+
+<h2 id="sql-query">SQL Query</h2>
+
+<p>You can use the <a href="./query-sql.html">SQLQuery</a> to search for matching <code>SpaceDocument</code> entries.
+For example: Read a document of type <strong>Product</strong> whose <strong>Price</strong> is greater than 15:</p>
+
+<pre><code class="language-java">public SpaceDocument readProductBySQL(GigaSpace gigaSpace) {
+// Create query:
+SQLQuery&lt;SpaceDocument&gt; query =
+new SQLQuery&lt;SpaceDocument&gt;(&quot;Product&quot;, &quot;Price &gt; ?&quot;);
+query.setParameter(1, 15f);
+// Read:
+SpaceDocument result = gigaSpace.read(query);
+return result;
+}
+</code></pre>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<p>Consider indexing properties used in queries to boost performance.</p>
+</div>
+
+
+
+
+
+
+
+
+<p>Queries on nested properties are supported. For example, to read products manufactured by <strong>Acme</strong>:</p>
+
+<pre><code class="language-java">public SpaceDocument[] readProductBySQLNested(GigaSpace gigaSpace) {
+// Create query:
+SQLQuery&lt;SpaceDocument&gt; query =
+new SQLQuery&lt;SpaceDocument&gt;(&quot;Product&quot;, &quot;Features.Manufacturer = ?&quot;);
+query.setParameter(1, &quot;Acme&quot;);
+// Read:
+SpaceDocument[] result = gigaSpace.readMultiple(query, 10);
+return result;
+}
+</code></pre>
+
+<h2 id="id-based-query">ID-Based Query</h2>
+
+<p>For example: Read a document of type <strong>Product</strong> whose ID is <strong>hw-1234</strong>:</p>
+
+<pre><code class="language-java">public SpaceDocument readProductById(GigaSpace gigaSpace) {
+return gigaSpace.readById(new IdQuery&lt;SpaceDocument&gt;(&quot;Product&quot;, &quot;hw-1234&quot;));
+}
+</code></pre>
+
+<p>Queries by multiple Ids are supported. For example:</p>
+
+<pre><code class="language-java">public SpaceDocument[] readProductByMultipleIds(GigaSpace gigaSpace) {
+Object[] ids = new Object[] {&quot;hw-1234&quot;, &quot;av-9876&quot;};
+ReadByIdsResult&lt;SpaceDocument&gt; result =
+gigaSpace.readByIds(new IdsQuery&lt;SpaceDocument&gt;(&quot;Product&quot;, ids));
+return result.getResultsArray();
+}
+</code></pre>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Notes</b><br>
+<ul>
+<li>All other <code>GigaSpace</code> query operations (<code>readIfExists</code>, <code>readMultiple</code>, <code>take</code>, <code>takeIfExists</code>, <code>takeMultiple</code>, <code>count</code>, and <code>clear</code>) are also supported for documents entries.</li>
+<li>All other ID-based operations (<code>readIfExists</code>, <code>takeById</code>, <code>takeIfExistsById</code>, <code>takeByIds</code>) arealso supported for documents.</li>
+<li>All overloads of those operations with timeout, transactions, modifiers etc. are supported for documents. The semantics is similar to POJOs.</li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+
+<div class='bs-callout bs-callout-danger'>
+<b style="color:#d9534f">Important</b><br>
+<p>An ID-based query will not return results if the condition is on an auto-generated ID field _spaceId (generated for spaceDocument). Internal fields should not be queried because implementations are subject to change.</p>
+</div>
+
+
+
+<h1 id="nested-properties">Nested Properties</h1>
+
+<p>The <code>Document</code> properties values can be either scalars (integers, strings, enumerations, etc), collections (arrays, lists), or nested properties (Map or an extension of map, such as <code>DocumentProperties</code>). Values must adhere to the same restrictions as in the POJO model (e.g. be serializable). Nested properties can be queried by using the dot (&lsquo;.&rsquo;) notation to describe paths, as shown above.</p>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<p>It&rsquo;s highly recommended to use <code>DocumentProperties</code> for nested documents since it contains performance and memory footprint optimizations which are tailored for GigaSpaces usage.</p>
+
+<ul>
+<li><p>While it&rsquo;s possible to use  <code>SpaceDocument</code> as a property, it is probably a mistake, since it contains extra information which is not relevant for nested properties (type name, version, etc.).</p></li>
+
+<li><p>Changing nested properties in an embedded space is not safe.</p></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+<h1 id="document-hierarchy">Document Hierarchy</h1>
+
+<p>SpaceDocument query supports hierarchical relationships so that entries of a child are visible in the context of the parent document, but not the other way around. For example, a document with name <code>Employee</code>   can register its parent document <code>Person</code> in the following way:</p>
+
+<pre><code class="language-java">SpaceTypeDescriptor employeeDescriptor = new SpaceTypeDescriptorBuilder(
+&quot;Child Document Type Name&quot;, parentSpaceTypeDescriptor).create();
+</code></pre>
+
+<p>Here is an example:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title=" Program" style="padding:10px"><pre><code class="language-java">    public static void main(String[] args) {
+
+// Create the Space
+GigaSpace space = new GigaSpaceConfigurer(new EmbeddedSpaceConfigurer(
+&quot;mySpace&quot;)).gigaSpace();
+
+registerDocument(space);
+
+Map&lt;String, Object&gt; properties = new HashMap&lt;String, Object&gt;();
+properties.put(&quot;Id&quot;, &quot;1234&quot;);
+properties.put(&quot;FirstName&quot;, &quot;John&quot;);
+properties.put(&quot;LastName&quot;, &quot;Fellner&quot;);
+
+SpaceDocument document1 = new SpaceDocument(&quot;Person&quot;, properties);
+
+space.write(document1);
+
+properties = new HashMap&lt;String, Object&gt;();
+properties.put(&quot;Id&quot;, &quot;12345&quot;);
+properties.put(&quot;FirstName&quot;, &quot;John&quot;);
+properties.put(&quot;LastName&quot;, &quot;Walters&quot;);
+properties.put(&quot;employeeId&quot;, &quot;1234&quot;);
+
+SpaceDocument document2 = new SpaceDocument(&quot;Employee&quot;, properties);
+
+space.write(document2);
+
+SQLQuery&lt;SpaceDocument&gt; query1 = new SQLQuery&lt;SpaceDocument&gt;(
+&quot;Person&quot;, &quot;&quot;);
+
+SpaceDocument[] result = space.readMultiple(query1);
+
+// You should see two documents
+System.out.println(result.length);
+
+SQLQuery&lt;SpaceDocument&gt; query2 = new SQLQuery&lt;SpaceDocument&gt;(
+&quot;Employee&quot;, &quot;&quot;);
+
+SpaceDocument[] result2 = space.readMultiple(query2);
+
+// You should see one document
+System.out.println(result2.length);
+
+System.exit(1);
+
+}
+</code></pre>
+</div>
+
+<div title=" RegisterDocument" style="padding:10px"><pre><code class="language-java">    static public void registerDocument(GigaSpace space) {
+SpaceTypeDescriptor personDescriptor = new SpaceTypeDescriptorBuilder(
+&quot;Person&quot;).idProperty(&quot;Id&quot;).create();
+// Register type:
+space.getTypeManager().registerTypeDescriptor(personDescriptor);
+
+SpaceTypeDescriptor employeeDescriptor = new SpaceTypeDescriptorBuilder(
+&quot;Employee&quot;, personDescriptor).create();
+// Register type:
+space.getTypeManager().registerTypeDescriptor(employeeDescriptor);
+}
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<h1 id="indexing">Indexing</h1>
+
+<p>Properties and nested paths can be <a href="./indexing.html">indexed</a> to boost queries performance. In the type registration sample above the <strong>Name</strong> and <strong>Price</strong> properties are indexed.</p>
+
+<p>Since the schema is flexible and new properties might be added after the type has been registered, it is possible to add indexes dynamically as well.</p>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For more information about indexing, see the <a href="./indexing.html">Indexing</a> page.</p>
+
+</div> 
+
+<h1 id="events">Events</h1>
+
+<p>Event containers (both <a href="./polling-container-overview.html">polling container</a> and <a href="./notify-container-overview.html">notify container</a>) support Space <code>Document</code> entries.</p>
+
+<p>Here is a simple example of a polling event container configuration using a <code>Document</code>:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Annotation " style="padding:10px"><pre><code class="language-xml">&lt;!-- Enable scan for OpenSpaces and Spring components --&gt;
+&lt;context:component-scan base-package=&quot;com.mycompany&quot;/&gt;
+
+&lt;!-- Enable support for @Polling annotation --&gt;
+&lt;os-events:annotation-support /&gt;
+
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;&gt;
+&lt;os-core:space-type type-name=&quot;Product&quot; &gt;
+&lt;os-core:id property=&quot;CatalogNumber&quot;/&gt;
+&lt;os-core:routing property=&quot;Category&quot;/&gt;
+&lt;os-core:basic-index path=&quot;Name&quot;/&gt;
+&lt;os-core:extended-index path=&quot;Price&quot;/&gt;
+&lt;/os-core:space-type&gt;
+&lt;/os-core:embedded-space&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot;/&gt;
+</code></pre>
+
+<pre><code class="language-java">@EventDriven @Polling
+public class SimpleListener {
+
+@EventTemplate
+SpaceDocument unprocessedData() {
+SpaceDocument template = new SpaceDocument(&quot;Product&quot;);
+template.setProperty(&quot;Name&quot;,&quot;Anvil&quot;);
+return template;
+}
+
+@SpaceDataEvent
+public SpaceDocument eventListener(SpaceDocument event) {
+//process Data here
+}
+}
+</code></pre>
+</div>
+<div title="  Namespace " style="padding:10px"><pre><code class="language-xml">&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;&gt;
+&lt;os-core:space-type type-name=&quot;Product&quot; &gt;
+&lt;os-core:id property=&quot;CatalogNumber&quot;/&gt;
+&lt;os-core:routing property=&quot;Category&quot;/&gt;
+&lt;os-core:basic-index path=&quot;Name&quot;/&gt;
+&lt;os-core:extended-index path=&quot;Price&quot;/&gt;
+&lt;/os-core:space-type&gt;
+&lt;/os-core:embedded-space&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot;/&gt;
+
+&lt;bean id=&quot;simpleListener&quot; class=&quot;SimpleListener&quot; /&gt;
+
+&lt;os-events:polling-container id=&quot;eventContainer&quot; giga-space=&quot;gigaSpace&quot;&gt;
+
+&lt;os-core:template&gt;
+&lt;bean class=&quot;com.gigaspaces.document.SpaceDocument&quot;&gt;
+&lt;constructor-arg value=&quot;Product&quot;/&gt;
+&lt;constructor-arg type=&quot;java.util.Map&quot;&gt;
+&lt;map&gt;
+&lt;entry key=&quot;Name&quot; value=&quot;Anvil&quot; /&gt;
+&lt;/map&gt;
+&lt;/constructor-arg&gt;
+&lt;/bean&gt;
+&lt;/os-core:template&gt;
+
+&lt;os-events:listener&gt;
+&lt;os-events:annotation-adapter&gt;
+&lt;os-events:delegate ref=&quot;simpleListener&quot;/&gt;
+&lt;/os-events:annotation-adapter&gt;
+&lt;/os-events:listener&gt;
+&lt;/os-events:polling-container&gt;
+</code></pre>
+</div>
+<div title="  Plain XML " style="padding:10px"><pre><code class="language-xml">
+&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.EmbeddedSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;gigaSpace&quot; class=&quot;org.openspaces.core.GigaSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;simpleListener&quot; class=&quot;SimpleListener&quot; /&gt;
+
+&lt;bean id=&quot;eventContainer&quot;
+class=&quot;org.openspaces.events.polling.SimplePollingEventListenerContainer&quot;&gt;
+
+&lt;property name=&quot;gigaSpace&quot; ref=&quot;gigaSpace&quot; /&gt;
+
+&lt;property name=&quot;template&quot;&gt;
+&lt;bean class=&quot;com.gigaspaces.document.SpaceDocument&quot;&gt;
+&lt;constructor-arg value=&quot;Product&quot;/&gt;
+&lt;constructor-arg type=&quot;java.util.Map&quot;&gt;
+&lt;map&gt;
+&lt;entry key=&quot;Name&quot; value=&quot;Anvil&quot; /&gt;
+&lt;/map&gt;
+&lt;/constructor-arg&gt;
+&lt;/bean&gt;
+&lt;/property&gt;
+
+&lt;property name=&quot;eventListener&quot;&gt;
+&lt;bean class=&quot;org.openspaces.events.adapter.AnnotationEventListenerAdapter&quot;&gt;
+&lt;property name=&quot;delegate&quot; ref=&quot;simpleListener&quot; /&gt;
+&lt;/bean&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+<div title="  Code " style="padding:10px"><pre><code class="language-java">
+GigaSpace gigaSpace = // either create the GigaSpace or get it by injection
+
+SpaceDocument template = new SpaceDocument(&quot;Product&quot;);
+template.setProperty(&quot;Name&quot;,&quot;Anvil&quot;);
+SimplePollingEventListenerContainer pollingEventListenerContainer = new SimplePollingContainerConfigurer(gigaSpace)
+.template(template)
+.eventListenerAnnotation(new Object() {
+@SpaceDataEvent
+public void eventHappened() {
+eventCalled.set(true);
+}
+}).pollingContainer();
+
+// when needed close the polling container
+pollingEventListenerContainer.destroy();
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<h1 id="fifo">FIFO</h1>
+
+<p><a href="./fifo-support.html">FIFO support</a> is off by default with <code>Document</code> entries (same as with POJO). To enable FIFO support, modify the type introduction code and set the desired FIFO support mode. For example:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Spring Namespace Configuration " style="padding:10px"><pre><code class="language-xml">&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;&gt;
+&lt;os-core:space-type type-name=&quot;Product&quot; fifo-support=&quot;OPERATION&quot; &gt;
+&lt;!-- other properties definition --&gt;
+&lt;/os-core:space-type&gt;
+&lt;/os-core:embedded-space&gt;
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot;/&gt;
+</code></pre>
+</div>
+<div title="  Plain Spring XML " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.EmbeddedSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;property name=&quot;spaceTypes&quot; &gt;
+&lt;list&gt;
+&lt;ref bean=&quot;productType&quot;/&gt;
+&lt;/list&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+&lt;bean id=&quot;gigaSpace&quot; class=&quot;org.openspaces.core.GigaSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot;/&gt;
+&lt;/bean&gt;
+
+&lt;bean name=&quot;productType&quot;
+class=&quot;org.openspaces.core.config.GigaSpaceDocumentTypeDescriptorFactoryBean&quot;&gt;
+&lt;property name=&quot;typeName&quot; value=&quot;Product&quot;/&gt;
+&lt;!-- other properties definition --&gt;
+&lt;property name=&quot;fifoSupport&quot; value=&quot;OPERATION&quot;/&gt;
+
+&lt;/bean&gt;
+</code></pre>
+</div>
+<div title="  Code " style="padding:10px"><pre><code class="language-java">// Create type descriptor:
+SpaceTypeDescriptor typeDescriptor = new SpaceTypeDescriptorBuilder(&quot;Product&quot;)
+// Other type descriptor settings.
+.fifoSupport(FifoSupport.OPERATION)
+.create();
+// Register type:
+gigaspace.getTypeManager().registerTypeDescriptor(typeDescriptor);
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+Changing FIFO support after a type has been registered is not supported.</div>
+
+
+
+
+
+
+
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For more information about FIFO, see the <a href="./fifo-support.html">FIFO Support</a> page.</p>
+
+</div> 
+
+<h1 id="transactions-and-optimistic-locking">Transactions and Optimistic Locking</h1>
+
+<p>Transactions and isolation modifiers semantics is identical to the POJO semantics. For more information about transactions, see the <a href="./transaction-overview.html">Transaction Management</a> page.</p>
+
+<p>Optimistic locking is disabled by default with <code>Document</code> entries (same as with POJO). To enable it, modify the type introduction code and set the optimistic locking support. For example:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Spring Namespace Configuration " style="padding:10px"><pre><code class="language-xml">&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;&gt;
+&lt;os-core:space-type type-name=&quot;Product&quot; optimistic-lock=&quot;true&quot; &gt;
+&lt;!-- other properties definition --&gt;
+&lt;/os-core:space-type&gt;
+&lt;/os-core:embedded-space&gt;
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot;/&gt;
+</code></pre>
+</div>
+<div title="  Plain Spring XML " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.EmbeddedSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;property name=&quot;spaceTypes&quot; &gt;
+&lt;list&gt;
+&lt;ref bean=&quot;productType&quot;/&gt;
+&lt;/list&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+&lt;bean id=&quot;gigaSpace&quot; class=&quot;org.openspaces.core.GigaSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot;/&gt;
+&lt;/bean&gt;
+
+&lt;bean name=&quot;productType&quot;
+class=&quot;org.openspaces.core.config.GigaSpaceDocumentTypeDescriptorFactoryBean&quot;&gt;
+&lt;property name=&quot;typeName&quot; value=&quot;Product&quot;/&gt;
+
+&lt;!-- other properties definition --&gt;
+&lt;property name=&quot;optimisticLock&quot; value=&quot;true&quot;/&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+<div title="  Code " style="padding:10px"><pre><code class="language-java">// Create type descriptor:
+SpaceTypeDescriptor typeDescriptor = new SpaceTypeDescriptorBuilder(&quot;Product&quot;)
+// Other type descriptor settings.
+.supportsOptimisticLocking(true)
+.create();
+// Register type:
+gigaspace.getTypeManager().registerTypeDescriptor(typeDescriptor);
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+Changing optimistic locking after a type has been registered is not supported.</div>
+
+
+
+
+
+
+
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For more information about optimistic locking, see the <a href="./transaction-optimistic-locking.html">Optimistic Locking</a> page.</p>
+
+</div> 
+
+<h1 id="local-cache-local-view">Local Cache / Local View</h1>
+
+<p><a href="./local-view.html">Local View</a> and <a href="./local-cache.html">Local Cache</a> are supported for Documents. By default, the <code>SpaceDocument</code> instance is stored in the cache which speeds up query performance since the data does not need to be transformed from internal structure to <code>SpaceDocument</code>.</p>
+
+<p>If you intend to use local cache or local view in a mixed POJO-Document environment, please refer to <a href="./document-pojo-interoperability.html">Document-POJO Interoperability</a>.</p>
+
+<h1 id="persistency">Persistency</h1>
+
+<p>External Data Source is supported for space documents.
+Example on how to implement an EDS that persists SpaceDocuments of type &ldquo;Trade&rdquo;:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Configuration " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;documentDataSource&quot; class=&quot;com.test.DocumentEDS&quot;/&gt;
+
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot; schema=&quot;persistent&quot; external-data-source=&quot;documentDataSource&quot;&gt;
+&lt;os-core:space-type type-name=&quot;Trade&quot; &gt;
+&lt;os-core:id property=&quot;uid&quot; auto-generate=&quot;true&quot;/&gt;
+&lt;os-core:routing property=&quot;symbolLabel&quot;/&gt;
+&lt;/os-core:space-type&gt;
+&lt;os-core:properties&gt;
+&lt;props&gt;
+&lt;prop key=&quot;space-config.external-data-source.data-class&quot;&gt;com.gigaspaces.document.SpaceDocument&lt;/prop&gt;
+&lt;/props&gt;
+&lt;/os-core:properties&gt;
+&lt;/os-core:embedded-space&gt;
+</code></pre>
+</div>
+
+<div title="  The EDS Implementation " style="padding:10px"><pre><code class="language-java">package com.test;
+
+public class DocumentEDS
+implements ManagedDataSource&lt;SpaceDocument&gt;, BulkDataPersister
+{
+
+public void init(Properties prop) throws DataSourceException
+{
+// initialize persistency layer
+}
+
+public DataIterator&lt;SpaceDocument&gt; initialLoad() throws DataSourceException
+{
+// load all the data from persistency
+// build and return an iterator of documents
+}
+
+public void executeBulk(List&lt;BulkItem&gt; bulk) throws DataSourceException
+{
+for (BulkItem bulkItem : bulk)
+{
+SpaceDocument document = (SpaceDocument) bulkItem.getItem();
+
+switch (bulkItem.getOperation())
+{
+case BulkItem.WRITE:
+
+// writeDocument(document);
+break;
+case BulkItem.UPDATE:
+
+// updateDocument(document, bulkItem.getIdPropertyName());
+break;
+case BulkItem.REMOVE:
+//removeDocument(document, bulkItem.getIdPropertyName());
+
+break;
+
+default:
+break;
+}
+}
+}
+
+public void shutdown() throws DataSourceException
+{
+//cleanup resources and close the persistency
+}
+
+}
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>Different document database can be used to implement the document persistency - MongoDB, CouchDB and others.
+Pojos can be persisted via document EDS as well, in the same way.</p>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<ul>
+<li>In order to support initialLoad of documents the relevant types must be declared in the &ldquo;space&rdquo; bean, so that they are registered in the space before initialLoad is invoked.</li>
+<li>Document persistence is currently not provided by default - If needed, the External Data Source should be implemented to fit the required solution.</li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+<h2 id="transient-document">Transient Document</h2>
+
+<p>When using a persistent space, there are situations where not all SpaceDocuments need to be persisted. You can specify the document to be transient by invoking the <code>setTransient()</code> method.</p>
+
+<pre><code class="language-java">   SpaceDocument doc = new SpaceDocument(&quot;Entity&quot;);
+......       
+doc.setTransient(true);
+</code></pre>
+
+<h1 id="space-filters">Space Filters</h1>
+
+<p>Space Filter are supported for space documents.</p>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>If you intend to use space filters in a mixed POJO-Document environment, please refer to <a href="./document-pojo-interoperability.html">Document-POJO Interoperability</a>.</p>
+
+</div> 
+
+<h1 id="replication-filters">Replication Filters</h1>
+
+<p>Space Replication Filter are supported for space documents.</p>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>If you intend to use space replication filters in a mixed POJO-Document environment, please refer to <a href="./document-pojo-interoperability.html">Document-POJO Interoperability</a>.</p>
+
+</div> 
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

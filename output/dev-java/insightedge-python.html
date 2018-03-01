@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Python</h1>
+<hr>
+
+
+<p>InsightEdge has a Python API available via PySpark. Its functionality is limited to the DataFrame API.</p>
+
+<h1 id="interactive-use">Interactive Use</h1>
+
+<p>There are two options to analyze data interactively in Python:</p>
+
+<ul>
+<li><a href="../started/insightedge-zeppelin.html">Zeppelin</a><br></li>
+<li>command line shell</li>
+</ul>
+
+<h1 id="zeppelin-notebook">Zeppelin Notebook</h1>
+
+<p>To develop notebooks in Python, use the <code>%pyspark</code> interpreter in the Zeppelin web notebook. See the <code>InsightEdge python example</code> notebook as a reference example.</p>
+
+<h1 id="command-line-shell">Command Line Shell</h1>
+
+<p>To start the command line shell, run the <code>./bin/insightedge-pyspark</code> script in the InsightEdge directory.</p>
+
+<p>For example, start InsightEdge in demo mode:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Linux" style="padding:10px"><pre><code class="language-bash">&lt;XAP-HOME&gt;/insightedge/bin/insightedge.sh demo
+</code></pre>
+</div>
+
+<div title="Windows" style="padding:10px"><pre><code class="language-bash">&lt;XAP-HOME&gt;\insightedge\bin\insightedge.cmd demo
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>Then start the command line shell:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Linux" style="padding:10px"><pre><code class="language-bash">&lt;XAP-HOME/insightedge/bin/insightedge-pyspark --master spark://127.0.0.1:7077
+</code></pre>
+</div>
+
+<div title="Windows" style="padding:10px"><pre><code class="language-bash">&lt;XAP-HOME&gt;\insightedge\bin\insightedge-pyspark --master spark://127.0.0.1:7077
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<h1 id="saving-and-loading-dataframes-in-python">Saving and Loading DataFrames in Python</h1>
+
+<p>To operate on InsightEdge DataFrames, use the regular PySpark DataFrame API with the <code>org.apache.spark.sql.insightedge</code> format and specify Data Grid <code>collection</code> or <code>class</code> options. For example,</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Python" style="padding:10px"><pre><code class="language-python"># create pyspark.sql.SparkSession
+spark = SparkSession.builder.getOrCreate()
+
+# load SF salaries dataset from file
+jsonFilePath = os.path.join(os.environ[&quot;XAP_HOME&quot;], &quot;insightedge/data/sf_salaries_sample.json&quot;)
+jsonDf = spark.read.json(jsonFilePath)
+
+# save DataFrame to the grid
+jsonDf.write.format(&quot;org.apache.spark.sql.insightedge&quot;).mode(&quot;overwrite&quot;).save(&quot;salaries&quot;)
+
+# load DataFrame from the grid
+gridDf = spark.read.format(&quot;org.apache.spark.sql.insightedge&quot;).option(&quot;collection&quot;, &quot;salaries&quot;).load()
+gridDf.show()
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>You can also load a DataFrame backed by a DataGrid Scala class with the <code>class</code> options, for example:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Python" style="padding:10px"><pre><code class="language-python">df = spark.read.format(&quot;org.apache.spark.sql.insightedge&quot;).option(&quot;class&quot;, my_class_name).load()
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<h1 id="self-contained-applications">Self-Contained Applications</h1>
+
+<p>To develop a self-contained submittable application, use the regular PySpark and configure InsightEdge settings in <code>SparkConf</code>:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Python" style="padding:10px"><pre><code class="language-python">from pyspark.conf import SparkConf
+from pyspark.sql import SparkSession
+
+conf = SparkConf()
+conf.setAppName(&quot;InsightEdge Python Example&quot;)
+conf.set(&quot;spark.insightedge.space.name&quot;, &quot;insightedge-space&quot;)
+conf.set(&quot;spark.insightedge.space.lookup.group&quot;, &quot;insightedge&quot;)
+conf.set(&quot;spark.insightedge.space.lookup.locator&quot;, &quot;127.0.0.1:4174&quot;)
+
+spark = SparkSession.builder.config(conf=SparkConf()).getOrCreate()
+
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>The complete source code is available at <code>&lt;XAP-HOME&gt;/insightedge/examples/python/sf_salaries.py</code>.</p>
+
+<p>The application can be submitted with <code>insightedge-submit</code> script, for example:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Linux" style="padding:10px"><pre><code class="language-bash">&lt;XAP-HOME&gt;/insightedge/bin/insightedge-submit &lt;XAP-HOME&gt;/insightedge/examples/python/sf_salaries.py
+</code></pre>
+</div>
+
+<div title="Windows" style="padding:10px"><pre><code class="language-bash">&lt;XAP-HOME&gt;\insightedge\bin\insightedge-submit &lt;XAP-HOME&gt;\insightedge\examples\python\sf_salaries.py
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

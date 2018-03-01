@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Space Containers</h1>
+<hr>
+
+
+<p>To edit a container&rsquo;s configuration, select a container node in the <strong>Container Tree</strong> panel on the left, then select the <strong>Container Configuration</strong> tab at the bottom of the Configuration panel.</p>
+
+<h1 id="lookup-service-options">Lookup service options</h1>
+
+<p>You may view the following container attributes in the <strong>Directory Services</strong> tab:
+<strong>Directory Services / Jini Lookup Services</strong> - these attributes determine where space instances are registered. They may have one of three values:</p>
+
+<ul>
+<li>JNDI service</li>
+<li>Jini Lookup Service</li>
+<li>Both of them</li>
+</ul>
+
+<p><img src="../../attachment_files/Container Configuration Directory Services Tab.jpg" alt="Container Configuration Directory Services Tab.jpg" /></p>
+
+<h1 id="configuration">Configuration</h1>
+
+<p><strong>You may view the following container attributes in the General tab:</strong></p>
+
+<ul>
+<li><strong>Home Directory</strong> &ndash; Read only field. Displays the installation directory of the GigaSpaces Server.</li>
+<li><strong>License</strong> &ndash; Use this field to change the GigaSpaces Server license key.</li>
+<li><strong>Container Socket Port</strong> -This is the port used by the container to export its stub. The default value is <code>0</code>.</li>
+<li><strong>Security Mode</strong> &ndash; The space container provides basic security capabilities that control whether users have full control or read-only access. <strong>Read Only</strong> specifies that all users should be blocked from creating and destroying spaces, shutting down containers, setting container configuration and restarting a container. <strong>Full Control</strong> specifies that all users are allowed to perform all operations on the container. If the configuration is set to <strong>Read Only</strong>, the only way to change it to <strong>Full Control</strong> is through the configuration file. This prevents users from changing the restrictions on a space browser.</li>
+</ul>
+
+<p><img src="../../attachment_files/Container Configuration General Tab - GigaSpaces Browse.jpg" alt="Container Configuration General Tab - GigaSpaces Browse.jpg" /></p>
+
+<h1 id="jms">JMS</h1>
+
+<p><strong>The JMS tab in the container configuration window enables viewing or modifying of the following container attributes:</strong></p>
+
+<ul>
+<li><strong>JMS Enabled</strong> &ndash; Must be checked in order to configure the server-side of the GigaSpaces JMS interface.</li>
+<li><strong>Internal JNDI Enabled</strong> &ndash; Must be checked if you want to use the GigaSpaces Server&rsquo;s lookup service for the JMS Destinations and connection factories lookup.</li>
+<li><strong>External JNDI Enabled</strong> &ndash; Must be checked if you want to use an external lookup service, such as the Jboss JNP naming protocol implementation.
+
+<ul>
+<li>If you enabled an external JNDI registry, update your JNDI provider&rsquo;s configuration properties inside the <code>jndi.properties</code> file and add the directory that contains the file to your classpath.</li>
+</ul></li>
+</ul>
+
+<p><img src="../../attachment_files/Container Configuration JMS Tab - GigaSpaces Browser.jpg" alt="Container Configuration JMS Tab - GigaSpaces Browser.jpg" /></p>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

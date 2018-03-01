@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Cluster View</h1>
+<hr>
+
+
+<p>Cluster View presents a graphic representation of the spaces in a cluster, the groups they comprise (replication, failover and load-balancing groups), and the relationships among them.
+Cluster View complements the visualization provided by the Container Tree panel, because it uses the cluster configuration file, as well as the GigaSpaces Server, as a reference. As a result, you can visualize spaces whether they are online or offline, without loading their containers. While the Container Tree panel is a good way to see which spaces are currently running, Cluster View gives you a larger picture of the space architecture.</p>
+
+<p>Another important advantage of Cluster View over the Container Tree panel is that it shows groups as an intermediate level between spaces and clusters. This level has always been a part of cluster configuration files, but it is now easier to visualize.</p>
+
+<p>An important distinction between Cluster View and the Container Tree is that the Cluster View is exclusively a monitoring tool. It does not allow you to perform any operations on clusters, groups or spaces, or to modify cluster or space configuration.</p>
+
+<h1 id="cluster-view-areas">Cluster View Areas</h1>
+
+<p>The Cluster View is divided into four main areas:</p>
+
+<ul>
+<li><strong>Cluster tree</strong> &ndash; at the top of the tree is the cluster node (<img src="../../attachment_files/spaceTreeIcon.gif" alt="spaceTreeIcon.gif" />), each representing a space listed in the cluster configuration file.</li>
+</ul>
+
+
+<div class='bs-callout bs-callout-warning'><p>Each cluster node (<img src="../../attachment_files/GMC_space_OperationsClusterNode_icon_6.5.jpg" alt="GMC_space_OperationsClusterNode_icon_6.5.jpg" />), which allows you to view all cluster information in one node (for more details, see <a href="#viewing-information-for-entire-cluster">below</a>).</p>
+</div>
+
+
+
+
+
+
+
+
+<ul>
+<li><strong>Visual display</strong> &ndash; this area changes according to your selection in the tree. When you select the cluster node, the visual display shows the groups in the cluster.</li>
+</ul>
+
+<div style="text-align:center"><p><img src="../../attachment_files/GMC_space_cluster_MainClusterNodeSelected_6.5.jpg" alt="GMC_space_cluster_MainClusterNodeSelected_6.5.jpg" /></p>
+</div>
+
+
+
+
+
+<p>When you select a group node, the display shows the spaces in the node. When you select a space, either by double-clicking it here or by clicking its node in the tree, the display focuses on that space and shows its connections to other spaces (in a replication group).</p>
+
+<ul>
+<li><strong>Legend</strong> &ndash; shows the meaning of the colors used in the visual display. There is a different legend for full cluster view and for spaces-in-group view.</li>
+<li><strong>Information Panel</strong> &ndash; when you select the cluster node in the tree, basic details about all the cluster&rsquo;s members are displayed here. When you select a space, by clicking its node in the tree or its representation in the visual display, this area divides into a number of tabs that provide a detailed description of the space&rsquo;s configuration settings, and its replication connections (in a replication group). All the information displayed in this panel is read-only.</li>
+</ul>
+
+<div style="text-align:center"><p><img src="../../attachment_files/GMC_space_cluster_SpecificClusterNodeSelected_6.5.jpg" alt="GMC_space_cluster_SpecificClusterNodeSelected_6.5.jpg" /></p>
+</div>
+
+
+
+
+
+
+<div class='bs-callout bs-callout-danger'><p>The view above does not display the number of objects for persistent spaces in LRU mode, since this might result in very high CPU usage. To change this, see the <a href="./gigaspaces-browser-menus-and-buttons.html#Display Persistent LRU Space Metrics">Menus and Buttons</a> section.</p>
+</div>
+
+
+
+<h2 id="viewing-information-for-entire-cluster">Viewing Information for Entire Cluster</h2>
+
+<p>The <strong>Operations</strong> cluster node (<img src="../../attachment_files/GMC_space_OperationsClusterNode_icon_6.5.jpg" alt="GMC_space_OperationsClusterNode_icon_6.5.jpg" />) allows you to view all classes, data, statistics, transactions, and connections for the entire cluster under a single node.</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/GMC_space_cluster_OperationsNodeTree_6.5.jpg" alt="GMC_space_cluster_OperationsNodeTree_6.5.jpg" /></p>
+</div>
+
+
+
+
+
+<p>The views under the <strong>Operations</strong> node have the same functionality as the views under the regular space/cluster nodes:</p>
+
+<ul>
+<li><strong>Data Types view</strong> &ndash; allows you to view all classes in the cluster and to inspect class objects. For more details, refer to the <a href="./gigaspaces-browser-data-types-view.html">Classes View</a> section.</li>
+<li><strong>Transactions view</strong> &ndash; displays all transactions in the cluster. For more details, refer to the <a href="./gigaspaces-browser-transaction-view.html">Transactions View</a> section.</li>
+<li><strong>Query view</strong> &ndash; allows you to query space classes and to inspect class objects. For more details, refer to the <a href="./gigaspaces-browser-query-view.html">Query View</a> section.</li>
+<li><strong>Statistics view</strong> &ndash; displays statistics for operations performed in the cluster. For more details, refer to the <a href="./gigaspaces-browser-statistics-view.html">Statistics View</a> section.</li>
+<li><strong>Connections view</strong> &ndash; displays connections to the cluster (includes additional columns: <strong>Cluster Member Name</strong>, <strong>Server IP Address</strong>, <strong>Server Port</strong>). For more details, refer to the <a href="./gigaspaces-browser-connection-view.html">Connections View</a> section.</li>
+</ul>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

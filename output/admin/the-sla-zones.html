@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Hosts, Zones &amp; Machine Utilization</h1>
+<hr>
+
+
+<p>The provisioning process of processing unit instances makes no guarantee regarding which GSCs each instance is provisioned on. It makes a best effort to evenly distribute the instances across available GSCs, taking into account the number of services on each host.</p>
+
+<p>The SLA enables you to define requirements which control the provisioning process of processing unit instances on the available GSCs. The requirements are based on machine level statistics and grouping of the GSC processes to zones (see below).</p>
+
+<p>The following example shows the variety of supported requirements:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Namespace " style="padding:10px"><pre><code class="language-xml">&lt;os-sla:sla&gt;
+&lt;os-sla:requirements&gt;
+&lt;os-sla:host ip=&quot;192.168.0.1&quot; /&gt;
+&lt;os-sla:host ip=&quot;192.168.0.2&quot; /&gt;
+&lt;os-sla:zone name=&quot;zone1&quot; /&gt;
+&lt;os-sla:zone name=&quot;zone2&quot; /&gt;
+&lt;os-sla:cpu high=&quot;.9&quot; /&gt;
+&lt;os-sla:memory high=&quot;.8&quot; /&gt;
+&lt;/os-sla:requirements&gt;
+&lt;/os-sla:sla&gt;
+</code></pre>
+</div>
+<div title="  Plain " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;SLA&quot; class=&quot;org.openspaces.pu.sla.SLA&quot;&gt;
+&lt;property name=&quot;requirements&quot;&gt;
+&lt;list&gt;
+&lt;bean class=&quot;org.openspaces.pu.sla.requirement.HostRequirement&quot;&gt;
+&lt;property name=&quot;id&quot; value=&quot;192.168.0.1&quot; /&gt;
+&lt;bean class=&quot;org.openspaces.pu.sla.requirement.HostRequirement&quot;&gt;
+&lt;property name=&quot;id&quot; value=&quot;192.168.0.2&quot; /&gt;
+&lt;/bean&gt;
+&lt;bean class=&quot;org.openspaces.pu.sla.requirement.ZoneRequirement&quot;&gt;
+&lt;property name=&quot;zone&quot; value=&quot;zone1&quot; /&gt;
+&lt;/bean&gt;
+&lt;bean class=&quot;org.openspaces.pu.sla.requirement.ZoneRequirement&quot;&gt;
+&lt;property name=&quot;zone&quot; value=&quot;zone2&quot; /&gt;
+&lt;/bean&gt;
+&lt;bean class=&quot;org.openspaces.pu.sla.requirement.CpuRequirement&quot;&gt;
+&lt;property name=&quot;high&quot; value=&quot;.9&quot; /&gt;
+&lt;/bean&gt;
+&lt;bean class=&quot;org.openspaces.pu.sla.requirement.MemoryRequirement&quot;&gt;
+&lt;property name=&quot;high&quot; value=&quot;.8&quot; /&gt;
+&lt;/bean&gt;
+&lt;/list&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>The above requirements contain the following provisioning constraints which are enforced by the GSM:</p>
+
+<ul>
+<li>Only provision the processing unit instances to hosts 192.168.0.1 and 192.168.0.2</li>
+<li>Only provision the processing unit instances to GSCs which belong to zone &ldquo;zone1&rdquo; or zone &ldquo;zone2&rdquo;</li>
+<li>Do not provision processing unit instances to GSCs whose hosting machine utilizes more than 90% of its CPU</li>
+<li>Do not provision processing unit instances to GSCs whose hosting JVM process utilizes more than 80% of its RAM</li>
+</ul>
+
+<p>When using the host or zone requirements, note that more than one requirement can be defined (for example, to define a set of machines this Processing Unit can be deployed to; define the machine&rsquo;s CPU utilization limit; and define the GSC&rsquo;s memory usage limit ).</p>
+
+<h1 id="using-zones">Using Zones</h1>
+
+<div style="text-align:center"><p><img src="../../attachment_files/zones.jpg" alt="zones.jpg" /></p>
+</div>
+
+
+
+
+
+<p>Defining zones allows you to configure logical tags for each GSC, according to which the processing unit instances will be provisioned to. You can use any alphanumeric combination for a zone name. The GSC can be started with a set of zones that are tagged to it, which match (or not) a given zone requirement in the processing unit&rsquo;s SLA (the zone name matching is case sensitive). The zones of a GSC are specified via the <code>com.gs.zones</code> system property. Typically this will be done by setting the XAP_GSC_OPTIONS environment variable before running the GSC, as shown below (note that you can also edit the <code>setenv.sh/bat</code> script manually, but it is less recommended since it touches a core system script):</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Unix " style="padding:10px"><pre><code class="language-bash">export XAP_GSC_OPTIONS=-Dcom.gs.zones=zone1,zone3 ${XAP_GSC_OPTIONS}
+</code></pre>
+</div>
+<div title="  Windows " style="padding:10px"><pre><code class="language-bash">set XAP_GSC_OPTIONS=-Dcom.gs.zones=zone1,zone3 %XAP_GSC_OPTIONS%
+</code></pre>
+</div>
+<div title="  Code " style="padding:10px"><pre><code class="language-java">Admin admin = new AdminFactory().create();
+admin.getGridServiceAgents().waitForAtLeastOne();
+GridServiceAgents agents = admin.getGridServiceAgents();
+for (GridServiceAgent gridServiceAgent : agents) {
+if (gridServiceAgent.getMachine().getHostName().equalsIgnoreCase(&quot;machineA&quot;))
+{
+GridServiceAgent agent = admin.getGridServiceAgents().waitForAtLeastOne();
+GridServiceContainerOptions gscOptions = new GridServiceContainerOptions();
+gscOptions.vmInputArgument(&quot;-Dcom.gs.zones=zone1,zone3&quot;);
+gscOptions.vmInputArgument(&quot;-Xmx256m&quot;);
+agent.startGridService(gscOptions);
+}
+}
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>The above defines zones &ldquo;zone1&rdquo; and &ldquo;zone3&rdquo; to be tagged to the GSC which will be started. Note that multiple zones can be specified using a comma separated list.</p>
+
+<p>The following table explains when a container with a specified zone can satisfy a Processing Unit with a required zone:</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Processing Unit</th>
+<th align="left">Container</th>
+<th align="left">Zone match?</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">PU[]</td>
+<td align="left">GSC[]</td>
+<td align="left">YES</td>
+</tr>
+
+<tr>
+<td align="left">PU[]</td>
+<td align="left">GSC[zone1]</td>
+<td align="left">YES</td>
+</tr>
+
+<tr>
+<td align="left">PU[zone1]</td>
+<td align="left">GSC[zone1]</td>
+<td align="left">YES</td>
+</tr>
+
+<tr>
+<td align="left">PU[zone1,zone2]</td>
+<td align="left">GSC[zone1]</td>
+<td align="left">YES</td>
+</tr>
+
+<tr>
+<td align="left">PU[zone1]</td>
+<td align="left">GSC[zone1,zone2]</td>
+<td align="left">YES</td>
+</tr>
+
+<tr>
+<td align="left">PU[zone1]</td>
+<td align="left">GSC[]</td>
+<td align="left">NO</td>
+</tr>
+
+<tr>
+<td align="left">PU[zone1]</td>
+<td align="left">GSC[zone2]</td>
+<td align="left">NO</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="max-instances-per-zone">Max Instances per Zone</h1>
+
+<p>The SLA definition allows to define maximum instances of a processing unit per zone. The semantics of the setting is different when using a processing unit that has an embedded space with primary / backup, and all other cases (non backup processing unit with embedded space, and plain processing units).</p>
+
+<p>When there are no backups, the setting basically controls the maximum instances per zone out of all the processing unit instances. The setting is usually used with the zone requirement setting to constrain where the processing unit instances will be created. Here is an example of a deployment where only 4 instances are allowed in zone1, and 3 instances are allowed in zone2, and the processing unit should only be instantiated on these two zones:</p>
+
+<pre><code class="language-xml">&lt;os-sla:sla max-instances-per-zone=&quot;zone1/4,zone2/3&quot;&gt;
+&lt;os-sla:requirements&gt;
+&lt;os-sla:zone name=&quot;zone1&quot; /&gt;
+&lt;os-sla:zone name=&quot;zone2&quot; /&gt;
+&lt;/os-sla:requirements&gt;
+&lt;/os-sla:sla&gt;
+</code></pre>
+
+<p>If, for example, we want to only have 4 instances running on zone1, 3 instances running on zone2, and the rest on zone3, then we can simply allow processing units to be created on zone3 as well in the requirements:</p>
+
+<pre><code class="language-xml">&lt;os-sla:sla max-instances-per-zone=&quot;zone1/4,zone2/3&quot;&gt;
+&lt;os-sla:requirements&gt;
+&lt;os-sla:zone name=&quot;zone1&quot; /&gt;
+&lt;os-sla:zone name=&quot;zone2&quot; /&gt;
+&lt;os-sla:zone name=&quot;zone3&quot; /&gt;
+&lt;/os-sla:requirements&gt;
+&lt;/os-sla:sla&gt;
+</code></pre>
+
+<p>When a processing unit does start an embedded space with a backup topology, the semantics of the SLA applies on a per partition level. This means that the setting allows to control if the primary and backup will run on the same zone or not. For example, if we want to deploy a primary with backup topology with 10 partitions each with one backup, and have the primary and backup not run on the same zone we can do the following:</p>
+
+<pre><code class="language-xml">&lt;os-sla:sla number-of-instances=&quot;10&quot; number-of=backups=&quot;1&quot; max-instances-per-zone=&quot;zone1/1,zone2/1&quot;&gt;
+&lt;os-sla:requirements&gt;
+&lt;os-sla:zone name=&quot;zone1&quot; /&gt;
+&lt;os-sla:zone name=&quot;zone2&quot; /&gt;
+&lt;/os-sla:requirements&gt;
+&lt;/os-sla:sla&gt;
+</code></pre>
+
+<p>In the above case, the primary and the backup will not run on the same zone. If the primary of partition 1 was started on zone1, then the backup of partition 1 will be started on zone2. This comes very handy when defining rack aware deployments.</p>
+
+<h1 id="requires-isolation">Requires Isolation</h1>
+
+<p>If <code>requires isolation</code> is true a, single processing unit instance takes exclusivity on a given GSC and only it can be deployed onto this GSC, (like GSC -Dcom.gigaspaces.grid.gsc.serviceLimit=1)</p>
+
+<p>The following example shows the requires isolation configuration:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Namespace " style="padding:10px"><pre><code class="language-xml">&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;${dataGridName}&quot;/&gt;
+
+&lt;os-sla:sla cluster-schema=&quot;partitioned&quot; number-of-instances=&quot;2&quot; number-of-backups=&quot;0&quot; requires-isolation=&quot;true&quot;&gt;
+&lt;/os-sla:sla&gt;
+</code></pre>
+</div>
+
+<div title="  AdminApi " style="padding:10px"><pre><code class="language-java">gsm.deploy(new SpaceDeployment(&quot;mySpace&quot;).numberOfInstances(2).numberOfBackups(0).requiresIsolation(true));
+gsm.deploy((new ProcessingUnitDeployment(&quot;myPU&quot;).numberOfInstances(2).numberOfBackups(0).requiresIsolation(true)));
+</code></pre>
+</div>
+
+<div title="  Command Line Interface " style="padding:10px"><pre><code class="language-xml">gs&gt; deploy-space -requires-isolation true mySpace
+gs&gt; deploy -requires-isolation true myPU
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<h1 id="instance-level-requirements">Instance Level Requirements</h1>
+
+<p>You can also define SLA deployment requirements on per processing unit instance basis. Here is an example:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Namespace " style="padding:10px"><pre><code class="language-xml">&lt;os-sla:sla&gt;
+&lt;os-sla:requirements&gt;
+&lt;os-sla:cpu high=&quot;.9&quot; /&gt;
+&lt;os-sla:memory high=&quot;.8&quot; /&gt;
+&lt;/os-sla:requirements&gt;
+&lt;os-sla:instance-SLAs&gt;
+&lt;os-sla:instance-SLA instance-id=&quot;1&quot;&gt;
+&lt;os-sla:requirements&gt;
+&lt;os-sla:host ip=&quot;100.0.0.1&quot; /&gt;
+&lt;/os-sla:requirements&gt;
+&lt;/os-sla:instance-SLA&gt;
+&lt;os-sla:instance-SLA instance-id=&quot;1&quot; backup-id=&quot;1&quot;&gt;
+&lt;os-sla:requirements&gt;
+&lt;os-sla:host ip=&quot;100.0.0.2&quot; /&gt;
+&lt;/os-sla:requirements&gt;
+&lt;/os-sla:instance-SLA&gt;
+&lt;/os-sla:instance-SLAs&gt;
+&lt;/os-sla:sla&gt;
+</code></pre>
+</div>
+<div title="  Plain " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;SLA&quot; class=&quot;org.openspaces.pu.sla.SLA&quot;&gt;
+&lt;property name=&quot;requirements&quot;&gt;
+&lt;list&gt;
+&lt;bean class=&quot;org.openspaces.pu.sla.requirement.CpuRequirement&quot;&gt;
+&lt;property name=&quot;high&quot; value=&quot;.9&quot; /&gt;
+&lt;/bean&gt;
+&lt;bean class=&quot;org.openspaces.pu.sla.requirement.MemoryRequirement&quot;&gt;
+&lt;property name=&quot;high&quot; value=&quot;.8&quot; /&gt;
+&lt;/bean&gt;
+&lt;/list&gt;
+&lt;/property&gt;
+&lt;property name=&quot;instanceSLAs&quot;&gt;
+&lt;list&gt;
+&lt;bean class=&quot;org.openspaces.pu.sla.InstanceSLA&quot;&gt;
+&lt;property name=&quot;instanceId&quot; value=&quot;1&quot; /&gt;
+&lt;property name=&quot;requirements&quot;&gt;
+&lt;list&gt;
+&lt;bean class=&quot;org.openspaces.pu.sla.requirement.HostRequirement&quot;&gt;
+&lt;property name=&quot;id&quot; value=&quot;100.0.0.1&quot; /&gt;
+&lt;/bean&gt;
+&lt;/list&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+&lt;bean class=&quot;org.openspaces.pu.sla.InstanceSLA&quot;&gt;
+&lt;property name=&quot;instanceId&quot; value=&quot;1&quot; /&gt;
+&lt;property name=&quot;backupId&quot; value=&quot;1&quot; /&gt;
+&lt;property name=&quot;requirements&quot;&gt;
+&lt;list&gt;
+&lt;bean class=&quot;org.openspaces.pu.sla.requirement.HostRequirement&quot;&gt;
+&lt;property name=&quot;id&quot; value=&quot;100.0.0.2&quot; /&gt;
+&lt;/bean&gt;
+&lt;/list&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+&lt;/list&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>The above example verifies that the <strong>first instance</strong> is deployed to a specific machine (specified by its IP address), and its <strong>second instance</strong> for the same partition is deployed to a different machine. All instances share the &ldquo;general&rdquo; requirements of CPU and memory. The first instance <strong>might be</strong> the primary and the second might be the backup, but there is no guarantee these will remain primary/backup as these are runtime properties and might change during the life-cycle of the clustered space. The activation property of the space (primary or backup) is determined once the instance is deployed and is not controlled by the GSM but as part of the primary election process.</p>
+
+<h1 id="zone-based-partitioning-provisioning">Zone Based Partitioning Provisioning</h1>
+
+<p>To accommodate partitions with different size we can use the zones configuration to provision each partition into a different zone. Each zone will be associated with GSCs having a different heap size (Xmx). The assumption here is a GSCs hosting a single partition instance (primary or a backup instance). With the following example we deploy a cluster with 3 partitions where each partition deployed into a different zone: Small (1GB GSC), Medium (2GB GSC ) and Large (3GB GSC).</p>
+
+<p>To start the small zone:</p>
+
+<pre><code class="language-bash">set XAP_GSC_OPTIONS=-Dcom.gs.zones=zoneSmall -Xmx1g
+gs-agent.bat
+</code></pre>
+
+<p>To start the medium zone:</p>
+
+<pre><code class="language-bash">set XAP_GSC_OPTIONS=-Dcom.gs.zones=zoneMedium -Xmx2g
+gs-agent.bat
+</code></pre>
+
+<p>To start the large zone:</p>
+
+<pre><code class="language-bash">set XAP_GSC_OPTIONS=-Dcom.gs.zones=zoneLarge -Xmx3g
+gs-agent.bat
+</code></pre>
+
+<p>Deploy a 3 partitions with a backup space cluster using the following sla.xml:</p>
+
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+xmlns:os-sla=&quot;http://www.openspaces.org/schema/sla&quot;
+xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+http://www.openspaces.org/schema/sla http://www.openspaces.org/schema/sla/openspaces-sla.xsd&quot;&gt;
+
+&lt;os-sla:sla&gt;
+&lt;os-sla:instance-SLAs&gt;
+&lt;os-sla:instance-SLA instance-id=&quot;1&quot;&gt;
+&lt;os-sla:requirements&gt;
+&lt;os-sla:zone name=&quot;zoneSmall&quot; /&gt;
+&lt;/os-sla:requirements&gt;
+&lt;/os-sla:instance-SLA&gt;
+&lt;os-sla:instance-SLA instance-id=&quot;1&quot; backup-id=&quot;1&quot;&gt;
+&lt;os-sla:requirements&gt;
+&lt;os-sla:zone name=&quot;zoneSmall&quot; /&gt;
+&lt;/os-sla:requirements&gt;
+&lt;/os-sla:instance-SLA&gt;
+&lt;os-sla:instance-SLA instance-id=&quot;2&quot;&gt;
+&lt;os-sla:requirements&gt;
+&lt;os-sla:zone name=&quot;zoneMedium&quot; /&gt;
+&lt;/os-sla:requirements&gt;
+&lt;/os-sla:instance-SLA&gt;
+&lt;os-sla:instance-SLA instance-id=&quot;2&quot; backup-id=&quot;1&quot;&gt;
+&lt;os-sla:requirements&gt;
+&lt;os-sla:zone name=&quot;zoneMedium&quot; /&gt;
+&lt;/os-sla:requirements&gt;
+&lt;/os-sla:instance-SLA&gt;
+&lt;os-sla:instance-SLA instance-id=&quot;3&quot;&gt;
+&lt;os-sla:requirements&gt;
+&lt;os-sla:zone name=&quot;zoneLarge&quot; /&gt;
+&lt;/os-sla:requirements&gt;
+&lt;/os-sla:instance-SLA&gt;
+&lt;os-sla:instance-SLA instance-id=&quot;3&quot; backup-id=&quot;1&quot;&gt;
+&lt;os-sla:requirements&gt;
+&lt;os-sla:zone name=&quot;zoneLarge&quot; /&gt;
+&lt;/os-sla:requirements&gt;
+&lt;/os-sla:instance-SLA&gt;
+&lt;/os-sla:instance-SLAs&gt;
+&lt;/os-sla:sla&gt;
+&lt;/beans&gt;
+</code></pre>
+
+
+<div class='bs-callout bs-callout-warning'><p>When using instance level SLA, max-instances settings do not apply (or any cluster level setting).</p>
+</div>
+
+
+
+
+
+
+
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

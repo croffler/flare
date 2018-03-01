@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >User-Role Management</h1>
+<hr>
+<p>Customize user/role management to meet your application requirements</p>
+
+<p>The <code>DirectoryManager</code> interface provides an API for managing users and roles. Implementing this interface is <strong>optional</strong> - and is usually the case if you have an external tool that manages it for you.</p>
+
+<p>From the <code>DirectoryManager</code> you can gain a <code>UserManager</code> interface and a <code>RoleManager</code> interface. Use the <code>UserManager</code> interface to create, delete, update <code>UserDetails</code> and the <code>RoleManager</code> interface to create, delete, update <code>RoleDetails</code>. This is just a logical separation - in reality you can choose how you want your users to be stored, and how you structure the one-to-many role to user relationship.</p>
+
+<p>GigaSpaces security is not aware of the directory at all. As long as the authentication process manages to access the user storage, authenticate the user and return all its authorities.</p>
+
+<p><strong>Sample usage of the <code>DirectoryManager</code> API</strong></p>
+
+<p>In the <a href="./securing-the-helloworld-example.html">Hello World example</a>, we presented a way to declare the users using the UI. It can also be done using the <code>DirectoryManager</code> API.</p>
+
+<p>Using the API we would like to declare the following:</p>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<p>The <strong>helloProcessor</strong> user will be granted <code>Take</code> access for <code>HelloObject</code> and <code>Write</code> access for <code>ProcessedHelloObject</code>.
+The <strong>helloFeeder</strong> user will be granted <code>Write</code> access for <code>HelloObject</code> and <code>Read</code> access for <code>ProcessedHelloObject</code>.</p>
+</div>
+
+
+
+
+
+
+
+
+<p>The GigaSpaces <code>User</code> is the default implementation of <code>UserDetails</code>. It accepts an array or a sequence of <code>Authority</code>-ies (<code>varargs</code>). Here we added the <code>ClassFilter</code> to restrict access to this specific class.</p>
+
+<pre><code class="language-java">Properties securityProperties = new Properties();
+SecurityManager securityManager = SecurityFactory.createSecurityManager(securityProperties);
+
+DirectoryManager directoryManager = securityManager.createDirectoryManager(new User(&quot;admin&quot;, &quot;admin&quot;));
+UserManager userManager = directoryManager.getUserManager();
+
+userManager.createUser(new User(&quot;helloProcessor&quot;, &quot;helloWorld&quot;,
+new SpaceAuthority(SpacePrivilege.TAKE, new ClassFilter(&quot;org.openspaces.example.helloworld.common.HelloObject&quot;)),
+new SpaceAuthority(SpacePrivilege.WRITE, new ClassFilter(&quot;org.openspaces.example.helloworld.common.HelloObject&quot;))
+));
+
+userManager.createUser(new User(&quot;helloFeeder&quot;, &quot;feedTheWorld&quot;,
+new SpaceAuthority(SpacePrivilege.WRITE, new ClassFilter(&quot;org.openspaces.example.helloworld.common.HelloObject&quot;)),
+new SpaceAuthority(SpacePrivilege.READ, new ClassFilter(&quot;org.openspaces.example.helloworld.common.HelloObject&quot;))
+));
+
+directoryManager.close();
+securityManager.close();
+</code></pre>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Using JConsole to Monitor the Client-Side Cache Activity</h1>
+<hr>
+
+
+<p>The Local View/Cache JMX Monitor monitors the number of objects stored within the client side cache and the activities performed with it. You can use <a href="http://docs.oracle.com/javase/8/docs/technotes/guides/management/jconsole.html">JConsole</a> to graph the number of objects within the local view/cache and other exposed statistics while the application is running. The Local View/Cache JMX Monitor exposing the following statistics:</p>
+
+<ul>
+<li>Object Count</li>
+<li>Read Count, Take Count, Write Count, Update Count</li>
+<li>Read TP, Take TP, Write TP, Update TP</li>
+</ul>
+
+<h1 id="using-the-local-view-cache-jmx-monitor">Using the Local View/Cache JMX Monitor</h1>
+
+<p>To use the Local View/Cache JMX Monitor:</p>
+
+<p><strong>Step 1.</strong> <a href="/download_files/GSClientCacheJMXMonitorXAP9.jar"><i class='fa fa-download fa-lg'></i></a>
+
+
+the monitor jar and add it into your application classpath.<br>
+<strong>Step 2.</strong> Add into your local view/cache configuration the <code>space-config.filters.Statistics.enabled</code> parameter as demonstrated below.<br>
+<strong>Step 3.</strong> Add into your application Spring file the <code>gsClientCacheMonitor</code> bean. The following example assumes you have an application using two master spaces, each has its own client local cache proxy. See how the <code>GigaSpacesClientCacheJMXMonitor</code> is configured to specify the different proxies used by the application:<br></p>
+
+<pre><code class="language-xml">&lt;os-core:space-proxy id=&quot;space&quot; space-name=&quot;mySpace&quot; /&gt;
+
+&lt;os-core:local-cache id=&quot;localCacheSpace&quot; space=&quot;space&quot;&gt;
+&lt;os-core:properties&gt;
+&lt;props&gt;
+&lt;prop key=&quot;space-config.filters.Statistics.enabled&quot;&gt;true&lt;/prop&gt;
+&lt;/props&gt;
+&lt;/os-core:properties&gt;
+&lt;/os-core:local-cache&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace1&quot; space=&quot;localCacheSpace&quot;/&gt;
+
+&lt;os-core:space-proxy id=&quot;space&quot; space-name=&quot;mySpace2&quot; /&gt;
+
+&lt;os-core:local-cache id=&quot;localCacheSpace2&quot; space=&quot;space2&quot;&gt;
+&lt;os-core:properties&gt;
+&lt;props&gt;
+&lt;prop key=&quot;space-config.filters.Statistics.enabled&quot;&gt;true&lt;/prop&gt;
+&lt;/props&gt;
+&lt;/os-core:properties&gt;
+&lt;/os-core:local-cache&gt;
+&lt;os-core:giga-space id=&quot;gigaSpace2&quot; space=&quot;localCacheSpace2&quot;/&gt;
+
+&lt;bean id=&quot;gsClientCacheMonitor&quot;
+class=&quot;com.gigaspaces.clientcachemonitor.GigaSpacesClientCacheJMXMonitor&quot;&gt;
+&lt;property name=&quot;gigaSpaceList&quot; &gt;
+&lt;list&gt;
+&lt;ref bean=&quot;gigaSpace1&quot;/&gt;
+&lt;ref bean=&quot;gigaSpace2&quot;/&gt;
+&lt;/list&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+
+<p>You can specify up to 5 local View/Cache <code>GigaSpace</code> beans as part of the <code>gigaSpaceList</code>.</p>
+
+<p><strong>Step 4.</strong> Start JConsole for your application JVM, move into the MBean Tab and select the <code>GigaSpacesClientCacheJMXMonitor</code> under the <code>com.gigaspaces.clientcachemonitor</code>.<br>
+<strong>Step 5.</strong> Click the relevant statistics you would like to monitor, and Double click the cell on the right side panel. you may monitor the entire statistics by clicking on the Attributes tree icon and double clicking on each value at the left side panel.<br>
+<strong>Step 6.</strong> A graph (or multiple graphs) should be presented illustrating the value of the monitored statistic(s). The graph(s) will be updated periodically.<br><br>
+See   example how you can monitor multiple local cache instances running within the same application:<br>
+<br></p>
+
+<p><img src="../../attachment_files/clientCacheJMXMonitor.jpg" alt="image" /></p>
+
+<p><br></p>
+
+
+<div class='bs-callout bs-callout-warning'><p>This version of the local view/cache monitor does not reflect statistics for operations using the <code>readByID</code> operation from the local view/cache.</p>
+</div>
+
+
+
+
+
+
+
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

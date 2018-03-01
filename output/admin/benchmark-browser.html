@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Benchmark View</h1>
+<hr>
+
+
+<p>The Benchmark view provides a user interface for benchmarking the space.</p>
+
+<p>The following options are provided:</p>
+
+<ul>
+<li>Specifying object type.</li>
+<li>Specifying the JavaSpaces API or Map API operation to perform.</li>
+<li>Specifying the number of iterations to perform.</li>
+<li>Specifying the sampling rate.</li>
+<li>Specifying Object size.</li>
+<li>Specifying batch size.</li>
+<li>Specifying the number of concurrent threads.</li>
+<li>Specifying the transaction type.</li>
+<li>Specify parallel operations. For example, running write and read operations in separate threads concurrently.</li>
+<li>Specify distributed cache mode.</li>
+<li>Export results to a CSV file.</li>
+<li>Display results in graph and tabular form.</li>
+<li>Benchmark configuration can be saved.</li>
+</ul>
+
+<p>The Benchmark view is comprised of 4 tabs:</p>
+
+<ul>
+<li><strong>Settings tab</strong> &ndash; allows you to configure the benchmark parameters.</li>
+<li><strong>Table tab</strong> &ndash; allows you to view the benchmark results in tabular format.</li>
+<li><strong>Graph tab</strong> &ndash; allows you to view the benchmark results using graphs.</li>
+<li><strong>Summary tab</strong> &ndash; includes the benchmark results summary.</li>
+</ul>
+
+<p>These options and tabs are described in the sections below.</p>
+
+<h1 id="settings-tab">Settings Tab</h1>
+
+<p>The <strong>Settings</strong> tab allows you to configure the benchmark parameters.</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/gmc_space_benchmark_6.0.2.jpg" alt="gmc_space_benchmark_6.0.2.jpg" /></p>
+</div>
+
+
+
+
+
+<p>It contains the following areas:</p>
+
+<ul>
+<li><strong>Options</strong></li>
+<li><strong>Lease</strong></li>
+<li>Admin operations</li>
+<li><strong>Operations</strong></li>
+<li><strong>Transaction</strong></li>
+<li><strong>Master-Local</strong></li>
+<li><strong>Results Output</strong></li>
+<li><strong>Configuration</strong></li>
+</ul>
+
+<p>These areas are detailed in the sections below.</p>
+
+<h2 id="options">Options</h2>
+
+<p>The Benchmark view <strong>Options</strong> area provides the following options:</p>
+
+<ul>
+<li><strong>Object type</strong> &ndash; type of object written to the space, possible options: <strong>Entry</strong>, <strong>POJO</strong>, <strong>JMS</strong>, <strong>Externalizable</strong>, <strong>Serializable</strong>, <strong>FIFO</strong>, <strong>POJO Externalizable</strong>, <strong>MetaDataEntry Externalizable</strong>, <strong>FIFO Externalizable</strong>, <strong>UID Externalizable</strong>. The selected object type is explained in the <strong>Description</strong> area.</li>
+<li><strong>Threads</strong> &ndash; the number of concurrent threads that run the test. This allows you to run multiple threads that call the selected operation at the same time.</li>
+</ul>
+
+<p>If you define that 1000 Entries be written to the space, and have 5 threads defined as part of the threads box, you will end up with 5000 Entries inside the space.</p>
+
+<ul>
+<li><strong>Iterations</strong> &ndash; the number of iterations the benchmark calls for the selected operation.</li>
+</ul>
+
+<p>You can allow a read cycle to be conducted several times using the <strong>Repeat Read/Get Operation</strong> option.</p>
+
+<ul>
+<li><strong>Entry size</strong> &ndash; the size of the Entry payload in bytes that is written to the space. This option is relevant only for the write and put operations.</li>
+<li><strong>Sampling rate</strong> &ndash; the benchmark provides the average TP reading in the <strong>Graph</strong> or <strong>Table</strong> tabs based on the sampling rate. For example, if you choose to write 5000 Entries to the space and the sampling rate is 1000, the results graph and table display 5 sampling points, which reflect the average TP of the write operation for the last sampling period (the last 1000 write operations). When using the <strong>Repeat Read/Get Operation</strong> option, you can select a sampling rate that is greater than the number of iterations.</li>
+<li><strong>Batches</strong> &ndash; this option allows you to call GigaSpaces batch operations (<code>writeMultiple, takeMultiple, readMultiple</code>). The number specified in this box is the number of batches that are performed in order to complete the number of iterations specified. Specifying <code>0</code> as the batch size calls the regular APIs.</li>
+</ul>
+
+<p>The numbers in the <strong>Iterations</strong>, <strong>Sampling rate</strong>, and <strong>Read/Take timeout</strong> boxes are in thousands, and the number in the <strong>Entry size</strong> box is in bytes.</p>
+
+<h2 id="lease">Lease</h2>
+
+<p>Checking the <strong>Return Lease</strong> check defines that operations performed in the space also create a <code>Lease</code> object. You can specify the expiration time of the lease in the <strong>Lease Time</strong> area, or check the <strong>FOREVER Lease</strong> check box, which means the lease will not expire unless you remove it from the space.</p>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<p>Checking the <strong>Return Lease</strong> check box might decrease performance.</p>
+</div>
+
+
+
+
+
+
+
+
+<h2 id="admin-operations">Admin Operations</h2>
+
+<ul>
+<li><p><strong>Use Clustered Proxy</strong> &ndash; <strong>relevant only when working with clustered spaces</strong>. This option defines that all operations in the cluster are performed on a clustered proxy, which is responsible for routing the operation to the relevant member/members. If a clustered proxy is not used, operations are performed directly on the selected cluster member, and not on the whole cluster.</p></li>
+
+<li><p><strong>Clean Space</strong> - if checked, the target space is cleaned (all objects and templates are removed) prior to the start of the benchmark.</p></li>
+
+<li><p><strong>Display Thread TP</strong> &ndash; this check box instructs the <a href="#graph-tab"><strong>Graph</strong> tab</a> to display the throughput of each thread separately. Different threads are represented by different colors.</p></li>
+</ul>
+
+<h2 id="operations">Operations</h2>
+
+<h3 id="javaspaces-api">JavaSpaces API</h3>
+
+<p>JavaSpaces operations use an Entry with 2 attributes:</p>
+
+<ul>
+<li><code>m_counter</code> &ndash; <code>java.lang.Long</code>. This stores a running number. This is an indexed attribute. Take and read operations use this attribute for template matching.</li>
+<li><code>m_content</code> &ndash; <code>java.lang.Byte\[\]</code>. This stores the payload data.</li>
+</ul>
+
+<p>The following operations can be performed when the <strong>JavaSpaces</strong> area is selected:</p>
+
+<ul>
+<li><strong>Write</strong> &ndash; writes objects to the space, according to the number of iterations.</li>
+<li><strong>Read</strong> &ndash; reads objects from the space, according to the number of iterations.</li>
+<li><strong>Take</strong> &ndash; takes objects from the space, according to the number of iterations.</li>
+<li><strong>Write and Read</strong> &ndash; writes and reads objects, according to the number of iterations. For example, defining 20,000 iterations in the <strong>Iterations</strong> text box writes 2,000 objects to the space, and reads those 2,000 objects from the space.</li>
+<li><strong>Write and Take</strong> &ndash; writes and takes objects, according to the number of iterations. For example, defining 20,000 iterations in the <strong>Iterations</strong> text box writes 2,000 objects to the space, and takes those 2,000 objects from the space.</li>
+<li><strong>Write and Notify</strong> &ndash; writes objects according to the number of iterations, and registers for notifications on those objects. For example, defining 20,000 iterations in the <strong>Iterations</strong> text box writes 2,000 objects to the space, sends 2,000 notifications, receives 2,000 notify acknowledgments, and registers for notifications on the written objects.</li>
+</ul>
+
+
+<div class='bs-callout bs-callout-info'>
+<b style="">Info</b><br>
+<p>The referral to objects above means either Entries or POJOs, depending on the specified <strong>Object Format</strong>.</p>
+</div>
+
+
+
+
+
+<h3 id="map-api">Map API</h3>
+
+<p>Map operations put an object with 2 attributes (value object) and a string key into the space.</p>
+
+<p>The following operations can be performed when the <strong>Map</strong> area is selected:</p>
+
+<ul>
+<li><strong>Put</strong> &ndash; puts Entries in the space, according to the number of iterations.</li>
+<li><strong>Get</strong> &ndash; gets Entries from the space, according to the number of iterations.</li>
+<li><strong>Remove</strong> &ndash; removes Entries from the space, according to the number of iterations.</li>
+<li><strong>Put and Get</strong> &ndash; puts Entries into the space, and gets Entries from the space, according to the number of iterations. For example, defining 20,000 iterations in the <strong>Iterations</strong> text box puts 2,000 Entries in the space, and gets those 2,000 Entries from the space.</li>
+<li><strong>Put and Remove</strong> &ndash; puts Entries into the space, and removes Entries from the space. For example, defining 20,000 iterations in the <strong>Iterations</strong> text box puts 2,000 Entries in the space, and removes those 2,000 Entries from the space.</li>
+</ul>
+
+<h3 id="parallel-operations">Parallel Operations</h3>
+
+<p>The <strong>Parallel operations</strong> check box is relevant only for <strong>Write and Read</strong>, <strong>Write and Take</strong>, <strong>Put and Get</strong>, and <strong>Put and Remove</strong> operations. When selecting this option, the operations are conducted simultaneously &ndash; i.e., a thread is spawned for the write operation, another one for the read operation, and these are executed at the same time, allowing the read thread to read an Entry that has been written by the write thread.</p>
+
+<h3 id="repeat-read-get-operation">Repeat Read/Get Operation</h3>
+
+<p>This option is relevant for the read or get operations. Specify the number of times to repeat the operation. This option allows you to benchmark the local cache.</p>
+
+<h2 id="transaction">Transaction</h2>
+
+<p>The <strong>Transaction</strong> area allows you to perform operations under transactions:</p>
+
+<ul>
+<li><strong>None</strong> &ndash; operations are called without using transactions.</li>
+<li><strong>Local</strong> &ndash; the GigaSpaces Local Transaction Manager is used to create the transaction object with the operations.</li>
+<li>Distributed - the Jini Distributed Transaction Manager is used to create the transaction object with the operations.
+In the <strong>Txn Manager URL</strong> text box, specify the host name and port in which your Jini Lookup Service is running:</li>
+</ul>
+
+<div style="text-align:center"><p><img src="../../attachment_files/GMC_space_benchmark_txManagerURL_6.1.jpg" alt="GMC_space_benchmark_txManagerURL_6.1.jpg" /></p>
+</div>
+
+
+
+
+
+<ul>
+<li>You can choose how many operations are performed before a transaction is committed. Default is <strong>Commit every 1 operation</strong>, meaning the transaction is committed after every single operation.</li>
+</ul>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+For more details on transactions, refer to <a href="../dev-java/transaction-overview.html">Transaction Manager</a>.
+</div> 
+
+<h2 id="master-local">Master-Local</h2>
+
+<p>Distributed cache is relevant when using read or get operations. This option starts a local cache in the Space Browser&rsquo;s VM. When a read or get operation is called, the Entry is first searched for at the local cache. If the Entry is not found at the local cache, it is searched for at the master space and sent back to the browser. Any subsequent read for the Entry is conducted from the local cache.</p>
+
+<h2 id="results-output">Results Output</h2>
+
+<p>To save the benchmark sample readings into a file, check the <strong>Save results to file</strong> check box, and specify a file. This generates a file with the results in tab-separated values.</p>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<p>The benchmark results are printed to an Excel file, which allows you to easily sort your results. To do this, open your printed Excel file, and select *<em>Filter</em> &gt; <strong>AutoFilter</strong> from the <strong>Data</strong> menu at the top.</p>
+</div>
+
+
+
+
+
+
+
+
+<h2 id="configuration">Configuration</h2>
+
+<p>The <strong>Configuration</strong> area allows you to save specific options you selected in the <em>Service View</em>, instead of having to re-select them every time you run a new benchmark. You can save these options by clicking the <strong>New</strong> button. In the <strong>New Configuration</strong> dialog type the name of your choice, for example, <code>myConfiguration</code>:</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/GMC_space_benchmark_New_Configuration_dialog_small_6.0.jpg" alt="GMC_space_benchmark_New_Configuration_dialog_small_6.0.jpg" /></p>
+</div>
+
+
+
+
+
+<p>Press <strong>OK</strong> to accept and close the dialog, and then click <strong>Save</strong>. The saved configuration now exists in the drop-down menu:</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/GMC_space_benchmark_Configuration_area_SavedConfiguration_6.0.jpg" alt="GMC_space_benchmark_Configuration_area_SavedConfiguration_6.0.jpg" /></p>
+</div>
+
+
+
+
+
+<p>You can add as many configurations as you like, and select the one you want to use from the drop-down menu. You can also delete or rename existing configurations using the <strong>Delete</strong> and <strong>Rename</strong> buttons.</p>
+
+<h1 id="table-tab">Table Tab</h1>
+
+<p>The <strong>Table</strong> tab allows you to view the benchmark results in tabular format. The table provides the throughput for write, read, or take operations, and the client process memory available during the test period.</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/benchmark_table_tab.gif" alt="benchmark_table_tab.gif" /></p>
+</div>
+
+
+
+
+
+<p>To clear the <strong>Table</strong> tab, click the <strong>Clear</strong> button.</p>
+
+<h1 id="graph-tab">Graph Tab</h1>
+
+<p>The <strong>Graph</strong> tab allows you to view the benchmark results using graphs. The graphs provided show the throughput for write/read/take operations and the client process memory available during the test period.</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/benchmark_graph_tab.gif" alt="benchmark_graph_tab.gif" /></p>
+</div>
+
+
+
+
+
+<p>To clear the <strong>Graph</strong> tab, click the <strong>Clear</strong> button.</p>
+
+<h1 id="summary-tab">Summary Tab</h1>
+
+<p>The <strong>Summary</strong> tab includes the benchmark results summary.</p>
+
+<p>When running multiple benchmarks, the last benchmark summary is added to the previously displayed summaries.</p>
+
+<p>The Summary tab includes the client system environment &ndash; OS, J2SE, memory, network interfaces information, the total time of the benchmark, the average throughput, the number of bytes written/read from the space, and the edition and build of GigaSpaces.</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/benchmark_summary_tab.gif" alt="benchmark_summary_tab.gif" /></p>
+</div>
+
+
+
+
+
+<p>To clear the <strong>Summary</strong> tab, click the <strong>Clear</strong> button.</p>
+
+<h1 id="starting-or-stopping-the-benchmark">Starting or Stopping the Benchmark</h1>
+
+<p>After completing the benchmark settings, click the <strong>Start</strong> button to invoke the selected operation(s) based on the configuration defined in the <strong>Settings</strong> tab.</p>
+
+<p>To stop the currently running benchmark, click the <strong>Stop</strong> button.</p>
+
+<h1 id="progress-bar">Progress Bar</h1>
+
+<p>The progress bar at the bottom of the <strong>Service view</strong> displays the current benchmark status.</p>
+
+<h1 id="benchmark-cli-utility">Benchmark CLI Utility</h1>
+
+<p>The benchmark utility provides a good tool for running performance benchmarks on the cache in various scenarios. This program performs a loop of write/put and read/get, or take/remove operations from a space, according to a different set of parameters. The result is the average time it took to perform the operations. You can define a sampling rate to allow you to track the intermediate performance while the benchmark example is running. You may also dump the results into a file to be converted into graphs and analyzed using a spreadsheet and analysis tools.</p>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+For more details, refer to <a href="./benchmark-utility-cli.html">Benchmark Utility</a>.
+</div> 
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

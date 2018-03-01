@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Nested Properties</h1>
+<hr>
+
+
+<p>The <a href="./query-sql.html">SQL Query</a> page shows how to express complex queries on flat space entries (e.g. entries which are composed of scalar types like integers and strings), but in reality space entries are often composed of more complex types.
+For example, a <strong>Person</strong> class may have:</p>
+
+<ul>
+<li>An <strong>address</strong> property of type <strong>Address</strong>, which is a user-defined class encapsulating address details (e.g. city, street).</li>
+<li>A <strong>phoneNumbers</strong> property of type <code>Map&lt;String, String&gt;</code>, encapsulating various phone numbers (e.g. home, work, mobile).</li>
+<li>A <strong>groups</strong> property of type <code>List&lt;String&gt;</code>, encapsulating various groups the person belongs to.</li>
+</ul>
+
+<p>An application would likely need to execute queries which involve such properties (e.g. a person which lives in city X, or is part of some group Y, or has a specific home phone number). This page explains how GigaSpaces <a href="./query-sql.html">SQLQuery</a> can be used to express such queries.</p>
+
+<h1 id="matching-paths">Matching Paths</h1>
+
+<p>Matching a nested property is done by specifying a <strong>Path</strong> which describes how to obtain its value.</p>
+
+<p>For example, suppose we have a <strong>Person</strong> class and an <strong>Address</strong> class, and <strong>Person</strong> has an <strong>address</strong> property of type <strong>Address</strong>:</p>
+
+<pre><code class="language-java">@SpaceClass
+public class Person {
+private Address address;
+// Getter and setter methods are omitted for brevity.
+}
+
+public class Address implements Serializable {
+private String city;
+// Getter and setter methods are omitted for brevity.
+}
+</code></pre>
+
+<p>The following example queries for a <strong>Person</strong> with an <strong>address</strong> whose <strong>city</strong> equals &ldquo;<strong>New York</strong>&ldquo;:</p>
+
+<pre><code class="language-java">... = new SQLQuery&lt;Person&gt;(Person.class, &quot;address.city = 'New York'&quot;);
+</code></pre>
+
+
+<div class='bs-callout bs-callout-info'><p>Note that other properties (if any) in <strong>address</strong> which are not part of the criteria are ignored in the matching process.</p>
+</div>
+
+
+
+
+
+<p>The number of levels in the path is unlimited.
+For example, suppose the <strong>Address</strong> class has a <strong>Street</strong> class which encapsulates a <strong>name</strong> (String) and a <strong>houseNum</strong> (int).
+The following example queries for a <strong>Person</strong> who live on &ldquo;*Main**&rdquo; street:</p>
+
+<pre><code class="language-java">... = new SQLQuery&lt;Person&gt;(Person.class, &quot;address.street.name = 'Main'&quot;);
+</code></pre>
+
+<p>Naturally, any other feature of the SQL syntax can be used with paths:</p>
+
+<pre><code class="language-java">// Using parameters instead of fixed criteria expressions:
+... = new SQLQuery&lt;Person&gt;(Person.class, &quot;address.city = ?&quot;, &quot;New York&quot;);
+// Using other SQL comparison operands:
+... = new SQLQuery&lt;Person&gt;(Person.class, &quot;address.street.houseNum &gt;= 10&quot;);
+// Using SQL composition operands to express compound predicates:
+... = new SQLQuery&lt;Person&gt;(Person.class, &quot;address.city = 'New York' AND address.street.houseNum &gt;= 10&quot;);
+</code></pre>
+
+<p>Paths can also be specified in <strong>ORDER BY</strong> and <strong>GROUP BY</strong> clauses:</p>
+
+<pre><code class="language-java">// Query for Persons in 'Main' street, sort results by city:
+... = new SQLQuery&lt;Person&gt;(Person.class, &quot;address.street.name = 'Main' ORDER BY address.city&quot;);
+
+// Query for Persons in 'Main' street, group results by city:
+... = new SQLQuery&lt;Person&gt;(Person.class, &quot;address.street.name = 'Main' GROUP BY address.city&quot;);
+</code></pre>
+
+<span id="NestedObjectQueryIndexes"></span>
+
+<h2 id="indexing">Indexing</h2>
+
+<p>Indexing plays an important role in a system&rsquo;s architecture - a query without indexes can slow down the system significantly. Paths can be indexed to boost performance, similar to properties.
+For example, suppose we&rsquo;ve analyzed our queries and decided that <strong>address.city</strong> is commonly used and should be indexed:</p>
+
+<pre><code class="language-java">@SpaceClass
+public class Person {
+private Address address;
+
+@SpaceIndex(path = &quot;city&quot;)
+public Address getAddress() {
+return address;
+}
+// Setter method is omitted for brevity.
+}
+</code></pre>
+
+
+<div class='bs-callout bs-callout-info'><p>Note that since the index is specified on top of the <strong>address</strong> property, the <code>path</code> is &ldquo;<strong>city</strong>&rdquo; rather than &ldquo;<strong>address.city</strong>&rdquo;.
+For more information see the <a href="./indexing.html#Nested Properties Indexing">Nested Properties Indexing</a> section under <a href="./indexing.html">Indexing</a>.</p>
+</div>
+
+
+
+
+
+
+<div class='bs-callout bs-callout-danger'><p>The type of the nested object must be a class - querying interfaces is not supported.
+Nested properties&rsquo; classes should be <code>Serializable</code>, otherwise the entry will not be accessible from remote clients.</p>
+</div>
+
+
+
+<h1 id="nested-maps">Nested Maps</h1>
+
+<p>The path syntax is tailored to detect <code>Map</code> objects and provide access to their content: when a property&rsquo;s key is appended to the path, it is implicitly resolved to the property&rsquo;s value (at runtime).</p>
+
+<p>For example, suppose the <strong>Person</strong> class contains a <strong>phoneNumbers</strong> property which is a <code>Map</code>, encapsulating various phone numbers (e.g. home, work, mobile):</p>
+
+<pre><code class="language-java">@SpaceClass
+public class Person {
+private Map&lt;String, String&gt; phoneNumbers;
+// Getter and setter methods are omitted for brevity.
+}
+</code></pre>
+
+<p>The following example queries for a <strong>Person</strong> whose <strong>phoneNumbers</strong> property contains the key-value pair <strong>&ldquo;home&rdquo; - &ldquo;555-1234&rdquo;</strong>:</p>
+
+<pre><code class="language-java">... = new SQLQuery&lt;Person&gt;(Person.class, &quot;phoneNumbers.home = '555-1234'&quot;);
+</code></pre>
+
+
+<div class='bs-callout bs-callout-info'><p>A path can continue traversing from &lsquo;regular&rsquo; properties to maps and back to &lsquo;regular&rsquo; properties as needed.
+Map properties are useful for creating a flexible schema - since the keys in the map are not part of the schema, the map can be used to add or remove data from a space object without changing its structure.</p>
+</div>
+
+
+
+
+
+<h2 id="indexing-1">Indexing</h2>
+
+<p>Paths containing map keys can be indexed to boost performance, similar to &lsquo;regular&rsquo; paths.
+For example, suppose we&rsquo;ve analyzed our queries and decided that <strong>phoneNumbers.home</strong> is commonly used and should be indexed:</p>
+
+<pre><code class="language-java">@SpaceClass
+public class Person {
+private Address address;
+
+@SpaceIndex(path = &quot;home&quot;)
+public Map&lt;String, String&gt; getPhoneNumbers() {
+return phoneNumbers;
+}
+// Setter method is omitted for brevity.
+}
+</code></pre>
+
+
+<div class='bs-callout bs-callout-info'><p>Note that since the index is specified on top of the <strong>phoneNumbers</strong> property, the <code>path</code> is &ldquo;<strong>home</strong>&rdquo; rather than &ldquo;<strong>phoneNumbers.home</strong>&rdquo;.
+For more information see the <a href="./indexing.html#Nested properties indexing">Nested Properties Indexing</a> section under <a href="./indexing.html">Indexing</a>.</p>
+</div>
+
+
+
+
+
+<span id="collection-support"></span>
+
+<h1 id="nested-collections">Nested Collections</h1>
+
+<p>The GigaSpaces SQL syntax supports a special operand <code>[*]</code>, which is sometimes referred to as the &lsquo;contains&rsquo; operand. This operand is used in conjunction with collection properties to indicate that each collection item should be evaluated, and if at least one such item matches, the owner entry is considered as matched.</p>
+
+
+<div class='bs-callout bs-callout-info'><p>Arrays are supported as well, except for arrays of primitive types (int, boolean, etc.) which are are <strong>not</strong> supported - use the equivalent wrapper type (java.lang.Integer, java.lang.Boolean, etc.) instead.</p>
+</div>
+
+
+
+
+
+<p>Suppose we have a type called <strong>Dealer</strong> with a property called <strong>cars</strong> (which is a list of strings).
+The following example queries for a <strong>Dealer</strong> whose <em>cars</em> collection property contains the <strong>&ldquo;Honda&rdquo;</strong> String:</p>
+
+<pre><code class="language-java">... = new SQLQuery&lt;Dealer&gt;(Dealer.class, &quot;cars[*] = 'Honda'&quot;);
+</code></pre>
+
+<p>Now suppose that <strong>cars</strong> is not a collection of Strings but of a user-defined class called <strong>Car</strong>, which has a string property called <strong>company</strong>.
+The following example queries for a <strong>Dealer</strong> whose <strong>cars</strong> collection property contains a <strong>Car</strong> with <strong>company</strong> which equals <strong>&ldquo;Honda&rdquo;</strong>:</p>
+
+<pre><code class="language-java">... = new SQLQuery&lt;Dealer&gt;(Dealer.class, &quot;cars[*].company = 'Honda'&quot;);
+</code></pre>
+
+<p>Matching collections within collections recursively is supported as well.
+Suppose the <strong>Car</strong> class has a collection of strings called <strong>tags</strong>, to store additional information.
+The following example queries for a <strong>Dealer</strong> which contains a <strong>car</strong> which contains a <strong>tag</strong> which equals &ldquo;<strong>Convertible</strong>&ldquo;:</p>
+
+<pre><code class="language-java">... = new SQLQuery&lt;Dealer&gt;(Dealer.class, &quot;cars[*].tags[*] = 'Convertible'&quot;);
+</code></pre>
+
+<p><br></p>
+
+<h2 id="multiple-conditions-on-collection-items">Multiple Conditions On Collection Items</h2>
+
+<p>The scope of the <code>[*]</code> operand is bounded to the predicate it participates in. When using it more than once, each occurrence is evaluated separately.
+This behavior is useful when looking for multiple distinct items, for example: a dealer with several cars of different companies.
+The following example queries for a <strong>Dealer</strong> which has both a <strong>Honda</strong> and a <strong>Subaru</strong>:</p>
+
+<pre><code class="language-java">... = new SQLQuery&lt;Dealer&gt;(Dealer.class, &quot;cars[*].company = 'Honda' AND cars[*].company = 'Subaru'&quot;);
+</code></pre>
+
+<p>You can use parentheses to specify multiple conditions on the same collection item. See examples below:
+The following example queries for a <strong>Dealer</strong> which has a <strong>Car</strong> whose <em>company</em> equals &ldquo;<strong>Honda</strong>&rdquo; and <strong>color</strong> equals &ldquo;<strong>Red</strong>&ldquo;:</p>
+
+<pre><code class="language-java">... = new SQLQuery&lt;Dealer&gt;(Dealer.class, &quot;cars[*](company = 'Honda' AND color = 'Red')&quot;);
+</code></pre>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Caution </b><br>
+<p>Writing that last query without parentheses will yield results which are somewhat confusing:</p>
+
+<pre><code class="language-java">... = new SQLQuery&lt;Dealer&gt;(Dealer.class, &quot;cars[*].company = 'Honda' AND cars[*].color = 'Red'&quot;);
+</code></pre>
+
+<p>This query will match any <strong>Dealer</strong> with a <strong>Honda</strong> car and a <strong>Red</strong> car, but not necessarily the same car (e.g. a blue <strong>Honda</strong> and a <strong>Red</strong> Subaru).</p>
+</div>
+
+
+
+
+
+
+
+
+<p>The following example queries for a <strong>Dealer</strong> which has a <strong>Car</strong> whose <em>company</em> equals &ldquo;<strong>Honda</strong>&rdquo; and <strong>color</strong> equals &ldquo;<strong>Red</strong>&rdquo; and one of the Car nested <strong>Tags</strong> List equals to &ldquo;Convertible&rdquo;:</p>
+
+<pre><code class="language-java">... = new SqlQuery&lt;Dealer&gt;(&quot;Cars[*](company = 'Honda' AND color = 'Red' AND tags[*] = 'Convertible')&quot;);
+</code></pre>
+
+<p>Here is a graphical representation of this query:</p>
+
+<p><img src="../../attachment_files/nestedquery.jpg" alt="../../attachment_files/nestedquery.jpg" /></p>
+
+
+<div class='bs-callout bs-callout-danger'>
+<b style="color:#d9534f">The following is not supported</b><br>
+<pre><code class="language-java">... = new SqlQuery&lt;Dealer&gt;(&quot;Cars[*](company = 'Honda' OR color = 'Red' OR tags[*] = 'Convertible')&quot;);
+</code></pre>
+
+<p>As it does not make sense to perform an OR in this case.</p>
+</div>
+
+
+
+<h4 id="in-operation">In operation</h4>
+
+<p>Beginning 10.1, SQLQuery now supports <code>IN</code> when used with nested properties. For example, to search for a dealer with cars where company is either &ldquo;Honda&rdquo; or &ldquo;Ford&rdquo;</p>
+
+<pre><code class="language-java">... = new SQLQuery&lt;Dealer&gt;(Dealer.class, &quot;cars[*].company in ('Honda', 'Ford') &quot;);
+</code></pre>
+
+<h2 id="indexing-2">Indexing</h2>
+
+<p>Collection properties can be indexed to boost performance, similar to &lsquo;regular&rsquo; paths, except that each item in the collection is indexed.
+For example, suppose we&rsquo;ve analyzed our queries and decided that <strong>cars[*].company</strong> is commonly used and should be indexed:</p>
+
+<pre><code class="language-java">@SpaceIndex(path = &quot;[*].company&quot;)
+public List&lt;Car&gt; getCars() {
+return this.cars;
+}
+</code></pre>
+
+
+<div class='bs-callout bs-callout-warning'><p>Note that since the index is specified on top of the <strong>cars</strong> property, the <code>path</code> is [<em>].company rather than cars[</em>].company**.
+The bigger the collection - the more memory is required to store the index at the server (since each item is indexed). Use with caution!
+For more information see the <a href="./indexing.html#Collection Indexing">Collection Indexing</a> section under <a href="./indexing.html">Indexing</a>.</p>
+</div>
+
+
+
+
+
+
+
+
+<h1 id="limitations">Limitations</h1>
+
+<ul>
+<li>The type of the nested object must be a class - querying interfaces is not supported.</li>
+<li>Nested properties&rsquo; classes should be <code>Serializable</code>, otherwise the entry will not be accessible from remote clients.</li>
+<li>Arrays of primitive types (int, boolean, etc.) are not supported - use the equivalent wrapper type (java.lang.Integer, java.lang.Boolean, etc.) instead.</li>
+</ul>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

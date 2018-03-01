@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Data Source</h1>
+<hr>
+
+
+<p>A MongoDB based implementation of the <a href="./space-data-source-api.html">Space Data Source</a>.</p>
+
+<h1 id="library-dependencies">Library dependencies</h1>
+
+<p>The MongoDB Space Data Source uses <a href="http://docs.mongodb.org/ecosystem/drivers/java/">MongoDB Driver</a> For communicating with the MongoDB cluster.</p>
+
+<p>include the following in your <code>pom.xml</code></p>
+
+<pre><code class="language-xml">    &lt;!-- currently the MongoDB library is not the central maven repository --&gt; 
+&lt;repositories&gt;
+&lt;repository&gt;
+&lt;id&gt;org.openspaces&lt;/id&gt;
+&lt;name&gt;OpenSpaces&lt;/name&gt;
+&lt;url&gt;http://maven-repository.openspaces.org&lt;/url&gt;
+&lt;/repository&gt;
+&lt;/repositories&gt;
+
+
+&lt;dependencies&gt;
+...
+&lt;!-- mongodb java driver --&gt;
+&lt;dependency&gt;
+&lt;groupId&gt;org.mongodb&lt;/groupId&gt;
+&lt;artifactId&gt;mongo-java-driver&lt;/artifactId&gt;
+&lt;version&gt;3.2.0&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt; 
+&lt;groupId&gt;org.antlr&lt;/groupId&gt; 
+&lt;artifactId&gt;antlr4-runtime&lt;/artifactId&gt; 
+&lt;version&gt;4.0&lt;/version&gt;
+&lt;/dependency&gt; 
+
+&lt;dependency&gt;
+&lt;groupId&gt;org.gigaspaces&lt;/groupId&gt;
+&lt;artifactId&gt;xap-mongodb&lt;/artifactId&gt;
+&lt;version&gt;12.3.0-m18&lt;/version&gt;
+&lt;/dependency&gt;
+...
+&lt;/dependencies&gt;
+</code></pre>
+
+<h1 id="setup">Setup</h1>
+
+<p>An example of how the MongoDB Space Data Source can be configured for a space that loads data back from MongoDB once initialized and
+also asynchronously persists the data using a mirror (see <a href="./mongodb-space-synchronization-endpoint.html">MongoDB Space Synchronization Endpoint</a>)).</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Spring" style="padding:10px"><pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+xmlns:os-core=&quot;http://www.openspaces.org/schema/core&quot; xmlns:os-jms=&quot;http://www.openspaces.org/schema/jms&quot;
+xmlns:os-events=&quot;http://www.openspaces.org/schema/events&quot;
+xmlns:os-remoting=&quot;http://www.openspaces.org/schema/remoting&quot;
+xmlns:os-sla=&quot;http://www.openspaces.org/schema/sla&quot; xmlns:tx=&quot;http://www.springframework.org/schema/tx&quot;
+xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+http://www.openspaces.org/schema/core http://www.openspaces.org/schema/12.3/core/openspaces-core.xsd
+http://www.openspaces.org/schema/events http://www.openspaces.org/schema/12.3/events/openspaces-events.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/12.3/remoting/openspaces-remoting.xsd&quot;&gt;
+
+&lt;bean id=&quot;propertiesConfigurer&quot;
+class=&quot;org.springframework.beans.factory.config.PropertyPlaceholderConfigurer&quot; /&gt;
+
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;dataSourceSpace&quot;&gt;
+space-data-source=&quot;spaceDataSource&quot; mirrored=&quot;true&quot; schema=&quot;persistent&quot;&gt;
+&lt;os-core:properties&gt;
+&lt;props&gt;
+&lt;!-- Use ALL IN CACHE, put 0 for LRU --&gt;
+&lt;prop key=&quot;space-config.engine.cache_policy&quot;&gt;1&lt;/prop&gt;
+&lt;prop key=&quot;cluster-config.cache-loader.central-data-source&quot;&gt;true&lt;/prop&gt;
+&lt;prop key=&quot;cluster-config.mirror-service.supports-partial-update&quot;&gt;true&lt;/prop&gt;
+&lt;/props&gt;
+&lt;/os-core:properties&gt;
+&lt;/os-core:embedded-space&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot; /&gt;
+
+&lt;bean id=&quot;mongoClient&quot; class=&quot;com.gigaspaces.persistency.MongoClientConnectorBeanFactory&quot;&gt;
+&lt;property name=&quot;db&quot; value=&quot;qadb&quot; /&gt;
+&lt;property name=&quot;config&quot;&gt;
+&lt;bean class=&quot;com.mongodb.MongoClient&quot;&gt;
+&lt;constructor-arg value=&quot;localhost&quot; type=&quot;java.lang.String&quot; /&gt;
+&lt;constructor-arg value=&quot;27017&quot; type=&quot;int&quot; /&gt;
+&lt;/bean&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;spaceDataSource&quot; class=&quot;com.gigaspaces.persistency.MongoSpaceDataSourceBeanFactory&quot;&gt;
+&lt;property name=&quot;mongoClientConnector&quot; ref=&quot;mongoClient&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;/beans&gt;
+</code></pre>
+</div>
+<div title="  Code " style="padding:10px"><pre><code class="language-java">    MongoClient config = new MongoClient(host, port);
+
+MongoClientConnector client = new MongoClientConnectorConfigurer()
+.client(config)
+.db(dbName)
+.create();
+
+MongoSpaceDataSource spaceDataSource = new MongoSpaceDataSourceConfigurer()
+.mongoClientConnector(client)
+.create();
+
+GigaSpace gigaSpace = new GigaSpaceConfigurer(new EmbeddedSpaceConfigurer(&quot;space&quot;)
+.schema(&quot;persistent&quot;) 
+.mirror(true) 
+.cachePolicy(new LruCachePolicy()) 
+.addProperty(&quot;cluster-config.cache-loader.central-data-source&quot;, &quot;true&quot;) 
+.addProperty(&quot;cluster-config.mirror-service.supports-partial-update&quot;, &quot;true&quot;) 
+.spaceDataSource(spaceDataSource) 
+.space()).gigaSpace();
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>For more details about different configurations see <a href="./space-persistency-overview.html">Space Persistency</a>.</p>
+
+<h1 id="before-you-begin">Before you begin</h1>
+
+<p>Before deploying your Processing Unit, please do the following:</p>
+
+<ol>
+<li>Copy the <code>xap-mongodb.jar</code> and <code>antlr4-runtime-4.0.jar</code> from <code>lib\optional\mongodb</code> to <code>lib\optional\pu-common</code>.</li>
+<li>download the following jar and copy it to <code>lib\optional\pu-common</code>:</li>
+<li><code>mongo-java-driver-3.2.0.jar</code> from <a href="http://docs.mongodb.org/ecosystem/drivers/java/">mongoDB&rsquo;s website</a> .</li>
+</ol>
+
+<h1 id="mongospacedatasource-properties">MongoSpaceDataSource Properties</h1>
+
+<table>
+<thead>
+<tr>
+<th align="left">Property</th>
+<th align="left">Description</th>
+<th align="left">Default</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">mongoClientConnector</td>
+<td align="left">A configured <code>com.gigaspaces.persistency.MongoClientConnector</code> bean. Must be configured</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="considerations">Considerations</h2>
+
+<h3 id="general-limitations">General limitations</h3>
+
+<ul>
+<li>All classes that belong to types that are to be introduced to the space during the initial metadata load must exist on the classpath of the JVM the Space is running on.</li>
+</ul>
+
+<h3 id="cache-miss-query-limitations">Cache miss Query limitations</h3>
+
+<p>Supported queries:</p>
+
+<ul>
+<li><p><code>id = 1234</code></p></li>
+
+<li><p><code>name = 'John' AND age = 13</code></p></li>
+
+<li><p><code>address.streetName = 'Liberty'</code></p></li>
+
+<li><p><code>age &gt; 15</code></p></li>
+
+<li><p><code>age &lt; 20</code></p></li>
+
+<li><p><code>age &lt;= 20</code></p></li>
+
+<li><p><code>age &gt;= 15</code></p></li>
+
+<li><p><code>name = 'John' OR name = 'Jane'</code></p></li>
+
+<li><p><code>name rlike 'A.*B'</code></p></li>
+
+<li><p><code>name like 'A%'</code></p></li>
+
+<li><p><code>name is NULL</code></p></li>
+
+<li><p><code>name is NOT NULL</code></p></li>
+</ul>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note:</b><br>
+<p>Java types Short, Float, BigDecimal and BigInt supported only =,&lt;&gt; queries &gt;,&lt;,&gt;=,&lt;= is not supported.</p>
+</div>
+
+
+
+
+
+
+
+
+<h1 id="unsupported-queries">Unsupported queries:</h1>
+
+<ul>
+<li>Contains is unsupported</li>
+</ul>
+
+<h1 id="mongo-as-a-service">Mongo As a Service</h1>
+
+<p>There are some Mongo DB hosting services that run on the cloud, and you can connect to them from your deployment environment for free. For example: <a href="https://mongolab.com">mongolab</a></p>
+
+<p>In order to configure the connection, you would need to connect using a URI that contains the username and password.</p>
+
+<pre><code class="language-xml">&lt;bean id=&quot;mongoClient&quot;
+class=&quot;com.gigaspaces.persistency.MongoClientConnectorBeanFactory&quot;&gt;
+&lt;property name=&quot;db&quot; value=&quot;xapdb&quot; /&gt;
+&lt;property name=&quot;config&quot;&gt;
+&lt;bean class=&quot;com.mongodb.MongoClient&quot;&gt;
+&lt;constructor-arg&gt;
+&lt;bean class=&quot;com.mongodb.MongoClientURI&quot;&gt;
+&lt;constructor-arg value=&quot;mongodb://&lt;DB_USERNAME&gt;:&lt;DB_PASSWORD&gt;@ds027017.mongolab.com:27017/xapdb&quot; type=&quot;java.lang.String&quot;/&gt;
+&lt;/bean&gt;
+&lt;/constructor-arg&gt;
+&lt;/bean&gt;
+&lt;/property&gt;
+&lt;/bean&gt;​
+</code></pre>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

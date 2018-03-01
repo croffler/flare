@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Deploying from Docker Hub</h1>
+<hr>
+
+
+<p>To run XAP using a Docker container, you need to pull and start a Docker image. The XAP Docker image utilizes GigaSpaces&rsquo; XAP <a href="https://docs.gigaspaces.com/xap/12.3/admin/command-line-interface.html" title="XAP CLI documentation">command line interface (CLI)</a>.</p>
+
+<p>To test the XAP Docker image, run the following in your command line to display a help screen with all the available commands:</p>
+
+<pre><code>docker run gigaspaces/xap --help
+</code></pre>
+
+<p>For example, the <code>version</code> command prints version information:</p>
+
+<pre><code>docker run gigaspaces/xap version
+</code></pre>
+
+<h1 id="running-your-first-container">Running Your First Container</h1>
+
+<p>The simplest and fastest way to start working with XAP is to get a single instance up and running on your local machine.  After the instance is initiated, you can start to explore the various features and capabilities.</p>
+
+<p>To run a single host on your machine:</p>
+
+<pre><code>docker run --name test -e XAP_LICENSE=tryme -p 8090:8090 -p 8099:8099 gigaspaces/xap
+</code></pre>
+
+<p>This command includes the  XAP <code>tryme</code> license, which enables you to use the full XAP product for 24 hours (you can  get a longer evaluation license from the main <a href="http://gigaspaces.com">GigaSpaces</a> website).</p>
+
+<p>When running the XAP Docker image without arguments, a host is automatically started with the following components:</p>
+
+<ul>
+<li><a href="https://docs.gigaspaces.com/xap/12.3/admin/xap-manager.html">XAP Manager</a> (mapped to port <code>8090</code>)</li>
+<li><a href="https://docs.gigaspaces.com/xap/12.3/admin/web-management-console.html">Web Management Console</a> (mapped to port <code>8099</code>)</li>
+</ul>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<p>These ports are mapped to your host, so you can access them.</p>
+</div>
+
+
+
+
+
+
+
+
+<h1 id="running-a-test-cluster-on-your-host">Running a Test Cluster on Your Host</h1>
+
+<p>If you want to test high availability or other distributed features on a single host, you can start multiple instances of XAP. All you need to do is assign identities so they can communicate with each other, and specify which containers will run the XAP Manager service. For example:</p>
+
+<pre><code>XAP_MANAGER_SERVERS=host1,host2,host3
+XAP_LICENSE=tryme
+docker run --name test1 -h=host1 -d -e XAP_LICENSE -e XAP_MANAGER_SERVERS -p 8090:8090 -p 8099:8099 gigaspaces/xap
+docker run --name test2 -h=host2 -d -e XAP_LICENSE -e XAP_MANAGER_SERVERS -p 8091:8090 -p 8100:8099 gigaspaces/xap
+docker run --name test3 -h=host3 -d -e XAP_LICENSE -e XAP_MANAGER_SERVERS gigaspaces/xap
+docker run --name test4 -h=host4 -d -e XAP_LICENSE -e XAP_MANAGER_SERVERS gigaspaces/xap
+docker run --name test5 -h=host5 -d -e XAP_LICENSE -e XAP_MANAGER_SERVERS gigaspaces/xap
+</code></pre>
+
+<p>Due to starting multiple management containers on the same host, the ports of the 2nd and 3rd containers must be mapped to different host ports, in order to avoid conflicts with the 1st container. The rest of the containers don&rsquo;t expose any ports; they are connected to the management nodes via Docker&rsquo;s default bridge network, and are managed through the Web Management Console or <a href="https://docs.gigaspaces.com/xap/12.3/admin/xap-manager-rest.html">REST Manager API</a>.</p>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

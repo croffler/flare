@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Transactions</h1>
+<hr>
+
+
+<p><code>GigaSpace</code> with the different XAP <a href="./transaction-overview.html">transaction managers</a> and Spring allow simple declarative definition of transactions. This boils down to the fact that if there is an ongoing transaction running, any operation performed using the <code>GigaSpace</code> interface joins it, using Spring&rsquo;s rich transaction support.</p>
+
+
+<div class='bs-callout bs-callout-warning'><p>In order to have XAP transactional, the transaction manager must be provided as a reference when constructing the GigaSpace bean.
+For example (using the distributed transaction manager):</p>
+</div>
+
+
+
+
+
+
+
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Namespace" style="padding:10px"><pre><code class="language-xml">&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;space&quot; /&gt;
+&lt;os-core:distributed-tx-manager id=&quot;transactionManager&quot;/&gt;
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot; tx-manager=&quot;transactionManager&quot;/&gt;
+</code></pre>
+</div>
+<div title="  Plain XML " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.EmbeddedSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;transactionManager&quot; class=&quot;org.openspaces.core.transaction.manager.DistributedJiniTransactionManager&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;gigaSpace&quot; class=&quot;org.openspaces.core.GigaSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot; /&gt;
+&lt;property name=&quot;transactionManager&quot; ref=&quot;transactionManager&quot; /&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>It is highly recommended to read the <a href="http://static.springframework.org/spring/docs/3.0.x/reference/transaction.html" target="_blank" >transaction management chapter <i class='fa fa-external-link'></i></a> in the Spring reference documentation.</p>
+
+</div> 
+
+<h1 id="transaction-provider">Transaction Provider</h1>
+
+<p>OpenSpaces provides a pluggable transaction provider using the following interface:</p>
+
+<pre><code class="language-java">public interface TransactionProvider {
+Transaction getCurrentTransaction(Object transactionalContext, IJSpace space);
+int getCurrentTransactionIsolationLevel(Object transactionalContext);
+}
+</code></pre>
+
+<p>OpenSpaces comes with a default transaction provider implementation, which uses Spring and its transaction manager in order to obtain the currently running transactions and automatically use them under transactional operations.</p>
+
+<p>XAP allows access to the current running transaction using the transaction provider. The following code example shows how the take operation can be performed using <code>IJspace</code> (users normally won&rsquo;t be required to do so):</p>
+
+<pre><code class="language-java">gigaSpace.getSpace().take(obj, gigaSpace.getCurrentTransaction(), 1000);
+</code></pre>
+
+<h1 id="isolation-level">Isolation Level</h1>
+
+<p>XAP supports three isolation levels: <code>READ_UNCOMMITTED</code>, <code>READ_COMMITTED</code> and <code>REPEATABLE_READ</code> (default). When using <code>GigaSpace</code>, the default isolation level that it will perform under can be defined in the following manner:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Namespace " style="padding:10px"><pre><code class="language-xml">&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;space&quot; /&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot; default-isolation=&quot;READ_COMMITTED&quot;/&gt;
+</code></pre>
+</div>
+<div title="  Plain XML " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.EmbeddedSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;gigaSpace&quot; class=&quot;org.openspaces.core.GigaSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot; /&gt;
+&lt;property name=&quot;defaultIsolationLevelName&quot; value=&quot;READ_COMMITTED&quot; /&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+<div title="  Code " style="padding:10px"><pre><code class="language-java">IJSpace space = // get Space either by injection or code creation
+
+GigaSpace gigaSpace = new GigaSpaceConfigurer(space)
+.defaultIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED)
+.gigaSpace();
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>In addition, Spring allows you to define the isolation level on the transaction definition itself:</p>
+
+<pre><code class="language-java">@Transactional(readOnly = true)
+public class DefaultFooService implements FooService {
+
+private GigaSpace gigaSpace;
+
+public void setGigaSpace(GigaSpace gigaSpace) {
+this.gigaSpace = gigaSpace;
+}
+
+public Foo getFoo(String fooName) {
+// do something
+}
+
+// these settings have precedence for this method
+@Transactional(readOnly = false,
+propagation = Propagation.REQUIRES_NEW,
+isolation  = Isolation.READ_COMMITTED)
+public void updateFoo(Foo foo) {
+// do something
+}
+}
+</code></pre>
+
+<p>In the above example, any operation performed using <code>GigaSpace</code> in the <code>updateFoo</code> method automatically works under the <code>READ_COMMITTED</code> isolation level.</p>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p><a href="./transaction-overview.html">Transaction Management</a></p>
+
+</div> 
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

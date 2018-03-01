@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Aggregators</h1>
+<hr>
+
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:80%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>With many systems such as pricing systems, risk management, trading and other analytic and business intelligence applications you may need to perform an aggregation activity across data stored within the data grid when generating reports or when running some business process. Such activity can leverage data stored in memory and will be much faster than performing it with a database.
+XAP provides common functionality to perform aggregations across the space. There is no need to retrieve the entire data set from the space to the client side , iterate the result set and perform the aggregation. This would be an expensive activity as it might return large amount of data into the client application.</p>
+</div>
+
+<div style='float:left;width:20%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><div class="row">
+<div style="float:left; width:170px;height=140px; padding-left:15px;padding-right:0px;position:relative;margin-left:0px;margin-right:0px;">
+<p><a href="http://www.youtube.com/watch?v=H22qPux8Fh8" data-width="853" data-title="Aggregations" data-height="480" data-toggle="lightbox"> <img src="http://img.youtube.com/vi/H22qPux8Fh8/0.jpg" class="img-responsive img-rounded">Aggregations</a></p>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<p>Built-in Aggregators allow you to perform the entire aggregation activity at the space side avoiding any data retrieval back to the client side. Only the result of each aggregation activity performed with each partition is returned back to the client side where all the results are reduced and returned to the client application. Such aggregation activity utilize the partitioned nature of the data-grid allowing each partition to execute the aggregation with its local data in parallel, where all the partitions intermediate results are fully aggregated at the client side using the relevant reducer implementation.</p>
+
+<h2 id="how-aggregators-works">How Aggregators Works?</h2>
+
+<p>Aggregators are executed by iterating the internal data grid structure that maintains the space objects. There is no materialization of the original user data grid object when performing this iteration (scan). This allows relatively fast scan. There is no need to index the aggregated fields (paths) - only the fields (paths) used to execute the query used to generate the result set scanned to calculate the aggregation. Future XAP releases may use indexes to perform the aggregation.</p>
+
+<h1 id="supported-aggregators">Supported Aggregators</h1>
+
+<div class="row" style="margin-right:5px; margin-left:0px">
+<img src="../../attachment_files/aggregation1.png" class="alignright" alt="" title="" />
+<p><br>
+XAP comes with several built-in Aggregators you may use. The aggregation process executed across all data grid partitions when using a partitioned data grid , or across the proxy master replica when using a replicated data grid. You may rout the aggregation into a specific partition. You may implement also a custom Aggregator that will perform a special aggregation logic on a given field (path) and a given entries set based on a query. Aggregators are specified via the <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/index.html?com/gigaspaces/query/aggregators/AggregationSet.html">AggregationSet</a> that may have one or more Aggregators listed.</p>
+
+</div>
+
+<p><br></p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Name</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">min</td>
+<td align="left">Returns the minimum value for a set of data grid entries for a given field (path) based on a given query.</td>
+</tr>
+
+<tr>
+<td align="left">max</td>
+<td align="left">Returns the maximum value for a set of data grid entries for a given field (path) based on a given query.</td>
+</tr>
+
+<tr>
+<td align="left">count</td>
+<td align="left">Returns the count (matching entries) value for a set of data grid entries based on a given query.</td>
+</tr>
+
+<tr>
+<td align="left">average</td>
+<td align="left">Returns the average value for a given set of data grid entries for a given field (path) based on a given query.</td>
+</tr>
+
+<tr>
+<td align="left">sum</td>
+<td align="left">Returns the sum value for a set of data grid entries for a given field (path) based on a given query.</td>
+</tr>
+
+<tr>
+<td align="left">groupby</td>
+<td align="left">Returns a key/value map of generated result set for multiple aggregations based on a given query and a given field(s)/paths(s). Perform similar aggregation as the SQL GROUP BY Statement</td>
+</tr>
+
+<tr>
+<td align="left">having</td>
+<td align="left">Used to perform additional filtering on the aggregation result set. Perform similar aggregation as the SQL <code>HAVING</code> Clause</td>
+</tr>
+
+<tr>
+<td align="left">distinct</td>
+<td align="left">Returns a distinct result based on a given query.</td>
+</tr>
+
+<tr>
+<td align="left">maxEntry</td>
+<td align="left">Returns the Entry (space object) with the maximum value for a set of data grid entries for a given field (path) based on a given query.</td>
+</tr>
+
+<tr>
+<td align="left">minEntry</td>
+<td align="left">Returns the Entry (space object) with the minimum value for a set of data grid entries for a given field (path) based on a given query.</td>
+</tr>
+
+<tr>
+<td align="left">custom</td>
+<td align="left">An extension to the <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/com/gigaspaces/query/aggregators/SpaceEntriesAggregator.html">SpaceEntriesAggregator</a>. Return the aggregation for a user defined logic on a given field (path) and a given entries set based on a query.</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="interoperability">Interoperability</h1>
+
+<p>Aggregators may be performed on any data generated by any type of client. For example - A call for Aggregation from a Java application may be performed on space objects that were written into the space using .NET application using the XAP.NET API. Same for a call from .NET Aggregation API for data written into the space via a Java application.</p>
+
+<h1 id="usage">Usage</h1>
+
+<p>Here are some aggregation examples using the <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/index.html?org/openspaces/extensions/QueryExtension.html">QueryExtension</a></p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Application " style="padding:10px"><pre><code class="language-java">import static org.openspaces.extensions.QueryExtension.*;
+...
+SQLQuery&lt;Person&gt; query = new SQLQuery&lt;Person&gt;(Person.class,&quot;country=? OR country=? &quot;);
+query.setParameter(1, &quot;UK&quot;);
+query.setParameter(2, &quot;U.S.A&quot;);
+
+// retrieve the maximum value stored in the field &quot;age&quot;
+Long maxAgeInSpace = max(space, query, &quot;age&quot;);
+/// retrieve the minimum value stored in the field &quot;age&quot;
+Long minAgeInSpace = min(space, query, &quot;age&quot;);
+// Sum the &quot;age&quot; field on all space objects.
+Long combinedAgeInSpace = sum(space, query, &quot;age&quot;);
+// Sum's the &quot;age&quot; field on all space objects then divides by the number of space objects.
+Double averageAge = average(space, query, &quot;age&quot;);
+// Retrieve the space object with the highest value for the field &quot;age&quot;.
+Person oldestPersonInSpace = maxEntry(space, query, &quot;age&quot;);
+/// Retrieve the space object with the lowest value for the field &quot;age&quot;.
+Person youngestPersonInSpace = minEntry(space, query, &quot;age&quot;);
+</code></pre>
+</div>
+<div title="  Space Class " style="padding:10px"><pre><code class="language-java">@SpaceClass
+public class Person {
+private Long id;
+private Long age;
+private String country;
+
+@SpaceId(autoGenerate=false)
+public Long getId() {
+return id;
+}
+
+public Person setId(Long id) {
+this.id = id;
+return this;
+}
+
+public Long getAge() {
+return age;
+}
+
+public Person setAge(Long age) {
+this.age = age;
+return this;
+}
+
+@SpaceIndex
+public String getCountry() {
+return country;
+}
+
+public Person setCountry(String country) {
+this.country = country;
+return this;
+}
+}
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p><br></p>
+
+<h1 id="compound-aggregation">Compound Aggregation</h1>
+
+<div class="row" style="margin-right:5px; margin-left:0px">
+<img src="../../attachment_files/aggregation2.png" class="alignright" alt="" title="" />
+<p><br>
+Compound aggregation will execute multiple aggregation operations across the space returning all of the result sets at once. When multiple aggregates are needed the compound aggregation API is significantly faster than calling each individual aggregate.</p>
+
+</div>
+
+<p><br></p>
+
+<pre><code class="language-java">import static org.openspaces.extensions.QueryExtension.*;
+...
+SQLQuery&lt;Person&gt; query = new SQLQuery&lt;Person&gt;(Person.class,&quot;country=? OR country=? &quot;);
+query.setParameter(1, &quot;UK&quot;);
+query.setParameter(2, &quot;U.S.A&quot;);
+
+AggregationResult aggregationResult = space.aggregate(query,
+new AggregationSet().maxEntry(&quot;age&quot;).minEntry(&quot;age&quot;).sum(&quot;age&quot;)
+.average(&quot;age&quot;).minValue(&quot;age&quot;).maxValue(&quot;age&quot;));
+
+//retrieve result by index
+Person oldest = (Person) aggregationResult.get(0);
+Person youngest = (Person) aggregationResult.get(1);
+Long sum = (Long) aggregationResult.get(2);
+Double average = (Double) aggregationResult.get(3);
+
+//retrieve result by string key
+Long min = (Long) aggregationResult.get(&quot;minValue(age)&quot;);
+Long max = (Long) aggregationResult.get(&quot;maxValue(age)&quot;);
+</code></pre>
+
+<h1 id="nested-fields-aggregation">Nested Fields Aggregation</h1>
+
+<p>Aggregation against the members of embedded space classes (nested field) is supported by supplying the field path while invoking the desired aggregate function.</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Application " style="padding:10px"><pre><code class="language-java">import static org.openspaces.extensions.QueryExtension.*;
+...
+SQLQuery&lt;Person&gt; query = new SQLQuery&lt;Person&gt;(Person.class,&quot;country=? OR country=? &quot;);
+query.setParameter(1, &quot;UK&quot;);
+query.setParameter(2, &quot;U.S.A&quot;);
+
+// retrieve the maximum value stored in the field &quot;age&quot;
+Integer maxAgeInSpace = max(space, personSQLQuery, &quot;demographics.age&quot;);
+</code></pre>
+</div>
+<div title="  Person Space Class " style="padding:10px"><pre><code class="language-java">@SpaceClass
+public class Person {
+private String id;
+private String name;
+private String state;
+private Demographics demographics;
+
+@SpaceId(autoGenerate = true)
+public String getId() {
+return id;
+}
+
+public void setId(String id) {
+this.id = id;
+}
+
+public String getName() {
+return name;
+}
+
+public void setName(String name) {
+this.name = name;
+}
+
+public String getState() {
+return state;
+}
+
+public void setState(String state) {
+this.state = state;
+}
+
+public Demographics getDemographics() {
+return demographics;
+}
+
+public void setDemographics(Demographics demographics) {
+this.demographics = demographics;
+}
+}
+</code></pre>
+</div>
+<div title="  Demographic Space Class " style="padding:10px"><pre><code class="language-java">public class Demographics     {
+private Integer age;
+private char gender;
+
+public Integer getAge() {
+return age;
+}
+
+public void setAge(Integer age) {
+this.age = age;
+}
+
+public char getGender() {
+return gender;
+}
+
+public void setGender(char gender) {
+this.gender = gender;
+}
+}
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<h1 id="group-aggregation">Group Aggregation</h1>
+
+<p>The <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/index.html?com/gigaspaces/query/aggregators/GroupByAggregator.html">GroupByAggregator</a> is used in conjunction with the aggregate functions to group the result-set by one or more columns. Here is an example:</p>
+
+<pre><code class="language-java">import static org.openspaces.extensions.QueryExtension.*;
+import com.gigaspaces.query.aggregators.GroupByAggregator;
+import com.gigaspaces.query.aggregators.GroupByFilter;
+import com.gigaspaces.query.aggregators.GroupByResult;
+import com.gigaspaces.query.aggregators.GroupByValue;
+
+// select AVG(salary), MIN(salary), MAX(salary) from Employees WHERE age &gt; 50 group by Department, Gender
+SQLQuery&lt;Employee&gt; query = new SQLQuery&lt;Employee&gt;(Employee.class, &quot;age &gt; ?&quot;,50);
+GroupByResult groupByResult = groupBy(gigaSpace, query, new GroupByAggregator()
+.select(average(&quot;salary&quot;), min(&quot;salary&quot;), max(&quot;salary&quot;))
+.groupBy(&quot;department&quot;, &quot;gender&quot;));
+
+for (GroupByValue group : groupByResult) {
+// Getting info from the keys:
+Department department = (Department) group.getKey().get(&quot;department&quot;);
+Gender gender = (Gender) group.getKey().get(&quot;gender&quot;);
+// Getting info from the value:
+double avgSalary = group.getDouble(&quot;avg(salary)&quot;);
+long maxSalary = group.getLong(&quot;max(salary)&quot;);
+long minSalary = group.getLong(&quot;min(salary)&quot;);
+}
+</code></pre>
+
+<p>You can also use the <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/index.html?com/gigaspaces/query/aggregators/GroupByFilter.html">GroupByFilter</a> to restrict the groups of selected objects to only those whose condition is TRUE similar to the SQL <code>HAVING</code> Clause.</p>
+
+<pre><code class="language-java">// Select AVG(Salary) , Count(*) from Employees Where companyId = 10 group by Department Having AVG(Salary) &gt; 18,000
+SQLQuery&lt;Employee&gt; query = new SQLQuery&lt;Employee&gt;(Employee.class,&quot;companyId = 10&quot;);
+
+GroupByResult groupByResult = groupBy(gigaSpace, query, new GroupByAggregator()
+.select(average(&quot;salary&quot;), count()).groupBy(&quot;department&quot;)
+.having(new GroupByFilter() {
+@Override
+public boolean process(GroupByValue group) {
+return group.getDouble(&quot;avg(salary)&quot;) &gt; 18000;
+}
+}));
+
+for (GroupByValue group : groupByResult) {
+// Getting info from the keys:
+Department department = (Department) group.getKey().get(&quot;department&quot;);
+// Getting info from the value:
+double avgSalary = group.getDouble(&quot;avg(salary)&quot;);
+long count = group.getLong(&quot;count(*)&quot;);
+}
+</code></pre>
+
+<h1 id="distinct-aggregation">Distinct Aggregation</h1>
+
+<p>The <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/index.html?com/gigaspaces/query/aggregators/DistinctAggregator.html">DistinctAggregator</a> is used in conjunction with the aggregate functions to perform a distinct select by one or more columns. Here is an example:</p>
+
+<pre><code class="language-java">import static org.openspaces.extensions.QueryExtension.distinct;
+
+public void selectDistinct()
+{
+SQLQuery&lt;Person&gt; query = new SQLQuery&lt;Person&gt;(Person.class, &quot;&quot;);
+query.setProjections(&quot;lastName&quot;,&quot;gender&quot;);
+
+// QueryExtension.
+DistinctAggregator&lt;Person&gt; aggregator = new DistinctAggregator&lt;Person&gt;()
+.distinct(&quot;lastName&quot;, &quot;gender&quot;);
+
+List&lt;Person&gt; persons = distinct(sandboxSpace, query, aggregator);
+}
+</code></pre>
+
+<h1 id="routing">Routing</h1>
+
+<p>When running on a partitioned space, it is important to understand how routing is determined for SQL queries.
+If the routing property is part of the criteria expression with an equality operand and without ORs, its value is used for routing.
+In some scenarios we may want to execute the query on a specific partition without matching the routing property (e.g. blocking operation). This can be done via the <code>setRouting</code> method:</p>
+
+<pre><code class="language-java">// Select AVG(Salary) , Count(*) from Employees Where companyId = 10 group by Department Having AVG(Salary) &gt; 18,000
+SQLQuery&lt;Employee&gt; query = new SQLQuery&lt;Employee&gt;(Employee.class,&quot;companyId = 10&quot;);
+query.setRouting(1);
+
+GroupByResult groupByResult = groupBy(gigaSpace, query, new GroupByAggregator()
+.select(average(&quot;salary&quot;), count()).groupBy(&quot;department&quot;)
+.having(new GroupByFilter() {
+@Override
+public boolean process(GroupByValue group) {
+return group.getDouble(&quot;avg(salary)&quot;) &gt; 18000;
+}
+}));
+
+for (GroupByValue group : groupByResult) {
+// Getting info from the keys:
+Department department = (Department) group.getKey().get(&quot;department&quot;);
+// Getting info from the value:
+double avgSalary = group.getDouble(&quot;avg(salary)&quot;);
+long count = group.getLong(&quot;count(*)&quot;);
+}
+
+</code></pre>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p><a href="./query-sql.html#routing">SQL Query Routing</a></p>
+
+</div> 
+
+<h1 id="custom-aggregation">Custom Aggregation</h1>
+
+<p>You may extend the <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/index.html?/com/gigaspaces/query/aggregators/SpaceEntriesAggregator.html">SpaceEntriesAggregator</a> to execute user defined aggregation logic on a given field (path) and a given entries set based on a query.</p>
+
+<p>The example below shows a<code>String</code> field concatenation aggregator - for each entry extracts the field (path) value and concatenates with the previous values extracted.</p>
+
+<p>The <code>aggregate</code> method is called within each partition. Here we keep the <code>ConcatAggregator</code> object (and its <code>transient StringBuilder sb</code>) alive for the duration of the scan so it can be reused to concatenate the values.</p>
+
+<p>The <code>aggregateIntermediateResult</code> method is called at the client side (only once). In this case this will be called with a brand new object created on the client side.</p>
+
+<p>Executing the Aggregation logic:</p>
+
+<pre><code class="language-java">AggregationResult result = gigaSpace.aggregate(query, new AggregationSet().add(new ConcatAggregator(&quot;name&quot;)));
+String concatResult = result.getString(&quot;concat(name)&quot;);
+System.out.println(concatResult);
+</code></pre>
+
+<p>The <code>ConcatAggregator</code> Aggregation logic extending the <code>SpaceEntriesAggregator</code>:</p>
+
+<pre><code class="language-java">import com.gigaspaces.query.aggregators.SpaceEntriesAggregator;
+import com.gigaspaces.query.aggregators.SpaceEntriesAggregatorContext;
+
+public class ConcatAggregator extends SpaceEntriesAggregator&lt;String&gt; {
+
+private final String path;
+private transient StringBuilder sb;
+
+public ConcatAggregator(String path) {
+this.path = path;
+}
+
+@Override
+public String getDefaultAlias() {
+return &quot;concat(&quot; + path + &quot;)&quot;;
+}
+
+@Override
+public void aggregate(SpaceEntriesAggregatorContext context) {
+String value = (String) context.getPathValue(path);
+if (value != null)
+concat(value);
+}
+
+@Override
+public String getIntermediateResult() {
+return sb == null ? null : sb.toString();
+}
+
+@Override
+public void aggregateIntermediateResult(String partitionResult) {
+concat(partitionResult);
+}
+
+private void concat(String s) {
+if (sb == null) {
+sb = new StringBuilder(s);
+} else {
+sb.append(',').append(s);
+}
+}
+}
+</code></pre>
+
+<p>Detailed Flow:</p>
+
+<p>The <code>aggregate(SpaceEntriesAggregatorContext context)</code> is called within each partition for each matching space object. The actual Aggregation is done within the instance members (in this case the <code>transient StringBuilder sb</code>). When all matching space objects have been scanned, the <code>getIntermediateResult</code> method is called to return the aggregation result of that partition (in this case - a string) back to the client (that is holding the clustered space proxy).</p>
+
+<p>The proxy holds a different instance of the <code>ConcatAggregator</code> custom aggregator, whenever it receives an intermediate result from each partition it calls <code>aggregateIntermediateResult(String partitionResult)</code>. Once all partitions have returned their results, the proxy invokes the <code>getFinalResult</code> method to retrieve the final aggregation result. This method is not shown in the example above since it&rsquo;s default implementation is to call <code>getIntermediateResult</code> method, which yields the correct value in most aggregation implementations. There might be some special cases where you will need to implement the <code>getFinalResult</code> method.</p>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For more examples see the Services &amp; Best Practices <a href="/sbp/aggregators-custom.html">Custom Aggregator</a></p>
+
+</div> 
+
+<h2 id="change-code-without-restarts">Change code without restarts</h2>
+
+<p>When executing a aggregation over the space, the code is loaded from the remote client and cached for future executions.
+Since the code is cached, modifications are ignored, and users are forced to restart the space whenever they modify the code.</p>
+
+<p>Starting with 12.1, you can use the <code>@SupportCodeChange</code> annotation to tell the space your code has changed.
+The space can store multiple versions of the same task. This is ideal for supporting clients using different versions of a task.</p>
+
+<p>For example, start with annotating your task with @SupportCodeChange(id=&ldquo;1&rdquo;), and when the code changes, set the annotation to @SupportCodeChange(id=&ldquo;2&rdquo;), and the space will load the new task.</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Aggregation Version 1" style="padding:10px"><pre><code class="language-java">@SupportCodeChange(id =&quot;1&quot;)
+public class ConcatAggregator extends SpaceEntriesAggregator&lt;String&gt; {
+
+private final String path;
+private transient StringBuilder sb;
+
+public ConcatAggregator(String path) {
+this.path = path;
+}
+
+@Override
+public String getDefaultAlias() {
+return &quot;concat(&quot; + path + &quot;)&quot;;
+}
+
+@Override
+public void aggregate(SpaceEntriesAggregatorContext context) {
+String value = (String) context.getPathValue(path);
+if (value != null)
+concat(value);
+}
+
+@Override
+public String getIntermediateResult() {
+return sb == null ? null : sb.toString();
+}
+
+@Override
+public void aggregateIntermediateResult(String partitionResult) {
+concat(partitionResult);
+}
+
+private void concat(String s) {
+if (sb == null) {
+sb = new StringBuilder(s);
+} else {
+sb.append(',').append(s);
+}
+}
+}
+</code></pre>
+</div>
+
+<div title="Aggregation version 2" style="padding:10px"><pre><code class="language-java">@SupportCodeChange(id =&quot;2&quot;)
+public class ConcatAggregator extends SpaceEntriesAggregator&lt;String&gt; {
+
+private final String path;
+private transient StringBuilder sb;
+
+public ConcatAggregator(String path) {
+this.path = path;
+}
+
+@Override
+public String getDefaultAlias() {
+return &quot;concat(&quot; + path + &quot;)&quot;;
+}
+
+@Override
+public void aggregate(SpaceEntriesAggregatorContext context) {
+String value = (String) context.getPathValue(path);
+if (value != null)
+concat(value);
+}
+
+@Override
+public String getIntermediateResult() {
+return sb == null ? null : sb.toString();
+}
+
+@Override
+public void aggregateIntermediateResult(String partitionResult) {
+concat(partitionResult);
+}
+
+private void concat(String s) {
+if (sb == null) {
+sb = new StringBuilder(s);
+} else {
+sb.append(':').append(s);
+}
+}
+}
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p><a href="./the-space-no-restart.html">Change code without restarts</a></p>
+
+</div> 
+
+<h1 id="considerations">Considerations</h1>
+
+<p>If the Aggregator method is called frequently or large complex objects are used as return types, it is recommended to implement optimized serialization such as <code>Externalizable</code> for the returned value object or use libraries such as <a href="https://github.com/EsotericSoftware/kryo">kryo</a>.</p>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For more information see <a href="./custom-serialization.html">Custom Serialization</a>.</p>
+
+</div> 
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

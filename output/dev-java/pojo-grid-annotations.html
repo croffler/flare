@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Grid Metadata</h1>
+<hr>
+
+
+<h1 id="gigaspacecontext">GigaSpaceContext</h1>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Attribute Annotation</td>
+<td>@GigaSpaceContext</td>
+</tr>
+
+<tr>
+<td>Description</td>
+<td>In previous Spring releases, Spring only allowed you to inject the GigaSpace instance using setter injection or constructor injection. XAP extended this injection mechanism by allowing you to use annotations to inject a GigaSpace instance. As of Spring 2.5, this is no longer required since Spring support annotation based injection using the @Resource or @Autowired annotations.</td>
+</tr>
+</tbody>
+</table>
+
+<div class="row"><div class="easyui-accordion" data-options="selected:'-1'" plain="true" style="margin-left:15px;margin-right:15px;height:auto;"><div title="Annotation" style="padding:10px;"><pre><code class="language-java">
+//There can be more than one GigaSpace instance defined
+
+public class MyService {
+
+@GigaSpaceContext(name=&quot;directGigaSpace&quot;)
+private GigaSpace directGigaSpace;
+
+@GigaSpaceContext(name=&quot;clusteredGigaSpace&quot;)
+private GigaSpace clusteredGigaSpace;
+}
+</code></pre>
+</div>
+
+</div></div>
+
+
+
+<p>There is no need to have a setter for the GigaSpace instance, and by annotating it with GigaSpaceContext, a GigaSpace instance is automatically injected. In order to enable this feature, the following element needs to be configured in the Spring application context:</p>
+
+<div class="row"><div class="easyui-accordion" data-options="selected:'-1'" plain="true" style="margin-left:15px;margin-right:15px;height:auto;"><div title="Spring Configuration" style="padding:10px;"><div class="easyui-tabs" plain="true" data-options=""><div title="  Namespace " style="padding:10px"><pre><code class="language-xml">
+&lt;os-core:giga-space-context/&gt;
+
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;/&gt;
+
+&lt;os-core:giga-space id=&quot;directGigaSpace&quot; space=&quot;space&quot;/&gt;
+
+&lt;os-core:giga-space id=&quot;clusteredGigaSpace&quot; space=&quot;space&quot; clustered=&quot;true&quot;/&gt;
+
+&lt;bean id=&quot;myService&quot; class=&quot;eg.MyService&quot; /&gt;
+</code></pre>
+</div>
+<div title="   Plain XML " style="padding:10px"><pre><code class="language-xml">
+&lt;bean id=&quot;gigaSpaceContext&quot; class=&quot;org.openspaces.core.context.GigaSpaceContextBeanPostProcessor&quot; /&gt;
+
+&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.EmbeddedSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;directGigaSpace&quot; class=&quot;org.openspaces.core.GigaSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;clusteredGigaSpace&quot; class=&quot;org.openspaces.core.GigaSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot; /&gt;
+&lt;proeprty name=&quot;clustered&quot; value=&quot;true&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;myService&quot; class=&quot;eg.MyService&quot; /&gt;
+</code></pre>
+</div>
+</div>
+</div>
+
+</div></div>
+
+
+
+<h1 id="gigaspacelatecontext">GigaSpaceLateContext</h1>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Class Annotation</td>
+<td></td>
+</tr>
+
+<tr>
+<td>Attribute Annotation</td>
+<td>@GigaSpaceLateContext</td>
+</tr>
+
+<tr>
+<td>Description</td>
+<td>XAP allows you to define beans (such as filters), that are later injected to the actual space. If such beans require access to the GigaSpace instance, a cyclic dependency occurs (GigaSpace requires the Space, but the Space requires the filter injection). XAP allows you to use the same annotation-based injection mechanism in order to inject the GigaSpace instance at a different lifecycle stage.</td>
+</tr>
+</tbody>
+</table>
+
+<div class="row"><div class="easyui-accordion" data-options="selected:'-1'" plain="true" style="margin-left:15px;margin-right:15px;height:auto;"><div title="Annotation" style="padding:10px;"><pre><code class="language-java">public class MyService {
+
+@GigaSpaceLateContext
+private GigaSpace gigaSpace;
+
+}
+</code></pre>
+</div>
+
+</div></div>
+
+
+
+<p>There is no need to have a setter for the <code>GigaSpace</code> instance, and by annotating it with <code>GigaSpaceLateContext</code>, a <code>GigaSpace</code> instance is automatically injected. In order to enable this feature, the following element needs to be configured in the Spring application context:</p>
+
+<div class="row"><div class="easyui-accordion" data-options="selected:'-1'" plain="true" style="margin-left:15px;margin-right:15px;height:auto;"><div title="Spring Configuration" style="padding:10px;"><div class="easyui-tabs" plain="true" data-options=""><div title="  Namespace " style="padding:10px"><pre><code class="language-xml">
+&lt;os-core:giga-space-late-context/&gt;
+
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;/&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot;/&gt;
+
+&lt;bean id=&quot;myService&quot; class=&quot;eg.MyService&quot; /&gt;
+</code></pre>
+</div>
+<div title="  Plain XML " style="padding:10px"><pre><code class="language-xml">
+&lt;bean id=&quot;gigaSpaceContext&quot; class=&quot;org.openspaces.core.context.GigaSpaceLateContextBeanPostProcessor&quot; /&gt;
+
+&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.EmbeddedSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;gigaSpace&quot; class=&quot;org.openspaces.core.GigaSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;myService&quot; class=&quot;eg.MyService&quot; /&gt;
+</code></pre>
+</div>
+</div>
+</div>
+
+</div></div>
+
+
+
+<h1 id="clusterinfocontext">ClusterInfoContext</h1>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Attribute Annotation</td>
+<td>@ClusterInfoContext</td>
+</tr>
+
+<tr>
+<td>Description</td>
+<td>This annotation injects cluster information into the class.</td>
+</tr>
+</tbody>
+</table>
+
+<div class="row"><div class="easyui-accordion" data-options="selected:'-1'" plain="true" style="margin-left:15px;margin-right:15px;height:auto;"><div title="Example" style="padding:10px;"><pre><code class="language-java">public class Process {
+
+@ClusterInfoContext
+ClusterInfo  clusterInfo;
+
+Integer instanceId = clusterInfo.getInstanceId();
+}
+</code></pre>
+</div>
+
+</div></div>
+
+
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

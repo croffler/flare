@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Transaction Support</h1>
+<hr>
+<p>The notify container can be configured with transaction support, so the event action can be performed under a transaction. Exceptions thrown by the event listener cause the operations performed within the listener to be rolled back automatically.</p>
+
+
+<div class='bs-callout bs-callout-warning'><p>When using transactions, only the event listener operations are rolled back. The notifications are not sent again in case of a transaction rollback. In case this behavior is required, please consider using the <a href="./polling-container-overview.html">Polling Event Container</a>.</p>
+</div>
+
+
+
+
+
+
+
+
+<p>Transaction support can be configured as follows:</p>
+
+<p><div class="easyui-tabs" plain="true" data-options=""><div title="  Annotation " style="padding:10px"><pre><code class="language-xml">
+&lt;!-- Enable scan for OpenSpaces and Spring components --&gt;
+&lt;context:component-scan base-package=&quot;com.mycompany&quot;/&gt;
+
+&lt;!-- Enable support for @Polling annotation --&gt;
+&lt;os-events:annotation-support /&gt;
+
+&lt;os-core:embedded-space  id=&quot;space&quot; space-name=&quot;mySpace&quot;/&gt;
+
+&lt;os-core:distributed-tx-manager id=&quot;transactionManager&quot; /&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot; tx-manager=&quot;transactionManager&quot;/&gt;
+</code></pre>
+
+<pre><code class="language-java">@EventDriven @Notify @TransactionalEvent
+public class SimpleListener {
+
+@EventTemplate
+Data unprocessedData() {
+Data template = new Data();
+template.setProcessed(false);
+return template;
+}
+
+@SpaceDataEvent
+public Data eventListener(Data event) {
+//process Data here
+}
+}
+</code></pre>
+</div>
+<div title="  Namespace " style="padding:10px"><pre><code class="language-xml">
+&lt;os-core:embedded-space  id=&quot;space&quot; space-name=&quot;mySpace&quot;/&gt;
+
+&lt;os-core:distributed-tx-manager id=&quot;transactionManager&quot; /&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot; tx-manager=&quot;transactionManager&quot;/&gt;
+
+&lt;bean id=&quot;simpleListener&quot; class=&quot;SimpleListener&quot; /&gt;
+
+&lt;os-events:notify-container id=&quot;eventContainer&quot; giga-space=&quot;gigaSpace&quot;&gt;
+
+&lt;os-events:tx-support tx-manager=&quot;transactionManager&quot;/&gt;
+
+&lt;os-core:template&gt;
+&lt;bean class=&quot;org.openspaces.example.data.common.Data&quot;&gt;
+&lt;property name=&quot;processed&quot; value=&quot;false&quot;/&gt;
+&lt;/bean&gt;
+&lt;/os-core:template&gt;
+
+&lt;os-events:listener&gt;
+&lt;os-events:annotation-adapter&gt;
+&lt;os-events:delegate ref=&quot;simpleListener&quot;/&gt;
+&lt;/os-events:annotation-adapter&gt;
+&lt;/os-events:listener&gt;
+&lt;/os-events:notify-container&gt;
+</code></pre>
+</div>
+<div title="  Plain XML " style="padding:10px"><pre><code class="language-xml">
+&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.EmbeddedSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;transactionManager&quot; class=&quot;org.openspaces.core.transaction.manager.LocalJiniTransactionManager&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;gigaSpace&quot; class=&quot;org.openspaces.core.GigaSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot; /&gt;
+&lt;property name=&quot;transactionManager&quot; ref=&quot;transactionManager&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;simpleListener&quot; class=&quot;SimpleListener&quot; /&gt;
+
+&lt;bean id=&quot;eventContainer&quot; class=&quot;org.openspaces.events.notify.SimpleNotifyEventListenerContainer&quot;&gt;
+&lt;property name=&quot;transactionManager&quot; ref=&quot;transactionManager&quot; /&gt;
+
+&lt;property name=&quot;gigaSpace&quot; ref=&quot;gigaSpace&quot; /&gt;
+
+&lt;property name=&quot;template&quot;&gt;
+&lt;bean class=&quot;org.openspaces.example.data.common.Data&quot;&gt;
+&lt;property name=&quot;processed&quot; value=&quot;false&quot;/&gt;
+&lt;/bean&gt;
+&lt;/property&gt;
+
+&lt;property name=&quot;eventListener&quot;&gt;
+&lt;bean class=&quot;org.openspaces.events.adapter.AnnotationEventListenerAdapter&quot;&gt;
+&lt;property name=&quot;delegate&quot; ref=&quot;simpleListener&quot; /&gt;
+&lt;/bean&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+</div>
+
+
+
+
+</p>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

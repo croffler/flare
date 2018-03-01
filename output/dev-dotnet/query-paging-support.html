@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Paging Support</h1>
+<hr>
+
+
+<p>In some scenarios there&rsquo;s a need to return a collection of entries from the space. This is usually carried out using one of the <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/org/openspaces/core/GigaSpace.html#readMultiple-T-">readMultiple</a> overloads in <code>GigaSpace</code>. However, if there are lots of matching entries, you may encounter several problems:</p>
+
+<ul>
+<li>Memory usage - Both the server and client need to allocate enough memory for the entire result set.</li>
+<li>Latency - Since all the results are returned in one bulk, the client must wait until the final result arrives before it can process the first one.</li>
+</ul>
+
+<p>A better approach is to create an iterator that iterates over the matching entries one at a time. Under the hood, the server returns results in batches, and when the client&rsquo;s buffer is exhausted the next batch is implicitly returned from the server.</p>
+
+
+<div class='bs-callout bs-callout-info'>
+<b style="">GSIterator</b><br>
+<p>This page describes the new space iterator which is intended to replace the old <code>GSIterator</code> starting 10.2. Information about the old GSIterator is available <a href="./query-paging-support-old.html">here</a>.</p>
+</div>
+
+
+
+
+
+<h1 id="usage">Usage</h1>
+
+<p>Use the <code>GetSpaceIterator(template)</code> to create the iterator. Example:</p>
+
+<pre><code class="language-java">    // Find and print all persons who are older than 21:
+foreach (var person in spaceProxy.GetSpaceIterator&lt;Person&gt;(new SqlQuery&lt;Person&gt;(&quot;Age &gt; 21&quot;)))
+{
+Console.WriteLine(&quot;Id: &quot; + person.Id + &quot;, Age: &quot; + person.Age);
+}
+</code></pre>
+
+<h2 id="transactions">Transactions</h2>
+
+<p>Iterating through the matched set does not lock the object. Objects that are under transaction and match the specified template will not be included as part of the matched set.</p>
+
+<h1 id="limitations">Limitations</h1>
+
+<h3 id="complex-queries">Complex queries</h3>
+
+<p>The space iterator only supports simple SQL queries. For more information about the differences between simple and complex queries see <a href="./query-sql.html#SimpleQueries">simple SQL queries</a>.</p>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

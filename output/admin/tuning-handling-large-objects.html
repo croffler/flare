@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Handling Large Objects</h1>
+<hr>
+
+
+<p>In order to store large files in memory, you should simply load the file into the relevant Data type (byte array , blob) and use the relevant API to write the data into the space. Large objects are treated like any other objects stored within the space.</p>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<p>The <code>com.gs.transport_protocol.lrmi.maxBufferSize</code> system property controls the chunk size. See the <a href="./tuning-communication-protocol.html#maxBufferSize">Communication Protocol</a> for details.</p>
+</div>
+
+
+
+
+
+
+
+
+<h2 id="memory-allocation-behavior">Memory Allocation Behavior</h2>
+
+<p>During the data transfer activity the space leverage non-heap buffers to transfer the data (NIO direct buffer) into the target process, but due-to the serialization behavior, the entire data object maintained for a short duration within the JVM heap. These in-transit buffers will be cleared once the JVM garbage collector will request these (weak reference). To allow this activity to have enough memory headroom, you should increase the Space and client heap size to accommodate these transit buffers. The heap size headroom required would be:</p>
+
+<pre><code class="language-bash">Maximum number of concurrent connections X Maximum Object size
+</code></pre>
+
+<h1 id="large-objects-examples">Large Objects Examples</h1>
+
+<h2 id="using-gigaspace-api-to-store-large-files-within-the-space">Using GigaSpace API to store large files within the space</h2>
+
+<pre><code class="language-java">public class SpaceFile {
+
+SpaceFile (){}
+SpaceFile (String name , byte[] content)
+{
+this.name = name;
+this.content= content;
+}
+String name;
+byte[] content;
+
+@SpaceId
+public String getName() {
+return name;
+}
+
+public void setName(String name) {
+this.name = name;
+}
+public byte[] getContent() {
+return content;
+}
+public void setContent(byte[] content) {
+this.content = content;
+}
+}
+</code></pre>
+
+<pre><code class="language-java">public static void main(String[] args) {
+GigaSpace gigaspace = new GigaSpaceConfigurer(new SpaceProxyConfigurer(&quot;space&quot;)).gigaSpace();
+String myfileName = &quot;d:temp\test.pdf&quot;;
+
+File myfile = new File(myfileName);
+
+//writing Space File to space
+SpaceFile spaceFile = new SpaceFile(myfile.getName(),fileToBytes(myfileName));
+gigaspace.write(spaceFile);
+
+//reading Space File from space
+SpaceFile spaceFile2 = gigaspace.readById(SpaceFile.class, &quot;test.pdf&quot;);
+bytesTofile(spaceFile2.getContent(), &quot;d:/temp/test_.pdf&quot;);
+}
+
+public static byte[] fileToBytes(String fileName) {
+FileInputStream inFile = null;
+byte[] content = null;
+
+try {
+System.out.println(&quot;Reading &quot; + fileName + &quot;...&quot;);
+inFile = new FileInputStream(fileName);
+int fileLength = (int) inFile.getChannel().size();
+content = new byte[fileLength];
+int length = 0;
+length = inFile.read(content);
+System.out.println(&quot;Read &quot; + length + &quot; out of &quot; + fileLength);
+inFile.close();
+} catch (Exception e) {
+e.printStackTrace();
+} finally {
+if (inFile != null)
+try {
+inFile.close();
+} catch (IOException e) {
+e.printStackTrace();
+}
+}
+return content;
+}
+
+public static void bytesTofile(byte[] content, String fileName) {
+ByteArrayInputStream bais = null;
+FileOutputStream fos = null;
+BufferedInputStream bis = null;
+try {
+bais = new ByteArrayInputStream(content);
+System.out.println(&quot;Copying Space file Data to destination file...&quot;);
+byte[] buffer = new byte[100];
+fos = new FileOutputStream(fileName);
+bis = new BufferedInputStream(bais);
+
+for (int count = 0; count != -1;) {
+count = bis.read(buffer);
+fos.write(buffer);
+}
+} catch (Exception e) {
+e.printStackTrace();
+} finally {
+try {
+if (bais != null)
+bais.close();
+if (fos != null)
+fos.close();
+if (bis != null)
+bis.close();
+} catch (Exception e) {
+}
+}
+System.out.println(&quot;Copying Space file Data to destination file...Done!&quot;);
+}
+</code></pre>
+
+<h2 id="using-jdbc-blob-to-store-large-files-within-the-space">Using JDBC BLOB to Store Large Files within the Space</h2>
+
+<pre><code class="language-java">Class.forName(&quot;com.j_spaces.jdbc.driver.GDriver&quot;).newInstance();
+String url = &quot;jdbc:gigaspaces:url:jini://*/*/mySpace&quot;;
+Connection conn = DriverManager.getConnection(url);
+
+Statement st1 = conn.createStatement();
+String createTable = &quot;CREATE TABLE MY_DATA (ID INTEGER INDEX,BLOB_COL BLOB)&quot;;
+st1.executeUpdate(createTable);
+st1.close();
+
+File imgfile = new File(&quot;c:templargeFile.pdf&quot;);
+
+for (int i = 1; i &lt; 5; i++) {
+FileInputStream fin = new FileInputStream(imgfile);
+PreparedStatement pre = conn.prepareStatement(&quot;insert into MY_DATA values(?,?)&quot;);
+pre.setInt(1, i);
+pre.setBinaryStream(2, fin, (int) imgfile.length());
+pre.executeUpdate();
+
+System.out.println(&quot;We have &quot; + i + &quot; files in the space&quot;);
+
+pre.close();
+fin.close();
+}
+
+for (int i = 1; i &lt; 5; i++) {
+PreparedStatement pre = conn.prepareStatement(&quot;select ID,BLOB_COL from MY_DATA where ID = ?&quot;);
+pre.setInt(1, i);
+ResultSet result = pre.executeQuery();
+while (result.next()) {
+int ID = result.getInt(1);
+Blob b = result.getBlob(2);
+System.out.println(&quot;ID=&quot; + ID + &quot; read &quot; + b.length()+ &quot; bytes&quot;);
+}
+pre.close();
+}
+</code></pre>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

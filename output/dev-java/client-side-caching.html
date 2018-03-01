@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Client-Side Caching</h1>
+<hr>
+
+
+<p>XAP supports client-side caching of Space data within the client application&rsquo;s JVM. When using client-side caching, the user essentially uses a two-layer cache architecture: The first layer is stored locally, within the client&rsquo;s JVM, and the second layer is stored within the remote master Space. The remote master Space may be used with any of the supported deployment topologies.</p>
+
+<h1 id="dependencies">Dependencies</h1>
+
+<p>In order to use this feature, include the <code>${XAP_HOME}/lib/optional/near-cache/xap-near-cache.jar</code> and <code>${XAP_HOME}/lib/optional/near-cache/xap-near-cache-spring.jar</code> files on your classpath or use maven dependencies:</p>
+
+<pre><code class="language-xml">&lt;dependency&gt;
+&lt;groupId&gt;com.gigaspaces&lt;/groupId&gt;
+&lt;artifactId&gt;xap-near-cache&lt;/artifactId&gt;
+&lt;version&gt;12.3.0-m18&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+&lt;groupId&gt;com.gigaspaces&lt;/groupId&gt;
+&lt;artifactId&gt;xap-near-cache-spring&lt;/artifactId&gt;
+&lt;version&gt;12.3.0-m18&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For more information on dependencies, refer to <a href="../started/maven-artifacts.html">Maven Artifacts</a>.</p>
+
+</div> 
+
+<h1 id="additional-resources">Additional Resources</h1>
+
+<ul>
+<li>For a detailed description of the different caching scenarios, refer to <a href="../overview/caching-scenarios.html">Caching Scenarios</a> in the Product Overview.</li>
+<li>For more advanced WAN- based topologies see the <a href="./multi-site-replication-overview.html">Multi-Site Replication over the WAN</a> section.</li>
+</ul>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

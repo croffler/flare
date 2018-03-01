@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Application Debugging</h1>
+<hr>
+
+
+<p>In some cases, you might want to monitor the activity of the JVM running as part of your .NET application. The <a href="http://java.sun.com/j2se/1.5.0/docs/guide/management/jconsole.html">jconsole</a> is a great tool that allows you to troubleshoot the JVM internals.</p>
+
+<h1 id="opening-the-jmx-port">Opening the JMX port</h1>
+
+<p>The following is used to open the JMX port to view and monitor the JVM loaded into the .NET process memory address.</p>
+
+<p>Have the following settings as part of your <code>app.config</code> file:</p>
+
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+&lt;configuration&gt;
+&lt;configSections&gt;
+&lt;section name=&quot;GigaSpaces&quot; type=&quot;GigaSpaces.Core.Configuration.GigaSpacesCoreConfiguration, GigaSpaces.Core&quot;/&gt;
+&lt;/configSections&gt;
+&lt;GigaSpaces&gt;
+&lt;JvmSettings&gt;
+&lt;JvmCustomOptions IgnoreUnrecognized=&quot;false&quot;&gt;
+&lt;add Option=&quot;-Dcom.sun.management.jmxremote.port=5144&quot;/&gt;
+&lt;add Option=&quot;-Dcom.sun.management.jmxremote.ssl=false&quot;/&gt;
+&lt;add Option=&quot;-Dcom.sun.management.jmxremote.authenticate=false&quot;/&gt;
+&lt;/JvmCustomOptions&gt;
+&lt;/JvmSettings&gt;
+&lt;/GigaSpaces&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<p>See <a href="./jvm-configuration.html">.NET JVM Configuration</a> for more details.</p>
+
+<h1 id="viewing-in-jconsole">Viewing in JConsole</h1>
+
+<ol>
+<li>Start <code>jconsole</code> &ndash; jconsole is located under the bin directory of the Java home, by default it is under <code>&lt;Installation dir&gt;\Runtime\java\bin</code></li>
+<li>Once the <code>jconsole</code> is started, select the <strong>Local</strong> tab:</li>
+</ol>
+
+<div style="text-align:center"><p><img src="../../attachment_files/dotnet/jcon11.jpg" alt="jcon1.jpg" /></p>
+</div>
+
+
+
+
+
+<ol>
+<li>This shows the status of the JVM running in your .NET application:</li>
+</ol>
+
+<div style="text-align:center"><p><img src="../../attachment_files/dotnet/jcon21.jpg" alt="jcon2.jpg" /></p>
+</div>
+
+
+
+
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For more details on JMX and <code>jconsole</code>, refer to:
+- <a href="http://java.sun.com/j2se/1.5.0/docs/guide/management/agent.html">Sun - Monitoring and Management Using JMX</a>
+- <a href="http://java.sun.com/j2se/1.5.0/docs/guide/management/jconsole.html">Sun - Using jconsole</a></p>
+
+</div> 
+
+<h1 id="viewing-in-jvisualvm">Viewing in JVisualVM</h1>
+
+<p>As an alternative to viewing in JConsole, you can also use JVisualVM.</p>
+
+<ol>
+<li>Start JVisualVM. The default location is the <code>C:\GigaSpaces\XAP.NET-12.3-x64\Runtime\Java</code> directory.</li>
+<li>Connect via JMX. Go to File | Add JMX Connection&hellip;
+<div style="text-align:center"><p><img src="../../attachment_files/dotnet/jvisualvm-connect.png" alt="jvisualvm-connect.png" /></p>
+</div>
+
+
+
+</li>
+<li>Enter the Connection: <code>localhost:5144</code></li>
+<li>For thread dumps, go to the &ldquo;Threads&rdquo; tab, and click on the &ldquo;Thread Dump&rdquo; button.
+<div style="text-align:center"><p><img src="../../attachment_files/dotnet/jvisualvm-thread1.png" alt="jvisualvm-thread1.png" /></p>
+</div>
+
+
+
+
+Or:
+Right click on the application in the left pane, and select &ldquo;Thread Dump&rdquo;.
+<div style="text-align:center"><p><img src="../../attachment_files/dotnet/jvisualvm-thread2.png" alt="jvisualvm-thread2.png" /></p>
+</div>
+
+
+
+</li>
+<li>Similarly for heap dumps, go to the &ldquo;Monitor&rdquo; tab, click on the &ldquo;Heap Dump&rdquo; button. Or right click on the application in the left pane and select &ldquo;Heap Dump&rdquo;.</li>
+</ol>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

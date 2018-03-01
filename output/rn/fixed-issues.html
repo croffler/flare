@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Changelog</h1>
+<hr>
+
+
+<p>This section lists the changes that were made in InsightEdge Platform 12.3.</p>
+
+<h1 id="features-and-enhancements">Features and Enhancements</h1>
+
+<ul>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13400" target="_blank">GS-13400</a></nobr>: Replication redolog compaction for mirror target.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13477" target="_blank">GS-13477</a></nobr>: Created v2 of XAP Manager REST API.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13491" target="_blank">GS-13491</a></nobr>: Renamed /deployments to /pus in v2 of XAP Manager REST API.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13480" target="_blank">GS-13480</a></nobr>: Limit Lookup Locator Discovery interval to 1 minute instead of 1 hour.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13482" target="_blank">GS-13482</a></nobr>: Change default of org.jini.rio.monitor.pendingRequestDelay to 1 minute instead of 10 minutes.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13470" target="_blank">GS-13470</a></nobr>: Upgrade packaged Jetty server to 9.2.24.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13458" target="_blank">GS-13458</a></nobr>: Upgrade Spring Framework to 4.3.13.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13457" target="_blank">GS-13457</a></nobr>: Upgrade Spring Security to 4.2.3.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13464" target="_blank">GS-13464</a></nobr>: Enhance gs-agent to Support running Web Management Console (&ndash;webui).</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13473" target="_blank">GS-13473</a></nobr>: Enhance CachePolicy configuration to use fluent syntax.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13463" target="_blank">GS-13463</a></nobr>: Remove obsolete security algorithm to align with current standards.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13102" target="_blank">GS-13102</a></nobr>: Added ability to monitor connection status for local views.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-12800" target="_blank">GS-12800</a></nobr>: Improved AbstractEventListenerContainer monitoring via public getter methods.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13224" target="_blank">GS-13224</a></nobr>: Improve log message to include table name when initial load fails due to wrong column name.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13452" target="_blank">GS-13452</a></nobr>: Improve responsiveness of remote statistics gathering in Admin API.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13136" target="_blank">GS-13136</a></nobr>: Make instance variables in DefaultHibernateSpaceDataSourceConfigurer protected.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13411" target="_blank">GS-13411</a></nobr>: User-defined cache criteria for hot data in MemoryXtend.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13436" target="_blank">GS-13436</a></nobr>: Added more GSM state information to application dump.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13442" target="_blank">GS-13442</a></nobr>: Reduce the footprint of the Lookup Service template cache.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13302" target="_blank">GS-13302</a></nobr>: When the query result set includes only indexes, fetch results from off-heap memory instead of disk.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-12365" target="_blank">GS-12365</a></nobr>: Asynchronous execution should always return immediately.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13417" target="_blank">GS-13417</a></nobr>: Add metrics to Lookup Service to facilitate troubleshooting of performance issues.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13389" target="_blank">GS-13389</a></nobr>: Lookup Service (LUS) enhancements to improve stability in environments with large clusters.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13433" target="_blank">GS-13433</a></nobr>: Enhance LRMI network filter buffer allocation strategy by adding support for large objects (&gt;10MB).</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13418" target="_blank">GS-13418</a></nobr>: Skip login page if Web UI is in non-secured mode.</li>
+</ul>
+
+<h1 id="resolved-issues">Resolved Issues</h1>
+
+<ul>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-12946" target="_blank">GS-12946</a></nobr>: Loop of restarts of pu instance in same container cause memory leak.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13484" target="_blank">GS-13484</a></nobr>: Missing partition instance not provisioned after network disconnected and reconnected.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13483" target="_blank">GS-13483</a></nobr>: Relocation listener is not called during failure to destroy instance.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13454" target="_blank">GS-13454</a></nobr>: Elastic Processing Unit failed to fully deploy with service-limit=1 even when there were empty GSCs running.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13300" target="_blank">GS-13300</a></nobr>: Eager Scale Strategy did not evenly redistribute partitions after a cluster node disconnected and reconnected.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13465" target="_blank">GS-13465</a></nobr>: Use XapNetworkInfo.getHost() instead of InetAddress.getLocalHost().</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13462" target="_blank">GS-13462</a></nobr>: XAP Manager doesn&rsquo;t support com.gigaspaces.lib.opt.security system property for providing an alternative path for custom security JARs.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13461" target="_blank">GS-13461</a></nobr>: Add missing xap-admin JAR for default XAP.NET application.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13453" target="_blank">GS-13453</a></nobr>: Inefficient use of underlying data structure slows down iterator performance.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13284" target="_blank">GS-13284</a></nobr>: In rare scenarios, a transactional Polling container may drop events.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13236" target="_blank">GS-13236</a></nobr>: The Admin API blocks itself, becoming unresponsive and exploding memory usage.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13440" target="_blank">GS-13440</a></nobr>: Incomplete recovery of processing units after healing of GSM (if there are 3 or more).</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13281" target="_blank">GS-13281</a></nobr>: Querying a type with enum on a re-deployed space returns incorrect results.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13383" target="_blank">GS-13383</a></nobr>: Insightedge shutdown command on Mac systems doesn&rsquo;t terminate the gs-agent.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13416" target="_blank">GS-13416</a></nobr>: Lookup service improvements resulted in loss of client notifications in rare scenarios.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13371" target="_blank">GS-13371</a></nobr>: REST calls to Spark failed on machine failover.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13317" target="_blank">GS-13317</a></nobr>: No proactive verification of user credentials when logging into secured web-ui.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13427" target="_blank">GS-13427</a></nobr>: The REST manager specification contained the wrong request status values.</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13430" target="_blank">GS-13430</a></nobr>: Inconsistent Request ID type in Manager REST API (string vs. numeric).</li>
+<li><nobr><a href="https://insightedge.atlassian.net/browse/GS-13204" target="_blank">GS-13204</a></nobr>: The ProcessingUnitInstance.relocationAndWait() may not abort after timeout, causing a permanent blocking state.</li>
+</ul>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>The complete list of changes is also available in <a href="https://insightedge.atlassian.net/issues/?filter=17726" target="_blank" >JIRA <i class='fa fa-external-link'></i></a>.</p>
+
+</div> 
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

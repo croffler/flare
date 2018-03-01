@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Transaction Support</h1>
+<hr>
+
+
+<p>Both the receive operation and the actual event action can be configured to be performed under a transaction. Transaction support is required when, for example, an exception occurs in the event listener, and the receive operation needs to be to rolled back (and the actual data event is returned to the space). Adding transaction support is very simple in the polling container, and can be done by injecting a transaction manager into it.</p>
+
+<p>For example:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Annotation" style="padding:10px"><pre><code class="language-xml">&lt;!-- Enable scan for OpenSpaces and Spring components --&gt;
+&lt;context:component-scan base-package=&quot;com.mycompany&quot;/&gt;
+
+&lt;!-- Enable support for @Polling annotation --&gt;
+&lt;os-events:annotation-support /&gt;
+
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;/&gt;
+
+&lt;os-core:distributed-tx-manager id=&quot;transactionManager&quot; /&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot; tx-manager=&quot;transactionManager&quot;/&gt;
+</code></pre>
+
+<pre><code class="language-java">@EventDriven @Polling @TransactionalEvent
+public class SimpleListener {
+
+@EventTemplate
+Data unprocessedData() {
+Data template = new Data();
+template.setProcessed(false);
+return template;
+}
+
+@SpaceDataEvent
+public Data eventListener(Data event) {
+//process Data here
+}
+}
+</code></pre>
+</div>
+<div title="Namespace" style="padding:10px"><pre><code class="language-xml">&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;/&gt;
+
+&lt;os-core:distributed-tx-manager id=&quot;transactionManager&quot; /&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot; tx-manager=&quot;transactionManager&quot;/&gt;
+
+&lt;bean id=&quot;simpleListener&quot; class=&quot;SimpleListener&quot; /&gt;
+
+&lt;os-events:polling-container id=&quot;eventContainer&quot; giga-space=&quot;gigaSpace&quot;&gt;
+&lt;os-events:tx-support tx-manager=&quot;transactionManager&quot;/&gt;
+
+&lt;os-core:template&gt;
+&lt;bean class=&quot;org.openspaces.example.data.common.Data&quot;&gt;
+&lt;property name=&quot;processed&quot; value=&quot;false&quot;/&gt;
+&lt;/bean&gt;
+&lt;/os-core:template&gt;
+
+&lt;os-events:listener&gt;
+&lt;os-events:annotation-adapter&gt;
+&lt;os-events:delegate ref=&quot;simpleListener&quot;/&gt;
+&lt;/os-events:annotation-adapter&gt;
+&lt;/os-events:listener&gt;
+&lt;/os-events:polling-container&gt;
+</code></pre>
+</div>
+<div title="Plain XML" style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.EmbeddedSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;transactionManager&quot; class=&quot;org.openspaces.core.transaction.manager.DistributedJiniTransactionManager&quot;/&gt;
+
+&lt;bean id=&quot;gigaSpace&quot; class=&quot;org.openspaces.core.GigaSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot; /&gt;
+&lt;property name=&quot;transactionManager&quot; ref=&quot;transactionManager&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;simpleListener&quot; class=&quot;SimpleListener&quot; /&gt;
+
+&lt;bean id=&quot;eventContainer&quot; class=&quot;org.openspaces.events.polling.SimplePollingEventListenerContainer&quot;&gt;
+&lt;property name=&quot;transactionManager&quot; ref=&quot;transactionManager&quot; /&gt;
+
+&lt;property name=&quot;gigaSpace&quot; ref=&quot;gigaSpace&quot; /&gt;
+
+&lt;property name=&quot;template&quot;&gt;
+&lt;bean class=&quot;org.openspaces.example.data.common.Data&quot;&gt;
+&lt;property name=&quot;processed&quot; value=&quot;false&quot;/&gt;
+&lt;/bean&gt;
+&lt;/property&gt;
+
+&lt;property name=&quot;eventListener&quot;&gt;
+&lt;bean class=&quot;org.openspaces.events.adapter.AnnotationEventListenerAdapter&quot;&gt;
+&lt;property name=&quot;delegate&quot; ref=&quot;simpleListener&quot; /&gt;
+&lt;/bean&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+<div title="Code" style="padding:10px"><pre><code class="language-java">GigaSpace gigaSpace = ...//create a GigaSpace instance
+
+//creating a transaction manager. For more details please refer to the [Transaction Management] section
+PlatformTransactionManager ptm = new DistributedJiniTxManagerConfigurer().transactionManager();
+
+//creating a listener
+SimpleListener listener = new SimpleListener();
+
+//creating a polling container which will automatically start receiving event from the space
+SimplePollingEventListenerContainer pollingContainer configurer = new SimplePollingContainerConfigurer(gigaSpace)
+.template(listener.getTemplate()).eventListenerAnnotation(listener)
+.transactionManager(ptm)
+.receiveTimeout(1000)
+.pollingContainer();
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<h1 id="isolation-timeout">Isolation &amp; Timeout</h1>
+
+<p>When using transactions with polling container a special care should be taken with timeout values. Transactions started by the polling container can have a timeout value associated with them (if not set will default to the default timeout value of the transaction manager, which is 90 Sec). If setting a specific timeout value, make sure the timeout value is higher than the timeout value for blocking operations and includes the expected execution time of the associated listener.</p>
+
+<p>
+<div class='bs-callout bs-callout-warning'><p>Note the timeout value is in seconds as per Spring spec for TransactionDefinition.</p>
+</div>
+
+
+
+
+
+
+</p>
+
+<p>Here is an example how timeout value (and transaction isolation) can be set with polling container:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Annotation" style="padding:10px"><pre><code class="language-xml">&lt;!-- Enable scan for OpenSpaces and Spring components --&gt;
+&lt;context:component-scan base-package=&quot;com.mycompany&quot;/&gt;
+
+&lt;!-- Enable support for @Polling annotation --&gt;
+&lt;os-events:annotation-support /&gt;
+
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;/&gt;
+
+&lt;os-core:distributed-tx-manager id=&quot;transactionManager&quot;/&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot; tx-manager=&quot;transactionManager&quot;/&gt;
+</code></pre>
+
+<pre><code class="language-java">@EventDriven @Polling @TransactionalEvent(isolation = Isolation.READ_COMMITTED, timeout = 1000)
+public class SimpleListener {
+
+@EventTemplate
+Data unprocessedData() {
+Data template = new Data();
+template.setProcessed(false);
+return template;
+}
+
+@SpaceDataEvent
+public Data eventListener(Data event) {
+//process Data here
+}
+}
+</code></pre>
+</div>
+<div title="Namespace" style="padding:10px"><pre><code class="language-xml">&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;/&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot;/&gt;
+
+&lt;os-core:distributed-tx-manager id=&quot;transactionManager&quot; /&gt;
+
+&lt;bean id=&quot;simpleListener&quot; class=&quot;SimpleListener&quot; /&gt;
+
+&lt;os-events:polling-container id=&quot;eventContainer&quot; giga-space=&quot;gigaSpace&quot;&gt;
+&lt;os-events:tx-support tx-manager=&quot;transactionManager&quot; tx-timeout=&quot;1000&quot; tx-isolation=&quot;READ_COMMITTED&quot; /&gt;
+
+&lt;os-core:template&gt;
+&lt;bean class=&quot;org.openspaces.example.data.common.Data&quot;&gt;
+&lt;property name=&quot;processed&quot; value=&quot;false&quot;/&gt;
+&lt;/bean&gt;
+&lt;/os-core:template&gt;
+
+&lt;os-events:listener&gt;
+&lt;os-events:annotation-adapter&gt;
+&lt;os-events:delegate ref=&quot;simpleListener&quot;/&gt;
+&lt;/os-events:annotation-adapter&gt;
+&lt;/os-events:listener&gt;
+&lt;/os-events:polling-container&gt;
+</code></pre>
+</div>
+<div title="Plain XML" style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.EmbeddedSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;gigaSpace&quot; class=&quot;org.openspaces.core.GigaSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;transactionManager&quot; class=&quot;org.openspaces.core.transaction.manager.DistributedJiniTransactionManager&quot; /&gt;
+
+&lt;bean id=&quot;simpleListener&quot; class=&quot;SimpleListener&quot; /&gt;
+
+&lt;bean id=&quot;eventContainer&quot; class=&quot;org.openspaces.events.polling.SimplePollingEventListenerContainer&quot;&gt;
+
+&lt;property name=&quot;gigaSpace&quot; ref=&quot;gigaSpace&quot; /&gt;
+
+&lt;property name=&quot;transactionManager&quot; ref=&quot;transactionManager&quot; /&gt;
+&lt;property name=&quot;transactionTimeout&quot; value=&quot;1000&quot; /&gt;
+&lt;property name=&quot;transactionIsolationLevelName&quot; value=&quot;READ_COMMITTED&quot; /&gt;
+
+&lt;property name=&quot;template&quot;&gt;
+&lt;bean class=&quot;org.openspaces.example.data.common.Data&quot;&gt;
+&lt;property name=&quot;processed&quot; value=&quot;false&quot;/&gt;
+&lt;/bean&gt;
+&lt;/property&gt;
+
+&lt;property name=&quot;eventListener&quot;&gt;
+&lt;bean class=&quot;org.openspaces.events.adapter.AnnotationEventListenerAdapter&quot;&gt;
+&lt;property name=&quot;delegate&quot; ref=&quot;simpleListener&quot; /&gt;
+&lt;/bean&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Change code without restarts</h1>
+<hr>
+
+
+<p>When executing user code on the space (e.g. space tasks), the space automatically loads the code from the remote client and caches it for future executions.
+Since the code is cached, modifications are ignored, and users are forced to restart the space whenever they modify the code.</p>
+
+<p>Starting with 12.1, you can use the <code>@SupportCodeChange</code> annotation to tell the space your code has changed.
+The space can store multiple versions of the same task. This is ideal for supporting clients using different versions of a task.</p>
+
+<p>This annotation can be used with:</p>
+
+<ul>
+<li><a href="./task-execution-overview.html">Task Execution</a><br></li>
+<li><a href="./change-api-custom-operation.html">Custom Change</a><br></li>
+<li><a href="./aggregators.html#custom-aggregation">Custom Aggregator</a></li>
+</ul>
+
+<h1 id="task-execution">Task execution</h1>
+
+<p>For example, start with annotating your task with @SupportCodeChange(id=&ldquo;1&rdquo;), and when the code changes, set the annotation to @SupportCodeChange(id=&ldquo;2&rdquo;), and the space will load the new task.</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Task version 1" style="padding:10px"><pre><code class="language-java">import org.openspaces.core.executor.Task;
+
+import com.gigaspaces.annotation.SupportCodeChange;
+
+@SupportCodeChange(id=&quot;1&quot;)
+public class DynamicTask implements Task&lt;Integer&gt; {
+
+@Override
+public Integer execute() throws Exception {
+return new Integer(1);
+}
+}
+</code></pre>
+</div>
+
+<div title="Task version 2" style="padding:10px"><pre><code class="language-java">import org.openspaces.core.executor.Task;
+
+import com.gigaspaces.annotation.SupportCodeChange;
+
+@SupportCodeChange(id=&quot;2&quot;)
+public class DynamicTask implements Task&lt;Integer&gt; {
+
+@Override
+public Integer execute() throws Exception {
+return new Integer(2);
+}
+}
+</code></pre>
+</div>
+
+<div title="Program" style="padding:10px"><pre><code class="language-java"> GigaSpace gigaSpace = new GigaSpaceConfigurer(new SpaceProxyConfigurer(&quot;xapSpace&quot;)).gigaSpace();
+
+DynamicTask task = new DynamicTask();
+
+AsyncFuture&lt;Integer&gt; execute = gigaSpace.execute(task);
+System.out.println(execute.get());
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For detailed information on task execution see <a href="./task-execution-overview.html">Task Execution over the space</a></p>
+
+</div> 
+
+<h1 id="custom-change">Custom Change</h1>
+
+<p>The annotation can be used for custom change operations.</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Change Version 1" style="padding:10px"><pre><code class="language-java">import com.gigaspaces.annotation.SupportCodeChange;
+import com.gigaspaces.client.CustomChangeOperation;
+import com.gigaspaces.server.MutableServerEntry;
+
+@SupportCodeChange(id=&quot;1&quot;)
+public class MultiplyIntegerChangeOperation extends CustomChangeOperation {
+private static final long serialVersionUID = 1L;
+private final String path;
+private final int multiplier;
+
+public MultiplyIntegerChangeOperation(String path) {
+this.path = path;
+}
+
+@Override
+public String getName() {
+return &quot;multiplyInt&quot;;
+}
+
+public String getPath() {
+return path;
+}
+
+@Override
+public Object change(MutableServerEntry entry) {
+int oldValue = (Integer) entry.getPathValue(path);
+int newValue = oldValue * 10;
+entry.setPathValue(path, newValue);
+return newValue;
+}
+}
+</code></pre>
+</div>
+
+<div title="Change version 2" style="padding:10px"><pre><code class="language-java">import com.gigaspaces.annotation.SupportCodeChange;
+import com.gigaspaces.client.CustomChangeOperation;
+import com.gigaspaces.server.MutableServerEntry;
+
+@SupportCodeChange(id=&quot;2&quot;)
+public class MultiplyIntegerChangeOperation extends CustomChangeOperation {
+private static final long serialVersionUID = 1L;
+private final String path;
+
+public MultiplyIntegerChangeOperation(String path) {
+this.path = path;
+}
+
+@Override
+public String getName() {
+return &quot;multiplyInt&quot;;
+}
+
+public String getPath() {
+return path;
+}
+
+@Override
+public Object change(MutableServerEntry entry) {
+int oldValue = (Integer) entry.getPathValue(path);
+int newValue = oldValue * 20;
+entry.setPathValue(path, newValue);
+return newValue;
+}
+}
+</code></pre>
+</div>
+
+<div title="Program" style="padding:10px"><pre><code class="language-java">
+GigaSpace gigaSpace = new GigaSpaceConfigurer(new SpaceProxyConfigurer(&quot;xapSpace&quot;)).gigaSpace();
+
+SQLQuery&lt;Employee&gt; query = new SQLQuery&lt;Employee&gt;(Employee.class, &quot;salary &gt; 50&quot;);
+ChangeResult&lt;Employee&gt; result = gigaSpace.change(query,
+new ChangeSet().custom(new MultiplyIntegerChangeOperation(&quot;salary&quot;)),
+ChangeModifiers.RETURN_DETAILED_RESULTS);
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For detailed information on Custom Change see <a href="./change-api-custom-operation.html">Custom Change</a></p>
+
+</div> 
+
+<h1 id="custom-aggregation">Custom Aggregation</h1>
+
+<p>The annotation can be used for custom aggregation operations.</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Aggregation Version 1" style="padding:10px"><pre><code class="language-java">@SupportCodeChange(id =&quot;1&quot;)
+public class ConcatAggregator extends SpaceEntriesAggregator&lt;String&gt; {
+
+private final String path;
+private transient StringBuilder sb;
+
+public ConcatAggregator(String path) {
+this.path = path;
+}
+
+@Override
+public String getDefaultAlias() {
+return &quot;concat(&quot; + path + &quot;)&quot;;
+}
+
+@Override
+public void aggregate(SpaceEntriesAggregatorContext context) {
+String value = (String) context.getPathValue(path);
+if (value != null)
+concat(value);
+}
+
+@Override
+public String getIntermediateResult() {
+return sb == null ? null : sb.toString();
+}
+
+@Override
+public void aggregateIntermediateResult(String partitionResult) {
+concat(partitionResult);
+}
+
+private void concat(String s) {
+if (sb == null) {
+sb = new StringBuilder(s);
+} else {
+sb.append(',').append(s);
+}
+}
+}
+</code></pre>
+</div>
+
+<div title="Aggregation version 2" style="padding:10px"><pre><code class="language-java">@SupportCodeChange(id =&quot;2&quot;)
+public class ConcatAggregator extends SpaceEntriesAggregator&lt;String&gt; {
+
+private final String path;
+private transient StringBuilder sb;
+
+public ConcatAggregator(String path) {
+this.path = path;
+}
+
+@Override
+public String getDefaultAlias() {
+return &quot;concat(&quot; + path + &quot;)&quot;;
+}
+
+@Override
+public void aggregate(SpaceEntriesAggregatorContext context) {
+String value = (String) context.getPathValue(path);
+if (value != null)
+concat(value);
+}
+
+@Override
+public String getIntermediateResult() {
+return sb == null ? null : sb.toString();
+}
+
+@Override
+public void aggregateIntermediateResult(String partitionResult) {
+concat(partitionResult);
+}
+
+private void concat(String s) {
+if (sb == null) {
+sb = new StringBuilder(s);
+} else {
+sb.append(':').append(s);
+}
+}
+}
+</code></pre>
+</div>
+
+<div title="Program" style="padding:10px"><pre><code class="language-java">    GigaSpace gigaSpace = new GigaSpaceConfigurer(new SpaceProxyConfigurer(&quot;xapSpace&quot;)).gigaSpace();
+SQLQuery&lt;Employee&gt; query = new SQLQuery&lt;Employee&gt;(Employee.class, &quot;salary &gt; 50&quot;);
+AggregationResult result = gigaSpace.aggregate(query, new AggregationSet().add(new ConcatAggregator(&quot;name&quot;)));
+String concatResult = result.getString(&quot;concat(name)&quot;);
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p><div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For detailed information on Custom Aggregator see <a href="./aggregators.html">Aggregators</a></p>
+
+</div> </p>
+
+<h1 id="number-of-caches">Number of caches</h1>
+
+<p>The default limit of class loaders (caches) is set to 3, when breached, the oldest cache is evicted in favor of the new one.
+This can be modified via space properties:</p>
+
+<table>
+<thead>
+<tr>
+<th>Property name</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>space-config.remote-code.max-class-loaders</td>
+<td>Limit number of class loaders (caches)</td>
+<td>3</td>
+</tr>
+
+<tr>
+<td>space-config.remote-code.support.code.change</td>
+<td>Enable / Disable code change</td>
+<td>true</td>
+</tr>
+</tbody>
+</table>
+
+
+<div class='bs-callout bs-callout-warning'><p><code>@SupportCodeChange</code> without id or with id=&ldquo;&rdquo; are not cached.</p>
+</div>
+
+
+
+
+
+
+
+
+<h1 id="limitations">Limitations</h1>
+
+<ul>
+<li>When using <code>@SupportCodeChange</code> no new types, can be introduced to the space.</li>
+<li>Anonymous classes and lambdas do not support the annotation.</li>
+</ul>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

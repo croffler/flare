@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >MongoDB Integration</h1>
+<hr>
+
+<div class='bs-callout bs-callout-danger'>
+<b style="color:#d9534f">Important</b><br>
+<p>This is a reference implementation of integrating MongoDB with XAP for persistency and data reload. GigaSpaces does not guarantee up-to-date upgrades or support of the target NoSQL store drivers. We encourage users to extend the open source implementation to their liking or contact GigaSpaces Professional Services for guidance at <a href="mailto:ps@gigaspaces.com">Consulting Services</a>.</p>
+</div>
+
+
+
+<p><a href="http://www.mongodb.com/">MongoDB</a> is an open-source database used by companies of all sizes, across all industries and for a wide variety of applications. It is an agile database that allows schemas to change quickly as applications evolve, while still providing the functionality developers expect from traditional databases, such as secondary indexes, a full query language and strict consistency.</p>
+
+<p>MongoDB is built for scalability, performance and high availability, scaling from single server deployments to large, complex multi-site architectures. By leveraging in-memory computing, MongoDB provides high performance for both reads and writes. MongoDB&rsquo;s native replication and automated failover enable enterprise-grade reliability and operational flexibility.</p>
+
+<p><strong>Dependencies</strong><br>
+In order to use this feature, include the <code>${XAP_HOME}/lib/optional/mongodb/xap-mongodb.jar</code> file on your classpath or use maven dependencies:</p>
+
+<pre><code class="language-xml">&lt;dependency&gt;
+&lt;groupId&gt;org.gigaspaces&lt;/groupId&gt;
+&lt;artifactId&gt;xap-mongodb&lt;/artifactId&gt;
+&lt;version&gt;12.3.0-m18&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For more information on dependencies, refer to <a href="../started/maven-artifacts.html">Maven Artifacts</a>.</p>
+
+</div> 
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

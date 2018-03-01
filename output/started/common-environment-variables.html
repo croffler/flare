@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Configuration</h1>
+<hr>
+
+
+<p>In this page you&rsquo;ll learn how XAP and InsightEdge configuration is applied, and how to override it.</p>
+
+<h2 id="xap">XAP</h2>
+
+<p>The XAP environment configuration is maintained by a configuration script file called <code>setenv</code>, located in the <code>XAP_HOME/bin</code> directory. Each of XAP&rsquo;s scripts invokes this script to load XAP&rsquo;s configuration. If you&rsquo;re developing standalone XAP client, it is recommended to use the <code>setenv</code> utility to derive the commonly used XAP libraries and setup environment.</p>
+
+<p>To use this utility, you simply need to call it from within your script file.</p>
+
+<h2 id="insightedge">InsightEdge</h2>
+
+<p>The InsightEdge environment configuration is maintained by a configuration script file called <code>insightedge-env</code>, located in the <code>XAP_HOME/insightedge/conf</code> directory. Again, each InsightEdge script invokes this script. Now, since <code>insightedge-env</code> starts by invoking XAP&rsquo;s <code>setenv</code>, all of XAP&rsquo;s configuration is applied as well.</p>
+
+<h1 id="overriding-default-values">Overriding Default Values</h1>
+
+<p>During initial development and usage of XAP there&rsquo;s usually no need to change any of the default values, but at some point you&rsquo;ll probably want to change some of them (e.g. the Grid Service Container heap size).</p>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<p>It is highly recommended not to make those changes in the original <code>setenv</code> script, as it complicates upgrading XAP later on. Instead, XAP provides an additional empty script called <code>setenv-overrides</code>, which is automatically called by <code>setenv</code>, and is intended for users to specify their overrides in a safe manner.</p>
+</div>
+
+
+
+
+
+
+
+
+<h1 id="xap-environment-variables">XAP Environment Variables</h1>
+
+<p>The following list describes XAP-related environment variables:</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Name</th>
+<th align="left">Description</th>
+<th align="left">Default Value</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">JAVA_HOME</td>
+<td align="left">The directory in which Java is installed</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">XAP_HOME</td>
+<td align="left">The GigaSpaces XAP home directory</td>
+<td align="left">Automatically set via the folder structure</td>
+</tr>
+
+<tr>
+<td align="left">XAP_LOOKUP_GROUPS</td>
+<td align="left">Lookup Service groups used for multicast discovery</td>
+<td align="left">xap-12.3.0</td>
+</tr>
+
+<tr>
+<td align="left">XAP_LOOKUP_LOCATORS</td>
+<td align="left">Lookup Service Locators used for unicast discovery</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">XAP_NIC_ADDRESS</td>
+<td align="left">The network interface card which will be used by XAP</td>
+<td align="left">Automatically set to the host name</td>
+</tr>
+
+<tr>
+<td align="left">XAP_SECURITY_POLICY</td>
+<td align="left">The default policy file.</td>
+<td align="left">XAP_HOME/policy/policy.all</td>
+</tr>
+
+<tr>
+<td align="left">XAP_LOGS_CONFIG_FILE</td>
+<td align="left">The location of XAP logging configuration</td>
+<td align="left">XAP_HOME/config/log/xap_logging.properties</td>
+</tr>
+
+<tr>
+<td align="left">XAP_MANAGER_OPTIONS</td>
+<td align="left">Java options for the XAP Manager</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">XAP_GSC_OPTIONS</td>
+<td align="left">Java options for the Grid Service Container (GSC)</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">XAP_GSM_OPTIONS</td>
+<td align="left">Java options for the Grid Service Manager (GSM)   <i class='fa fa-exclamation-triangle' style='color:#CF9E53;'></i>
+
+
+
+</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">XAP_GSA_OPTIONS</td>
+<td align="left">Java options for the Grid Service Agent (GSA)</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">XAP_LUS_OPTIONS</td>
+<td align="left">Java options for the Lookup Service (LUS)     <i class='fa fa-exclamation-triangle' style='color:#CF9E53;'></i>
+
+
+
+</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">XAP_ESM_OPTIONS</td>
+<td align="left">Java options for the Elastic Service Manager (ESM)</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">XAP_GUI_OPTIONS</td>
+<td align="left">Java options for the GigaSpaces Management Center</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">XAP_WEBUI_OPTIONS</td>
+<td align="left">Java options for the Web Management Console</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+
+<p><i class='fa fa-exclamation-triangle' style='color:#CF9E53;'></i>
+
+
+
+When running in ./gs-agent &ndash;manager configuration, this environment variable is ignored.</p>
+
+<h1 id="insightedge-environment-variables">InsightEdge Environment Variables</h1>
+
+<p>The following list describes InsightEdge-related environment variables:</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Name</th>
+<th align="left">Description</th>
+<th align="left">Default Value</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">SPARK_HOME</td>
+<td align="left">The directory in which Spark is installed</td>
+<td align="left"><code>XAP_HOME/insightedge</code></td>
+</tr>
+
+<tr>
+<td align="left">INSIGHTEDGE_CLASSPATH_EXT</td>
+<td align="left">Extra classpath to append to InsightEdge components</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">INSIGHTEDGE_SPACE_NAME</td>
+<td align="left">Space name to use in InsightEdge scripts and examples</td>
+<td align="left"><code>insightedge-space</code></td>
+</tr>
+</tbody>
+</table>
+
+<p>In addition, you can use standard Spark environment variables as well - The InsightEdge platform loads spark components in a manner which preserves their usage. For example, set <code>SPARK_MASTER_PORT</code> to override the default <code>7077</code> port.</p>
+
+<h1 id="upgrading-from-previous-versions">Upgrading From Previous Versions</h1>
+
+<p>In previous versions, environment variable names were inconsistent, which occasionally led to confusion. Starting with XAP 11.0, all XAP related environment variables have been renamed to have a <code>XAP_</code> prefix, so they&rsquo;re easier to identify. The following table maps the pre-11.0 names to the new names:</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Name before 11.0</th>
+<th align="left">Name in 12.0</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">JSHOMEDIR</td>
+<td align="left">XAP_HOME</td>
+</tr>
+
+<tr>
+<td align="left">LOOKUPGROUPS</td>
+<td align="left">XAP_LOOKUP_GROUPS</td>
+</tr>
+
+<tr>
+<td align="left">LOOKUPLOCATORS</td>
+<td align="left">XAP_LOOKUP_LOCATORS</td>
+</tr>
+
+<tr>
+<td align="left">NIC_ADDR</td>
+<td align="left">XAP_NIC_ADDRESS</td>
+</tr>
+
+<tr>
+<td align="left">POLICY</td>
+<td align="left">XAP_SECURITY_POLICY</td>
+</tr>
+
+<tr>
+<td align="left">GS_LOGGING_CONFIG_FILE</td>
+<td align="left">XAP_LOGS_CONFIG_FILE</td>
+</tr>
+
+<tr>
+<td align="left">GSC_JAVA_OPTIONS</td>
+<td align="left">XAP_GSC_OPTIONS</td>
+</tr>
+
+<tr>
+<td align="left">GSM_JAVA_OPTIONS</td>
+<td align="left">XAP_GSM_OPTIONS</td>
+</tr>
+
+<tr>
+<td align="left">GSA_JAVA_OPTIONS</td>
+<td align="left">XAP_GSA_OPTIONS</td>
+</tr>
+
+<tr>
+<td align="left">LUS_JAVA_OPTIONS</td>
+<td align="left">XAP_LUS_OPTIONS</td>
+</tr>
+
+<tr>
+<td align="left">ESM_JAVA_OPTIONS</td>
+<td align="left">XAP_ESM_OPTIONS</td>
+</tr>
+</tbody>
+</table>
+
+<span id="extension"></span>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<p>If you&rsquo;d rather postpone or avoid changing your scripts to the new names, you can use the new <code>setenv-overrides</code> script to map the corresponding values. For example, suppose in the past you&rsquo;ve needed to override the default lookup groups and the GSC options. If you&rsquo;ve followed the best practices, you probably created a custom script to set those environment variables before calling the original script, something like:</p>
+</div>
+
+
+
+
+
+
+
+
+<div class="easyui-tabs" plain="true" data-options=""><div title=" my-gs-agent.sh (Unix)" style="padding:10px"><pre><code class="language-bash">export LOOKUPGROUPS=foo
+export GSC_JAVA_OPTIONS=-Xms1024m -Xmx1024m
+./gs-agent.sh
+</code></pre>
+</div>
+<div title=" my-gs-agent.bat (Windows)" style="padding:10px"><pre><code class="language-bash">set LOOKUPGROUPS=foo
+set GSC_JAVA_OPTIONS=-Xms1024m -Xmx1024m
+call gs-agent.bat
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p><br>
+The <code>gs-agent</code> script calls the <code>setenv</code> script to setup the environment, which in turn calls the <code>setenv-overrides</code> script mentioned above to allow users to override the default values. You can modify <code>setenv-overrides</code> to propagate the old variables to the new ones, for example:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title=" setenv-overrides.sh (Unix)" style="padding:10px"><pre><code class="language-bash">export XAP_LOOKUP_GROUPS=$LOOKUPGROUPS
+export XAP_GSC_OPTIONS=$GSC_JAVA_OPTIONS
+</code></pre>
+</div>
+<div title=" setenv-overrides.bat (Windows)" style="padding:10px"><pre><code class="language-bash">set XAP_LOOKUP_GROUPS=%LOOKUPGROUPS%
+set XAP_GSC_OPTIONS=%GSC_JAVA_OPTIONS%
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

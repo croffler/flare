@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >SQL Client</h1>
+<hr>
+
+
+<p>The In-Grid SQL Query driver can be used with existing visualization tools to gain insight into the data grid by using the specific tool provided features like drag and drop.</p>
+
+<p>Examples:</p>
+
+<ul>
+<li><a href="https://www.tableau.com/" target="_blank" >Tableau <i class='fa fa-external-link'></i></a>,</li>
+<li><a href="https://www.microstrategy.com/us" target="_blank" >MicroStrategy <i class='fa fa-external-link'></i></a>,</li>
+<li><a href="https://www.visualintelligence.co.nz/qlikview/" target="_blank" >QlikView <i class='fa fa-external-link'></i></a>)</li>
+<li><a href="http://squirrel-sql.sourceforge.net/" target="_blank" >SquirreL <i class='fa fa-external-link'></i></a></li>
+<li><a href="http://sqlline.sourceforge.net/" target="_blank" >sqlline <i class='fa fa-external-link'></i></a></li>
+</ul>
+
+<h1 id="squirrel">SquirreL</h1>
+
+<p><strong>1.</strong> Download and install <a href="http://squirrel-sql.sourceforge.net/#installation" target="_blank" >SquirreL <i class='fa fa-external-link'></i></a></p>
+
+<p><strong>2.</strong> Start SquirreL</p>
+
+<p><strong>3.</strong> Go to <code>Drivers</code> vertical tab on the left and click + button to add a new driver.</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/xap-sql/squirrel-driver.png" alt="image" /></p>
+</div>
+
+
+
+
+
+<p><strong>4.</strong> Go to <code>Aliases</code> vertical tab on the left and click + button to add a new connection.</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/xap-sql/squirrel-alias.png" alt="image" /></p>
+</div>
+
+
+
+
+
+<p><strong>5.</strong> Connect to the data grid</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/xap-sql/squirrel-connect.png" alt="image" /></p>
+</div>
+
+
+
+
+
+<p><strong>6.</strong> Run query, e.g. SELECT * FROM Product;</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/xap-sql/squirrel-query.png" alt="image" /></p>
+</div>
+
+
+
+
+
+
+<div class='bs-callout bs-callout-warning'><p>Currently there is a problem with RMI Classloader + Squirell, so as a workaround we copy our driver to the SquirreL lib folder. On Mac, copy jar as following: cp ./xap-calcite/target/gigaspaces-xap-jdbc-1.12.0-SNAPSHOT.jar /Applications/SQuirreLSQL.app/Contents/Resources/Java/lib.</p>
+</div>
+
+
+
+
+
+
+
+
+<p><br></p>
+
+<h1 id="sqlline">sqlline</h1>
+
+<p>Make sure you have Space deployed with some data and is accessible.</p>
+
+<p><strong>1.</strong> Download <a href="http://sqlline.sourceforge.net/" target="_blank" >sqlline <i class='fa fa-external-link'></i></a></p>
+
+<p><strong>2.</strong> cd ./xap-calcite/</p>
+
+<p><strong>3.</strong> ./sqlline</p>
+
+<p><strong>4.</strong> To connect to the space:</p>
+
+<pre><code class="language-bash">!connect jdbc:xap:url=jini://*/*/space?locators=127.0.0.1 Enter credentials if your space is secured (or just press Return otherwise).
+</code></pre>
+
+<p><strong>5.</strong> To list available tables:</p>
+
+<pre><code class="language-bash">!tables
+</code></pre>
+
+<p><strong>6.</strong> Execute any query, e.g.</p>
+
+<pre><code class="language-sql">SELECT * FROM Product;
+</code></pre>
+
+<p><strong>7.</strong> To close sqlline:</p>
+
+<pre><code class="language-bash">!quit
+</code></pre>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

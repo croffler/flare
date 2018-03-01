@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >What&#39;s New</h1>
+<hr>
+
+
+<p>This section describes product changes, along with new features and functionality for the early access version of InsightEdge Platform release 12.3.</p>
+
+<p>Draft documentation is available, and may not completely describe the product updates as it is still in progress. For additional details about the available features and enhancements in this version, refer to the  <a href="/early_access/index.html">Early Access</a> description.</p>
+
+<h1 id="performance-improvement">Performance Improvement</h1>
+
+<p>In systems with MemoryXtend, the platform can store the values of indexed fields in off-heap memory, to avoid having to fetch data from disk (SSD or HD) for queries that only need the index. This feature can optimize performance by up to 50% for the following operations:</p>
+
+<ul>
+<li>Read with projection and only indexed fields in query and projection - primary instance optimization</li>
+<li>Take with only indexed fields in query - backup optimization</li>
+<li>Clear with only indexed fields in query - primary and backup instance optimization</li>
+</ul>
+
+<h1 id="administration">Administration</h1>
+
+<h2 id="new-command-line-interface">New Command Line Interface</h2>
+
+<p>A new interactive Command Line Interface (CLI) based on the REST Manager API is planned for version 12.3. It is meant to replace the legacy GigaSpaces CLI, and supports both InsightEdge and XAP applications. This feature is still under construction, but is sufficiently mature for user evaluation.</p>
+
+<p>We encourage users to begin working with the new CLI and give us feedback. You can run the new CLI via the <code>xap</code> script in the <strong>bin</strong> folder (use <code>--help</code> to get started). Commands that have not yet been fully implemented will generate an &ldquo;under construction&rdquo; message. The following is a partial list of the available functionality:</p>
+
+<ul>
+<li>Deploy a Processing Unit or Space</li>
+<li>List, create, kill, and restart containers (GSCs)</li>
+<li>List hosts</li>
+<li>Start an agent on the current hosts</li>
+<li>List Spaces and Space instances</li>
+</ul>
+
+<h2 id="gs-agent-enhancement">GS-Agent Enhancement</h2>
+
+<p>Users can now configure the gs-agent to launch the Web Management Console when deploying an InsightEdge or XAP environment, using the new <code>--webui</code> option.</p>
+
+<h1 id="gigaspaces-on-docker-hub">GigaSpaces on Docker Hub</h1>
+
+<p>A Docker image for XAP has been published at <a href="https://hub.docker.com/r/gigaspaces/xap/">Docker Hub</a>. This feature is still under construction, but is sufficiently mature for user evaluation and feedback.</p>
+
+<p>To access the Docker image, follow the instructions on the <a href="https://hub.docker.com/r/gigaspaces/xap/">GigaSpaces XAP</a> page. Docker images for XAP open source and InsightEdge will be available soon.</p>
+
+<h1 id="tiered-storage-enhancement">Tiered Storage Enhancement</h1>
+
+<p>The custom initial load mechanism in MemoryXtend has been extended to provide full life cycle management of the blobstore cache, so that users can prioritize data availability throughout the application lifetime. Users can define a set of queries that define what data should be cached as hot data in the in-memory data grid, while cold data continues to be stored on disk (SSD or HD).</p>
+
+<h1 id="third-party-product-changes">Third-Party Product Changes</h1>
+
+<ul>
+<li><a href="http://www.eclipse.org/jetty/">Jetty</a> package has been upgraded to <code>9.2.24</code></li>
+<li><a href="https://projects.spring.io/spring-framework/">Spring Framework</a> integration has been upgraded to <code>4.3.13</code></li>
+<li><a href="http://projects.spring.io/spring-security/">Spring Security</a> integration has been upgraded to <code>4.2.3</code></li>
+</ul>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

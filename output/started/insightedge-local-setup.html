@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Local Machine Setup</h1>
+<hr>
+
+
+<p>This section explains how to start an InsightEdge environment on a local machine.</p>
+
+<h1 id="prerequisites">Prerequisites</h1>
+
+<p>Before running InsightEdge, verify that you have the following installed in your environment:</p>
+
+<ul>
+<li>Java 8</li>
+<li>Scala 2.11</li>
+<li>Maven 3.1+</li>
+</ul>
+
+<h1 id="starting-the-local-environment">Starting the Local Environment</h1>
+
+<p>The InsightEdge environment consists of Spark and the XAP Data Grid.</p>
+
+<h2 id="starting-full-environment">Starting Full Environment</h2>
+
+<p>To start a complete InsightEdge environment on your local machine, run the following command from the <code>&lt;XAP_HOME&gt;/insightedge/bin</code> directory:</p>
+
+<pre><code class="language-bash">insightedge demo
+</code></pre>
+
+<p>This will start the following components on your machine:</p>
+
+<ul>
+<li>Spark Master UI at <a href="http://localhost:8080" target="_blank" >localhost:8080 <i class='fa fa-external-link'></i></a>
+
+<ul>
+<li>Url for submitting spark jobs: <code>spark://127.0.0.1:7077</code></li>
+</ul></li>
+<li>Spark Worker UI at <a href="http://localhost:8081" target="_blank" >localhost:8081 <i class='fa fa-external-link'></i></a></li>
+<li>Zeppelin UI at <a href="http://localhost:9090" target="_blank" >localhost:9090 <i class='fa fa-external-link'></i></a></li>
+<li>XAP Service grid:
+
+<ul>
+<li>XAP Manager at <a href="http://localhost:8090" target="_blank" >localhost:8090 <i class='fa fa-external-link'></i></a></li>
+<li>A Space called <code>insightedge-space</code> with 2 partitions</li>
+</ul></li>
+</ul>
+
+<h2 id="starting-only-data-grid">Starting Only Data Grid</h2>
+
+<p>If you wish to start only the data grid (e.g. you&rsquo;re spark master url is <code>local[*]</code>, or you prefer to use an existing Spark cluster), run the following:</p>
+
+<p>First, start a local XAP manager with two containers on your machine by running the following command from the <code>&lt;XAP_HOME&gt;/bin</code> directory:</p>
+
+<pre><code class="language-bash">./gs-agent.sh --manager-local --gsc=2
+</code></pre>
+
+<p>Next, deploy a space called <code>insightedge-space</code> with 2 partitions by running the following command from the <code>&lt;XAP_HOME&gt;/insightedge/bin</code> directory:</p>
+
+<pre><code class="language-bash">insightedge deploy-space --partitions=2 insightedge-space
+</code></pre>
+
+<h1 id="stopping-local-environment">Stopping Local Environment</h1>
+
+<p>To stop the environment, you can use <code>shutdown</code> mode that sends kill signal to all relevant processes:</p>
+
+<pre><code class="language-bash">insightedge shutdown
+</code></pre>
+
+<h1 id="what-s-next">What&rsquo;s Next?</h1>
+
+<ul>
+<li>To get started with the Apache Zeppelin Web Notebook, see <a href="insightedge-zeppelin.html">Web notebook</a>.</li>
+<li>To run the examples on your local InsightEdge environment, see <a href="insightedge-examples.html">Running the examples</a></li>
+<li>To create your first InsightEdge application, see <a href="insightedge-first-app.html">Developing Your First Application</a></li>
+<li>To learn more on the <code>insightedge</code> script, see <a href="insightedge-script.html">InsightEdge Script</a></li>
+<li>To setup a cluster on a set of machines, see <a href="../admin/cluster_setup.html">Cluster Setup For InsightEdge</a></li>
+</ul>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

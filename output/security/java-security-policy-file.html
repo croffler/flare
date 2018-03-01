@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Java Security Policy File</h1>
+<hr>
+
+
+<p>When accessing the space, you should have the <code>java.security.policy</code> property set correctly.
+You may use a default security file bundled with the distribution. It is located at:
+<code>&lt;XAP Root&gt;\policy\policy.all</code>:</p>
+
+<pre><code class="language-bash">grant {
+permission java.security.AllPermission &quot;&quot;, &quot;&quot;;
+};
+</code></pre>
+
+<p>You can augment or replace the default JVM runtime permissions using the <code>java.security.policy</code> system property to specify the path to a policy file. This System property is unique in that it can use <code>=</code> or <code>==</code> to indicate whether the policy file specified should append to, or replace the default permissions. If you use the &ldquo;=&rdquo;, the permissions in the specified policy file are appended to the default permissions. If you use the <code>==</code>, then the permissions in the specified policy file replace the default permissions.</p>
+
+<p>The preferred way is to export the environment variable <code>XAP_SECURITY_POLICY</code> which is defined in the script <code>&lt;XAP Root&gt;\bin\setenv.(sh/bat)</code>, instead of the system property <code>java.security.policy</code> to specify the path to a policy file.
+Use the <code>setenv-overrides.(sh/bat)</code> script and define the security policy file path:</p>
+
+<pre><code class="language-bash">  export XAP_SECURITY_POLICY=/home/xap-user/my-policy.txt
+</code></pre>
+
+<p>GigaSpaces includes default security permissions, based on the above settings. These are located in the <code>xap-common.jar</code> file, under <code>\com\gigaspaces\start\policy.all</code>. If you do not need special security settings, you do not need to set up the <code>java.security.policy</code> property when accessing the space. The default setting is used. The same occurs when using the <code>SpaceFinder</code> to start a space (not using the <code>ServiceStarter</code>).</p>
+
+<p><strong>Flat File Structure</strong> &ndash; the <code>policy.all</code> file can be moved under the <code>&lt;XAP Root&gt;</code> directory, if you want to maintain a flat file structure &ndash; where configuration, jar, and security files can be organized under the <code>&lt;XAP Root&gt;</code> folder, or under their main folder without having sub-folders.</p>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For more details on Java security, refer to: <a href="http://docs.oracle.com/javase/8/docs/technotes/guides/security/PolicyFiles.html">Sun;Default Policy Implementation and Policy File Syntax</a>.</p>
+
+</div> 
+
+<h1 id="security-permissions-required-for-xap">Security permissions required for XAP</h1>
+
+<p>If you want to create your own security policy file, you need to add, at least, the following security grants.</p>
+
+<pre><code class="language-bash">grant {
+permission java.util.PropertyPermission &quot;*&quot;, &quot;read, write&quot;;
+permission java.lang.RuntimePermission &quot;getProtectionDomain&quot;;
+permission java.io.FilePermission &quot;&lt;&lt;ALL FILES&gt;&gt;&quot;, &quot;read, write, delete, execute&quot;;
+permission java.io.SerializablePermission &quot;enableSubstitution&quot;;
+permission java.lang.reflect.ReflectPermission &quot;suppressAccessChecks&quot;;
+permission java.lang.RuntimePermission &quot;accessClassInPackage.org.apache.*&quot;;
+permission java.lang.RuntimePermission &quot;accessClassInPackage.sun.*&quot;;
+permission java.lang.RuntimePermission &quot;accessDeclaredMembers&quot;;
+permission java.lang.RuntimePermission &quot;createClassLoader&quot;;
+permission java.lang.RuntimePermission &quot;getClassLoader&quot;;
+permission java.lang.RuntimePermission &quot;loadLibrary.libtcnative-1&quot;;
+permission java.lang.RuntimePermission &quot;loadLibrary.management&quot;;
+permission java.lang.RuntimePermission &quot;loadLibrary.net&quot;;
+permission java.lang.RuntimePermission &quot;loadLibrary.tcnative-1&quot;;
+permission java.lang.RuntimePermission &quot;modifyThread&quot;;
+permission java.lang.RuntimePermission &quot;modifyThreadGroup&quot;;
+permission java.lang.RuntimePermission &quot;org.jboss.security.SecurityAssociation.setServer&quot;;
+permission java.lang.RuntimePermission &quot;setContextClassLoader&quot;;
+permission java.lang.RuntimePermission &quot;createSecurityManager&quot;;
+permission java.lang.RuntimePermission &quot;setFactory&quot;;
+permission java.lang.RuntimePermission &quot;setIO&quot;;
+permission java.lang.RuntimePermission &quot;shutdownHooks&quot;;
+permission java.net.NetPermission &quot;specifyStreamHandler&quot;;
+permission java.net.SocketPermission &quot;*&quot;, &quot;listen, resolve, connect, accept&quot;;
+permission java.security.SecurityPermission &quot;createAccessControlContext&quot;;
+permission java.security.SecurityPermission &quot;getDomainCombiner&quot;;
+permission java.security.SecurityPermission &quot;getPolicy&quot;;
+permission java.security.SecurityPermission &quot;getProperty.*&quot;;
+permission java.security.SecurityPermission &quot;insertProvider.SUN&quot;;
+permission java.security.SecurityPermission &quot;putProviderProperty.SUN&quot;;
+permission java.security.SecurityPermission &quot;setPolicy&quot;;
+permission java.security.SecurityPermission &quot;setProperty.package.access&quot;;
+permission java.security.SecurityPermission &quot;setProperty.package.definition&quot;;
+permission net.jini.security.GrantPermission &quot;java.security.AllPermission&quot;;
+permission com.sun.jini.discovery.internal.EndpointInternalsPermission &quot;set&quot;;
+permission com.sun.jini.discovery.internal.EndpointInternalsPermission &quot;get&quot;;
+permission java.util.logging.LoggingPermission &quot;control&quot;;
+permission net.jini.discovery.DiscoveryPermission &quot;*&quot;;
+permission javax.security.auth.AuthPermission &quot;refreshLoginConfiguration&quot;;
+permission javax.security.auth.AuthPermission &quot;setLoginConfiguration&quot;;
+permission javax.management.MBeanServerPermission &quot;createMBeanServer&quot;;
+permission javax.management.MBeanServerPermission &quot;findMBeanServer&quot;;
+permission javax.management.MBeanServerPermission &quot;newMBeanServer&quot;;
+permission javax.management.MBeanTrustPermission &quot;register&quot;;
+permission javax.management.MBeanPermission &quot;*&quot;, &quot;*&quot;;
+permission java.lang.RuntimePermission &quot;org.jboss.security.SecurityAssociation.setRunAsRole&quot;;
+permission javax.security.auth.AuthPermission &quot;doAsPrivileged&quot;;
+permission java.lang.RuntimePermission &quot;org.jboss.security.SecurityAssociation.getPrincipalInfo&quot;;
+permission javax.security.auth.AuthPermission &quot;createLoginContext.HsqlDbRealm&quot;;
+permission javax.security.auth.AuthPermission &quot;getLoginConfiguration&quot;;
+permission java.lang.RuntimePermission &quot;org.jboss.security.SecurityAssociation.accessContextInfo&quot;;
+permission javax.security.auth.PrivateCredentialPermission &quot;javax.resource.spi.security.PasswordCredential * \&quot;*\&quot;&quot;, &quot;read&quot;;
+permission javax.security.auth.AuthPermission &quot;*&quot;;
+permission java.lang.RuntimePermission &quot;org.jboss.security.SecurityAssociation.setPrincipalInfo&quot;;
+permission net.jini.security.GrantPermission &quot;java.security.AllPermission \&quot;&lt;all permissions&gt;\&quot;, \&quot;&lt;all actions&gt;\&quot;&quot;;
+permission net.jini.export.ExportPermission &quot;exportRemoteInterface.com.sun.jini.reggie.Registrar&quot;;
+permission com.sun.jini.thread.ThreadPoolPermission &quot;getSystemThreadPool&quot;;
+permission javax.management.MBeanServerPermission &quot;releaseMBeanServer&quot;;
+permission java.lang.RuntimePermission &quot;exitVM&quot;;
+};
+</code></pre>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >MemoryXtend for Flash/SSD</h1>
+<hr>
+
+
+<h1 id="introduction">Introduction</h1>
+
+<p>XAP MemoryXtend for Flash/SSD delivers built-in, high-speed persistence that leverages local or attached SSD devices and all-flash-arrays (AFA). It delivers low latency write and read performance, as well as fast data recovery.  XAP MemoryXtend for Flash/SSD is based on <a href="http://rocksdb.org/" target="_blank" >RocksDB <i class='fa fa-external-link'></i></a>, which is a persistent key/value store optimized for fast storage environments.</p>
+
+<h1 id="architecture-and-components">Architecture and Components</h1>
+
+<p>When configured for Flash/SSD, the MemoryXtend architecture tiers the storage of each Space partition instance across two components: a Space partition instance (managed JVM heap) and an embedded key/value store (the blobstore) as shown in the diagram below.</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/blobstore/memoryxtend-rocksdb-architecture.png" alt="image" /></p>
+</div>
+
+
+
+
+
+<h2 id="space-partition-instance">Space Partition Instance</h2>
+
+<p>The Space partition instance is a JVM heap that acts as an LRU cache against the underlying blobstore. This tier in the architecture stores indexes, Space class metadata, transactions, replication redo logs, leases, and statistics.
+Upon a Space read operation, if the object exists in the JVM heap (i.e. a cache <i>hit</i>) it is immediately returned to the Space proxy client. Otherwise, the Space loads it from the underlying blobstore and places it on the JVM heap (known as a cache <i>miss</i>).</p>
+
+<h2 id="blobstore">Blobstore</h2>
+
+<p>The blobstore is based on a log-structured merge tree architecture (similar to popular NoSQL databases such as: <a href="https://hbase.apache.org/" target="_blank" >HBase <i class='fa fa-external-link'></i></a>, <a href="https://cloud.google.com/bigtable/" target="_blank" >BigTable <i class='fa fa-external-link'></i></a>, or <a href="https://cassandra.apache.org/" target="_blank" >Cassandra <i class='fa fa-external-link'></i></a>). There are three main components in the blobstore:</p>
+
+<ul>
+<li><strong>MemTable</strong>: An in-memory data structure (residing on off-heap RAM) where all incoming writes are stored. When a MemTable fills up, it is flushed to an SST file on storage.</li>
+<li><strong>Log</strong>: A write-ahead log (WAL) that serializes MemTable operations to a persistent medium as log files. In the event of failure, WAL files can be used to recover the key/value store to its consistent state, by reconstructing the MemTable from the logs.</li>
+<li><strong>Sorted String Table (SST) files</strong>: SSTable is a data structure (residing on disk) that efficiently stores a large data footprint while optimizing for high throughput, and sequential read/write workloads. When a MemTable fills up, it is flushed to an SST file on storage and the corresponding WAL file can be deleted.</li>
+<li><strong>Built-in Cache</strong>: MemoryXtend comes with a built-in cache. This cache is part of the Space partition tier, and stores objects in their native form.</li>
+</ul>
+
+<h1 id="configuration-and-deployment">Configuration and Deployment</h1>
+
+<p>Any existing XAP Space can be configured to integrate a blobstore with it. As with a typical Processing Unit, configuration is done through <code>pu.xml</code> or code. For example:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Namespace" style="padding:10px"><pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+xmlns:os-core=&quot;http://www.openspaces.org/schema/core&quot;
+xmlns:blob-store=&quot;http://www.openspaces.org/schema/rocksdb-blob-store&quot;
+xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+http://www.openspaces.org/schema/core http://www.openspaces.org/schema/12.3/core/openspaces-core.xsd
+http://www.openspaces.org/schema/rocksdb-blob-store http://www.openspaces.org/schema/12.3/rocksdb-blob-store/openspaces-rocksdb-blobstore.xsd&quot;&gt;
+
+&lt;blob-store:rocksdb-blob-store id=&quot;myBlobStore&quot; paths=&quot;[/mnt/db1,/mnt/db2]&quot; mapping-dir=&quot;/tmp/mapping&quot;/&gt;
+
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot; &gt;
+&lt;os-core:blob-store-data-policy blob-store-handler=&quot;myBlobStore&quot; persistent=&quot;true&quot;/&gt;
+&lt;/os-core:embedded-space&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot;/&gt;
+&lt;/beans&gt;
+</code></pre>
+</div>
+<div title="Plain XML" style="padding:10px"><pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+xmlns:os-core=&quot;http://www.openspaces.org/schema/core&quot;
+xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+http://www.openspaces.org/schema/core http://www.openspaces.org/schema/12.3/core/openspaces-core.xsd&quot;&gt;
+
+&lt;bean id=&quot;blobstoreid&quot; class=&quot;com.gigaspaces.blobstore.rocksdb.config.RocksDBBlobStoreDataPolicyFactoryBean&quot;&gt;
+&lt;property name=&quot;paths&quot; value=&quot;[/mnt/db1,/mnt/db2]&quot;/&gt;
+&lt;property name=&quot;mappingDir&quot; value=&quot;/tmp/mapping&quot;/&gt;
+&lt;/bean&gt;
+
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;&gt;
+&lt;os-core:blob-store-data-policy blob-store-handler=&quot;blobstoreid&quot; persistent=&quot;true&quot;/&gt;
+&lt;/os-core:embedded-space&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot;/&gt;
+&lt;/beans&gt;
+</code></pre>
+</div>
+<div title="Code" style="padding:10px"><pre><code class="language-java">RocksDBBlobStoreConfigurer rocksDbConfigurer = new RocksDBBlobStoreConfigurer();
+rocksDbConfigurer.setPaths(&quot;[/mnt/db1,/mnt/db2]&quot;);
+rocksDbConfigurer.setMappingDir(&quot;/tmp/mapping&quot;);
+
+BlobStoreDataCachePolicy blobStorePolicy = new BlobStoreDataCachePolicy();
+blobStorePolicy.setBlobStoreHandler(rocksDbConfigurer.create());
+blobStorePolicy.setPersistent(true);
+
+
+EmbeddedSpaceConfigurer spaceConfigurer = new EmbeddedSpaceConfigurer(&quot;mySpace&quot;);
+spaceConfigurer.cachePolicy(blobStorePolicy);
+
+GigaSpace gigaSpace = new GigaSpaceConfigurer(spaceConfigurer).gigaSpace();
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>The following table describes the configuration options used in <code>rocksdb-blob-store</code> above.</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Property</th>
+<th align="left">Description</th>
+<th align="left">Default</th>
+<th align="left">Use</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">paths</td>
+<td align="left">A comma-separated array of mount paths used for each Space partition&rsquo;s blobstore. Th number of paths in the array should correspond to the number of partition instances in the Space (primaries and backups). For instance, for a two-partition Space with no backups, <code>/mnt/db1</code> corresponds to the first partition, while <code>/mnt/db2</code> to the second one.</td>
+<td align="left"></td>
+<td align="left">required</td>
+</tr>
+
+<tr>
+<td align="left">mapping-dir</td>
+<td align="left">A directory in the file system that contains the &ldquo;partition to blobstore&rdquo; mapping file. This file is automatically generated by MemoryXtend. In the event of a partition re-location, the mapping file is updated.</td>
+<td align="left"></td>
+<td align="left">required</td>
+</tr>
+
+<tr>
+<td align="left">central-storage</td>
+<td align="left">Specifies whether the deployment strategy is for <a href="./memoryxtend-rocksdb-ssd.html#central-storage">central storage</a> (i.e. SAN configuration) or <a href="./memoryxtend-rocksdb-ssd.html#local-storage">local storage</a> on each grid machine (default).</td>
+<td align="left">false</td>
+<td align="left">optional</td>
+</tr>
+
+<tr>
+<td align="left">db-options</td>
+<td align="left">Specifies the tuning parameters for the persistent data store in the underlying blobstore. This includes SST formats, compaction settings and flushes. See the <a href="./memoryxtend-rocksdb-ssd.html#performance-tuning">Performance Tuning</a> section for details.</td>
+<td align="left"></td>
+<td align="left">optional</td>
+</tr>
+
+<tr>
+<td align="left"><nobr>data-column-family-options<nobr></td>
+<td align="left">Specifies the tuning parameters for the LSM logic and memory tables. See the <a href="./memoryxtend-rocksdb-ssd.html#performance-tuning">Performance Tuning</a> section for details.</td>
+<td align="left"></td>
+<td align="left">optional</td>
+</tr>
+
+<tr>
+<td align="left">blob-store-handler</td>
+<td align="left">Blobstore implementation.</td>
+<td align="left"></td>
+<td align="left">required</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="blobstore-on-heap-cache-configuration">Blobstore On-Heap Cache Configuration</h2>
+
+<p>As mentioned above, MemoryXtend comes with a built-in, LRU-based data cache that stores objects in their native form. The following table describes the blobstore cache configuration options.</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Property</th>
+<th align="left">Description</th>
+<th align="left">Default</th>
+<th align="left">Use</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><nobr>cache-entries-percentage</nobr></td>
+<td align="left">The cache size is determined based on the percentage of the GSC JVM max memory(-Xmx). If <code>-Xmx</code> is not specified, the default cache size is <code>10000</code> objects.</td>
+<td align="left">20%</td>
+<td align="left">optional</td>
+</tr>
+
+<tr>
+<td align="left">avg-object-size-KB</td>
+<td align="left">Average object size, in KB. <code>avg-object-size-bytes</code> and <code>avg-object-size-KB</code> cannot be used together.</td>
+<td align="left">5</td>
+<td align="left">optional</td>
+</tr>
+
+<tr>
+<td align="left">avg-object-size-bytes</td>
+<td align="left">Average object size, in bytes. <code>avg-object-size-bytes</code> and <code>avg-object-size-KB</code> cannot be used together.</td>
+<td align="left">5000</td>
+<td align="left">optional</td>
+</tr>
+
+<tr>
+<td align="left">persistent</td>
+<td align="left">Data is written to flash memory, and the Space performs recovery from the flash memory if needed.</td>
+<td align="left"></td>
+<td align="left">required</td>
+</tr>
+
+<tr>
+<td align="left">blob-store-cache-query</td>
+<td align="left">One or more SQL queries that determine which objects will be stored in cache.</td>
+<td align="left"></td>
+<td align="left">optional</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Calculating cache-entries-percentage</strong></p>
+
+<p>This setting is used to define the maximum number of objects that a GSC heap can hold before it starts evicting. Here is the formula for calculating it:</p>
+
+<p><code>Number of objects = ((GSC Xmx) * (cache-entries-percentage/100))/average-object-size-KB</code></p>
+
+<p>Lets say we set a cache entries percentage of 20, and an average object size of 2KB (the default). On a 10GB GSC:</p>
+
+<p>N = {10GB * 1024 * 1024) * (<sup>20</sup>&frasl;<sub>100</sub>) } / 2
+= {(10,485,760) * (0.2)} / 2
+= {2,097,152} / 2
+= 1,048,576 objects can fit in a single GSC before LRU starts evicting.</p>
+
+<h3 id="custom-caching">Custom Caching</h3>
+
+<h4 id="data-recovery-on-restart">Data Recovery on Restart</h4>
+
+<p>The MemoryXtend architecture allows for data persisted on the blobstore to be available for the data grid upon restart. To enable this, you have to enable the <code>persistent</code> option in the blobstore policy.</p>
+
+<pre><code class="language-xml">  &lt;os-core:blob-store-data-policy persistent=&quot;true&quot; blob-store-handler=&quot;myBlobStore&quot;&gt;
+</code></pre>
+
+<h4 id="blobstore-cache-custom-queries">Blobstore Cache Custom Queries</h4>
+
+<p>The <code>blob-store-cache-query</code> option enables customizing the cache contents. You can define a set of SQL queries, so that only objects that fit the queries:</p>
+
+<ul>
+<li>Are pre-loaded into the JVM heap upon data grid initialization/restart.</li>
+<li>Are stored in the JVM heap after Space operations.</li>
+</ul>
+
+<p>This guarantees that any subsequent read requests will hit RAM, providing predictable latency (and avoiding cache misses). This customization is useful when read latencies for specific class types (such as hot data, current day stocks) must be predictable.</p>
+
+<p>The SQL queries are static and cannot be changed dynamically. To update them, make the necessary modifications and then restart the application.</p>
+
+<p><strong>Example</strong></p>
+
+<p>In this example, an online trading platform defines the following criteria for &ldquo;hot&rdquo; data:</p>
+
+<ul>
+<li><code>Stock</code> instances where the price &gt; 1000</li>
+<li><code>Trade</code> instances with volume &gt; 10000</li>
+<li><code>Account</code> instances with platinum rating</li>
+</ul>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Namespace" style="padding:10px"><pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+xmlns:os-core=&quot;http://www.openspaces.org/schema/core&quot;
+xmlns:os-events=&quot;http://www.openspaces.org/schema/events&quot;
+xmlns:os-remoting=&quot;http://www.openspaces.org/schema/remoting&quot;
+xmlns:blob-store=&quot;http://www.openspaces.org/schema/rocksdb-blob-store&quot;
+xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+http://www.openspaces.org/schema/core http://www.openspaces.org/schema/12.3/core/openspaces-core.xsd
+http://www.openspaces.org/schema/events http://www.openspaces.org/schema/12.3/events/openspaces-events.xsd
+http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/12.3/remoting/openspaces-remoting.xsd
+http://www.openspaces.org/schema/rocksdb-blob-store http://www.openspaces.org/schema/12.3/rocksdb-blob-store/openspaces-rocksdb-blobstore.xsd&quot;&gt;
+
+&lt;blob-store:rocksdb-blob-store id=&quot;myBlobStore&quot; paths=&quot;[/tmp/rocksdb]&quot; mapping-dir=&quot;/tmp/mapping&quot;/&gt;
+
+&lt;os-core:embedded-space id=&quot;space&quot; name=&quot;mySpace&quot;&gt;
+&lt;os-core:blob-store-data-policy persistent=&quot;true&quot; blob-store-handler=&quot;myBlobStore&quot;&gt;
+&lt;os-core:blob-store-cache-query class=&quot;com.gigaspaces.blobstore.rocksdb.Stock&quot; where=&quot;price &gt; 1000&quot;/&gt;
+&lt;os-core:blob-store-cache-query class=&quot;com.gigaspaces.blobstore.rocksdb.Trade&quot; where=&quot;volume &gt; 10000&quot;/&gt;
+&lt;os-core:blob-store-cache-query class=&quot;com.gigaspaces.blobstore.rocksdb.Account&quot; where=&quot;rating = 'platinum'&quot;/&gt;
+&lt;/os-core:blob-store-data-policy&gt;
+&lt;/os-core:embedded-space&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot;/&gt;
+</code></pre>
+</div>
+
+<p><div title="Code" style="padding:10px"><pre><code class="language-java"> BlobStoreDataCachePolicy blobStorePolicy = new BlobStoreDataCachePolicy();
+blobStorePolicy.setBlobStoreHandler(rocksDbConfigurer.create());
+blobStorePolicy.setPersistent(true);
+blobStorePolicy.addCacheQuery(new SQLQuery(Stock.class, &quot;price &gt; 1000&quot;));
+blobStorePolicy.addCacheQuery(new SQLQuery(Trade.class, &quot;volume &gt; 10000&quot;));
+blobStorePolicy.addCacheQuery(new SQLQuery(Account.class, &quot;rating = &lsquo;platinum&rsquo;&quot;));</p>
+
+<p>EmbeddedSpaceConfigurer spaceConfigurer = new EmbeddedSpaceConfigurer(&quot;mySpace&quot;);
+spaceConfigurer.cachePolicy(blobStorePolicy);
+GigaSpace gigaSpace = new GigaSpaceConfigurer(spaceConfigurer.space()).gigaSpace();
+</code></pre>
+</div></p>
+</div>
+
+
+
+
+
+
+<p>When the <code>com.gigaspaces.cache</code> logging is turned on, the following output is generated:</p>
+
+<pre><code class="language-bash">2016-12-26 07:57:56,378  INFO [com.gigaspaces.cache] - BlobStore internal cache recovery:
+blob-store-queries: [SELECT * FROM com.gigaspaces.blobstore.rocksdb.Stock WHERE price &gt; 1000, SELECT * FROM com.gigaspaces.blobstore.rocksdb.Trade WHERE volume &gt; 10000, SELECT * FROM com.gigaspaces.blobstore.rocksdb.Account WHERE rating = 'platinum'].
+Entries inserted to blobstore cache: 80.
+</code></pre>
+
+<h4 id="lazy-load">Lazy Load</h4>
+
+<p>If no custom queries are defined, the <strong>lazy load</strong> approach is used and no data is loaded into the JVM heap upon restart. MemoryXtend saves only the indexes in RAM, and the rest of the objects are stored on disk. As read throughput increases from clients, most of the data eventually loads into the data grid RAM tier. This is a preferred approach when the volume of data persisted on flash memory exceeds what can fit into memory.</p>
+
+<h4 id="blob-store-cache-metrics">Blob Store Cache Metrics</h4>
+
+<p>The concept of cache <em>hit</em> and cache <em>miss</em> is very important for cache analysis. A hit occurs when querying data that is stored in the cache. A miss occurs when querying data that is stored on disk.</p>
+
+<p>Custom caching distinguishes between hot data (that fits the custom queries) and cold data. Hot data is stored in cache and on disk, while cold data is stored only on disk.</p>
+
+<p>Ideally, all hot data would be found in cache. However, the cache size is limited, and likely isn&rsquo;t able to store all the hot data. This means that data can exist in one of three states:</p>
+
+<ul>
+<li>Hot data <strong>and</strong> found in cache. Querying this data will result in a <strong><em>cache hit</em></strong>.</li>
+<li>Hot data <strong>not</strong> found in cache (because cache is full). Querying this data will result in a <strong><em>hot data cache miss</em></strong>.</li>
+<li>Cold data that is stored only in disk. Querying this data will result in a <strong><em>cold data cache miss</em></strong>.</li>
+</ul>
+
+<p>Total cache misses = hot data cache misses + cold data cache misses.</p>
+
+<p>By modifying the custom queries, the cache efficiency (maximizing hits and minimizing misses) can be improved. To keep track of the cache efficiency, key metrics are measured and stored, including hits, total misses, and hot data misses.
+For information about XAP metrics and how to use them, refer to the <a href="./metrics-overview.html">Metrics</a> section of this guide.</p>
+
+<h1 id="off-heap-memory-usage">Off-Heap Memory Usage</h1>
+
+<p>XAP can store the values of indexed fields in the process native (off-heap) memory. This is done to avoid having to fetch data from the disk for queries that only need the index. This feature is off by default. To enable it, configure the  following Space properties:</p>
+
+<ul>
+<li><code>space-config.engine.blobstore.offheap.enabled</code> - Disabled (false) by default.</li>
+<li><code>space-config.engine.blobstore.offheap.max_memory_size</code> - Amount of memory allocated to the off-heap memory, in bytes. Required if the previous property is set to &ldquo;true&rdquo;. Sample values: <code>15MB</code>, <code>15mb</code>, <code>30b</code>, <code>4gb</code></li>
+</ul>
+
+<p>This optimization behavior is relevant for operations that don&rsquo;t need the un-indexed field values in order to execute. The current operations that benefit are:</p>
+
+<ul>
+<li>Read with projection and only indexed fields in query and projection - primary instance optimization</li>
+<li>Take with only indexed fields in query - backup optimization</li>
+<li>Clear with only indexed fields in query - primary and backup instance optimization</li>
+</ul>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<p>This behavior increases the overall memory consumption of the Space by several bytes (depending on the indexed fields) per entry.</p>
+</div>
+
+
+
+
+
+
+
+
+<p>Before any operation that requires memory allocation (write, update, and initial load), the off-heap memory manager checks how much of the allocated memory has been used. If the memory is full, an <code>OffHeapMemoryShortageException</code> is thrown. Read, take, and clear operations are always allowed.</p>
+
+
+<div class='bs-callout bs-callout-danger'>
+<b style="color:#d9534f">Important</b><br>
+<p>If the used memory is below the configured threshold, then a large write operation may exceed the threshold without being blocked or throwing an exception. Users should take this into account when setting the maximum memory size. This behavior is similar to that of the regular <a href="../dev-java/memory-management-overview.html">memory manager</a>.</p>
+</div>
+
+
+
+<p>The amount of used off-heap memory can be tracked using the <code>space_blobstore_offheap_used-bytes</code> metric, as described on the <a href="./metrics-bundled.html#blobstore-operations">Metrics</a> page.</p>
+
+<p>When a Processing Unit is undeployed or a Space is killed, the off-heap memory manager erases the related data from the off-heap memory.</p>
+
+<p>See the following example:</p>
+
+<pre><code class="language-java">    public static class TestSpaceClass {
+
+private Integer id;
+private Integer age;
+private Boolean active;
+
+public TestSpaceClass() {
+}
+
+@SpaceId
+public Integer getId() {
+return id;
+}
+
+public void setId(Integer id) {
+this.id = id;
+}
+
+@SpaceIndex
+public Integer getAge() {
+return age;
+}
+
+public void setAge(Integer age) {
+this.age = age;
+}
+
+public Boolean getActive() {
+return active;
+}
+
+public void setActive(Boolean active) {
+this.active = active;
+}
+}
+</code></pre>
+
+<pre><code>gigaSpace.readMultiple(new SQLQuery&lt;TestSpaceClass&gt;(TestSpaceClass.class, &quot;age = 3&quot;).setProjections(&quot;id&quot;, &quot;age&quot;));
+</code></pre>
+
+<p>To see whether your query can benefit from this optimization behavior, you can set <code>com.gigaspaces.cache</code> to FINE and look for the following log entry:</p>
+
+<pre><code class="language-property">2017-11-28 07:57:49,115  FINE [com.gigaspaces.cache] - BlobStore - enabled optimization for query: SELECT * FROM com.gigaspaces.test.blobstore.rocksdb.AbstractRocksDBOptimizationTest$TestSpaceClass 
+2017-11-28 07:57:49,115  FINE [com.gigaspaces.cache] - BlobStore - disabled optimization for query: SELECT * FROM com.gigaspaces.test.blobstore.rocksdb.AbstractRocksDBOptimizationTest$TestSpaceClass 
+</code></pre>
+
+<p>When set to FINER, you can see where the entries were fetched from. Look for the following log entry:</p>
+
+<pre><code class="language-property">2017-11-28 07:57:49,117  FINER [com.gigaspaces.cache] - container [mySpace_container1_1:mySpace] Blobstore- entry loaded from off heap, uid=-1850388785^84^98^0^0
+2017-11-28 07:57:49,117  FINER [com.gigaspaces.cache] - container [mySpace_container1_1:mySpace] Blobstore- entry loaded from disk, uid=-1850388785^84^98^0^0
+</code></pre>
+
+<h1 id="deployment-strategies">Deployment Strategies</h1>
+
+<h2 id="local-storage">Local Storage</h2>
+
+<p>This configuration allows each space partition instance (primary or backup) to use a machine-local storage device (SSD/HDD). With this approach, data locality is leveraged so that the devices local to the machine are used for reads/writes. The local storage deployment strategy provides an easy way to implement a &ldquo;local persistent store&rdquo; (also known as native persistence) pattern.</p>
+
+<p><br></p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/blobstore/memoryxtend-local-storage.png" alt="image" /></p>
+</div>
+
+
+
+
+
+<p><br></p>
+
+<h2 id="central-storage">Central Storage</h2>
+
+<p>This deployment strategy works well with <a href="http://en.wikipedia.org/wiki/Storage_area_network" target="_blank" >storage area networks (SAN) <i class='fa fa-external-link'></i></a>, which means that the disk drive devices are installed in a remote storage array but behave as if they&rsquo;re attached the the local machine. Most storage networks use the iSCSI or Fibre Channel protocol for communication between servers and disk drive devices. This configuration breaks the coupling between a partition instance and a local machine device, allowing seamless relocation of paritions across data grid machines.</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/blobstore/memoryxtend-central-storage.png" alt="image" /></p>
+</div>
+
+
+
+
+
+<p>Tiering storage between Space partition instances and attached storage can be applied across one or more storage arrays, as shown in the configurations below:</p>
+
+<h3 id="single-storage-array">Single Storage Array</h3>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:80%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>The following example deployes a 2 partitions space with a single backup (2,1) in the following manner:</p>
+
+<ul>
+<li><code>/mnt/db1</code> will be mounted to the 1st primary.</li>
+<li><code>/mnt/db2</code> will be mounted to the 2nd primary.</li>
+<li><code>/mnt/db3</code> will be mounted to the 1st backup.</li>
+<li><code>/mnt/db4</code> will be mounted to the 2nd backup.</li>
+</ul>
+</div>
+
+<div style='float:left;width:20%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><div class="container">
+<div class="row">
+<div style="float:left;width:150px;height=140px; border-style:solid;border-color:#E5E4E2;border-radius:10px;padding:0px;position:relative;margin:0px;">
+<p>
+<a  class="example-image-link" href="../../attachment_files/blobstore/rockdb2.png" data-toggle="lightbox" data-title="Single storage arrays">
+<img src="../../attachment_files/blobstore/rockdb2.png" class="img-responsive img-rounded">
+</a>
+</p>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<pre><code class="language-xml">&lt;blob-store:rocksdb-blob-store id=&quot;myBlobStore&quot; paths=&quot;[/mnt/db1,/mnt/db2,/mnt/db3,/mnt/db4]&quot;/&gt;
+</code></pre>
+
+<h3 id="dual-storage-array">Dual Storage Array</h3>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:80%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>The following example deployes a 2-partition Space with a single backup (2,1) in the following manner:</p>
+
+<ul>
+<li><code>/mnt1/db1</code> will be mounted to the 1st primary.</li>
+<li><code>/mnt1/db2</code> will be mounted to the 2nd primary.</li>
+<li><code>/mnt2/db1</code> will be mounted to the 1st backup.</li>
+<li><code>/mnt2/db2</code> will be mounted to the 2nd backup.</li>
+</ul>
+</div>
+
+<div style='float:left;width:20%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><div class="container">
+<div class="row">
+<div style="float:left;width:150px;height=140px; border-style:solid;border-color:#E5E4E2;border-radius:10px;padding:0px;position:relative;margin:0px;">
+<p>
+<a  class="example-image-link" href="../../attachment_files/blobstore/rockdb3.png" data-toggle="lightbox" data-title="Two storage arrays">
+<img src="../../attachment_files/blobstore/rockdb3.png" class="img-responsive img-rounded">
+</a>
+</p>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<pre><code class="language-xml">&lt;blob-store:rocksdb-blob-store id=&quot;myBlobStore&quot; paths=&quot;[/mnt1/db1,/mnt1/db2],[/mnt2/db1,/mnt2/db2]&quot;/&gt;
+</code></pre>
+
+<h1 id="performance-tuning">Performance Tuning</h1>
+
+<h2 id="persistent-data-store-tuning-parameters">Persistent Data Store Tuning Parameters</h2>
+
+<p>XAP uses the default DBOptions class <code>com.com.gigaspaces.blobstore.rocksdb.config.XAPDBOptions</code>.</p>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>A list of configuration properties can be found in  the <a href="https://github.com/facebook/rocksdb/blob/master/java/src/main/java/org/rocksdb/DBOptionsInterface.java" target="_blank" >org.rocksdb.DBOptionsInterface <i class='fa fa-external-link'></i></a> Java docs.</p>
+
+</div> 
+
+<table>
+<thead>
+<tr>
+<th align="left">Property</th>
+<th align="left">Description</th>
+<th align="left">Value</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">createIfMissing</td>
+<td align="left">Configure whether to create the database if it is missing. This value is always overriden with <code>true</code>.</td>
+<td align="left">true</td>
+</tr>
+
+<tr>
+<td align="left">maxBackgroundCompactions</td>
+<td align="left">Specifies the maximum number of concurrent background compaction jobs, submitted to the default LOW priority thread pool. <br /> If you&rsquo;re increasing this, also consider increasing the number of threads in the LOW priority thread pool</td>
+<td align="left">8</td>
+</tr>
+
+<tr>
+<td align="left">maxBackgroundFlushes</td>
+<td align="left">Specifies the maximum number of concurrent background flush jobs. <br />If you&rsquo;re increasing this, also consider increasing the number of threads in the HIGH priority thread pool.</td>
+<td align="left">8</td>
+</tr>
+
+<tr>
+<td align="left">maxOpenFiles</td>
+<td align="left">Number of open files that can be used by the database.  You may need to increase this if your database has a large working set. When the value is set to -1, files that are opened are always kept open.</td>
+<td align="left">-1</td>
+</tr>
+
+<tr>
+<td align="left">tableFormatConfig</td>
+<td align="left">Set the configuration for the table format. <br/> The default is BlockBasedTableConfig with <ul><li>noBlockCache = opposite of <code>useCache</code></li><li>blockCacheSize = <code>cacheSize</code></li><li>blockSize = <code>blockSize</code></li><li> filter = BloomFilter(10,false)</li><li>formatVersion = 0</li></ul>The highlighted values are taken from the <code>rocksdb-blob-store</code> namespace / <code>RocksDBBlobStoreConfigurer</code> if provided, otherwise the following defaults are used: <ul><li>useCache = true</li><li>cacheSize = 100MB</li><li>blockSize = 16KB</li></ul>If a custom tableFormatConfig is provided, the values from the namespace/configurer are ignored.</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="lsm-logic-and-memtables-tuning-parameters">LSM Logic and MemTables Tuning Parameters</h2>
+
+<p>Below are the values for the default class <code>com.com.gigaspaces.blobstore.rocksdb.config.XAPColumnFamilyOptions</code>.</p>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>A list of configuration properties can be found in  the <a href="https://github.com/facebook/rocksdb/blob/master/java/src/main/java/org/rocksdb/ColumnFamilyOptionsInterface.java">org.rocksdb.ColumnFamilyOptionsInterface</a> Java docs.</p>
+
+</div> 
+
+<table>
+<thead>
+<tr>
+<th align="left">Property</th>
+<th align="left">Description</th>
+<th align="left">Value</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">writeBufferSize</td>
+<td align="left">Amount of data to build up in memory (backed by an unsorted log on disk) <br/>before converting to a sorted on-disk file. Should be in bytes.</td>
+<td align="left">64 MB</td>
+</tr>
+
+<tr>
+<td align="left">levelZeroSlowdownWritesTrigger</td>
+<td align="left">Soft limit on number of level-0 files. XAP begins to slow down writes at this point. <br />A value &lt; 0 means that no writing slowdown is triggered by the number of files in level-0.</td>
+<td align="left">8</td>
+</tr>
+
+<tr>
+<td align="left">maxWriteBufferNumber</td>
+<td align="left">The maximum number of write buffers that are built up in memory.</td>
+<td align="left">4</td>
+</tr>
+
+<tr>
+<td align="left">targetFileSizeBase</td>
+<td align="left">The target file size for compaction, should be in bytes.</td>
+<td align="left">64 MB</td>
+</tr>
+
+<tr>
+<td align="left">softPendingCompactionBytesLimit</td>
+<td align="left">The soft limit to impose on compaction.</td>
+<td align="left">0</td>
+</tr>
+
+<tr>
+<td align="left">hardPendingCompactionBytesLimit</td>
+<td align="left">The hard limit to impose on compaction.</td>
+<td align="left">0</td>
+</tr>
+
+<tr>
+<td align="left">levelCompactionDynamicLevelBytes</td>
+<td align="left">If true, RocksDB will pick the target size of each level dynamically.</td>
+<td align="left">false</td>
+</tr>
+
+<tr>
+<td align="left">maxBytesForLevelBase</td>
+<td align="left">The upper limit of the total size of level-1 files in bytes.</td>
+<td align="left">512 MB</td>
+</tr>
+
+<tr>
+<td align="left">compressionPerLevel</td>
+<td align="left">Sets the compression policy for each level.</td>
+<td align="left">[NO_COMPRESSION, <br /> NO_COMPRESSION, <br/>SNAPPY_COMPRESSION]</td>
+</tr>
+
+<tr>
+<td align="left">mergeOperatorName</td>
+<td align="left">Sets the merge operator to be used for merging two merge operands of the same key.</td>
+<td align="left">put</td>
+</tr>
+
+<tr>
+<td align="left">fsync</td>
+<td align="left">By default, each write returns after the data is pushed into the operating system. The transfer from operating system memory to the underlying persistent storage happens asynchronously. When sync is configured to true, each write operation doesn&rsquo;t return until the data being written has been pushed all the way to persistent storage. <br/> This parameter should be set to true while storing data to file systems like ext3, which can lose files after a reboot. <br />If this property is set, the <code>fsync</code> that is passed to the <code>rocksdb-blob-store</code> namespace/<code>RocksDBBlobStoreConfigurer</code> (if any) is ignored.</td>
+<td align="left">false</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="examples">Examples</h2>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Namespace" style="padding:10px"><pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+xmlns:os-core=&quot;http://www.openspaces.org/schema/core&quot;
+xmlns:blob-store=&quot;http://www.openspaces.org/schema/rocksdb-blob-store&quot;
+xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+http://www.openspaces.org/schema/core http://www.openspaces.org/schema/12.3/core/openspaces-core.xsd
+http://www.openspaces.org/schema/rocksdb-blob-store http://www.openspaces.org/schema/12.3/rocksdb-blob-store/openspaces-rocksdb-blobstore.xsd&quot;&gt;
+
+&lt;bean id=&quot;dbOptions&quot; class=&quot;com.gigaspaces.blobstore.rocksdb.config.XAPDBOptions&quot;&gt;
+&lt;!-- This will override the default of 8 --&gt;
+&lt;property name=&quot;maxBackgroundCompactions&quot; value=&quot;4&quot; /&gt;
+&lt;property name=&quot;maxBackgroundFlushes&quot; value=&quot;4&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;dataColumnFamilyOptions&quot; class=&quot;com.gigaspaces.blobstore.rocksdb.config.XAPColumnFamilyOptions&quot;&gt;
+&lt;property name=&quot;maxBytesForLevelMultiplier&quot; value=&quot;20&quot;/&gt;
+&lt;/bean&gt;
+
+&lt;blob-store:rocksdb-blob-store id=&quot;myBlobStore&quot; fsync=&quot;false&quot;
+cache-size-mb=&quot;100&quot; block-size-kb=&quot;16&quot;
+db-options=&quot;dbOptions&quot; data-column-family-options=&quot;dataColumnFamilyOptions&quot;
+paths=&quot;[/tmp/rocksdb,/tmp/rocksdb2]&quot; mapping-dir=&quot;/tmp/mapping&quot;/&gt;
+
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot; &gt;
+&lt;os-core:blob-store-data-policy blob-store-handler=&quot;myBlobStore&quot;/&gt;
+&lt;/os-core:embedded-space&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot;/&gt;
+&lt;/beans&gt;
+</code></pre>
+</div>
+<div title="Code" style="padding:10px"><pre><code class="language-java">RocksDBBlobStoreConfigurer configurer = new RocksDBBlobStoreConfigurer()
+.setPaths(&quot;[/tmp/rocksdb,/tmp/rocksdb2]&quot;)
+.setMappingDir(&quot;/tmp/mapping&quot;)
+.setCacheSizeMB(100)
+.setBlockSizeKB(16)
+.setFsync(false);
+
+XAPDBOptions dbOptions = new XAPDBOptions();
+configurer.setDBOptions(dbOptions); // optional
+
+XAPColumnFamilyOptions dataColumnFamilyOptions = new XAPColumnFamilyOptions();
+configurer.setDataColumnFamilyOptions(dataColumnFamilyOptions); // optional
+
+RocksDBBlobStoreHandler rocksDBBlobStoreHandler = configurer.create();
+
+BlobStoreDataCachePolicy cachePolicy = new BlobStoreDataCachePolicy();
+cachePolicy.setBlobStoreHandler(rocksDBBlobStoreHandler);
+
+EmbeddedSpaceConfigurer embeddedSpaceConfigurer = new EmbeddedSpaceConfigurer(&quot;mySpace&quot;);
+embeddedSpaceConfigurer.cachePolicy(cachePolicy);
+
+gigaSpace = new GigaSpaceConfigurer(embeddedSpaceConfigurer.space()).gigaSpace();
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

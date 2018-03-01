@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Filtering  Data</h1>
+<hr>
+
+
+<p>In some cases, there can be data that should not be replicated between the sites but should still be replicated locally between the primary and the backup/mirror service. In this case using the replicate class level or object level decoration is irrelevant as there is a need to control the replication behavior only to the remote site. Since a replication channel to a gateway is like any other replication channel, therefore a custom <a href="../admin/cluster-replication-filters.html">Replication Filter</a> at the source space can be used to filter the relevant data from being sent to the target gateway.</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/WAN-replicationfilter.jpg" alt="WAN-replicationfilter.jpg" /></p>
+</div>
+
+
+
+
+
+<p>This filtering should be based on the replication target name in order to identify the correct replication filter is called for the outgoing replication to the gateway.</p>
+
+
+<div class='bs-callout bs-callout-success'><p>The output-filter can be used also to modify the replicated data before it is arriving the target site. When using a <code>SpaceDocument</code> the modified field must be a predefined field described with the document schema (fixed field).</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<h1 id="using-the-filter">Using the Filter</h1>
+
+<h3 id="filtering-objects">Filtering Objects</h3>
+
+<p>With the example below a replication filter is used with the source space (output-filter). The New-York space is configured not to replicate the Stock object type to London site. This Stock object type still being replicated to all other location replication targets (backup/mirror) and also to the remote Hong Kong gateway. The filtering can be determined also based on the content of the replicated object or any other custom business logic.</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  New York Space " style="padding:10px"><pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+xmlns:os-core=&quot;http://www.openspaces.org/schema/core&quot;
+xmlns:os-events=&quot;http://www.openspaces.org/schema/events&quot;
+xmlns:os-remoting=&quot;http://www.openspaces.org/schema/remoting&quot;
+xmlns:os-sla=&quot;http://www.openspaces.org/schema/sla&quot;
+xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+http://www.openspaces.org/schema/core http://www.openspaces.org/schema/12.3/core/openspaces-core.xsd
+http://www.openspaces.org/schema/events http://www.openspaces.org/schema/12.3/events/openspaces-events.xsd
+http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/12.3/remoting/openspaces-remoting.xsd
+http://www.openspaces.org/schema/sla http://www.openspaces.org/schema/12.3/sla/openspaces-sla.xsd
+http://www.openspaces.org/schema/core/gateway http://www.openspaces.org/schema/12.3/core/gateway/openspaces-gateway.xsd&quot;&gt;
+
+&lt;bean id=&quot;londonFilter&quot; class=&quot;com.gigaspaces.examples.gateway.LondonReplicationFilter&quot;/&gt;
+
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;myNYSpace&quot; gateway-targets=&quot;gatewayTargets&quot;&gt;
+&lt;os-core:space-replication-filter&gt;
+&lt;os-core:output-filter ref=&quot;londonFilter&quot;/&gt;
+&lt;/os-core:space-replication-filter&gt;
+&lt;/os-core:embedded-space&gt;
+
+&lt;os-gateway:targets id=&quot;gatewayTargets&quot; local-gateway-name=&quot;NEWYORK&quot;&gt;
+&lt;os-gateway:target name=&quot;LONDON&quot;/&gt;
+&lt;os-gateway:target name=&quot;HONGKONG&quot;/&gt;
+&lt;/os-gateway:targets&gt;
+
+&lt;/beans&gt;
+</code></pre>
+</div>
+<div title="  Replication Filter Implementation " style="padding:10px"><pre><code class="language-java">public class LondonReplicationFilter implements IReplicationFilter {
+
+public void init(IJSpace space, String paramUrl, ReplicationPolicy replicationPolicy) {
+}
+
+public void process(int direction, IReplicationFilterEntry replicationFilterEntry, String replicationTargetName) {
+if (replicationTargetName.equals(&quot;gateway:LONDON&quot;)) {
+if (replicationFilterEntry.getClassName().equals(Stock.class.getName())) {
+replicationFilterEntry.discard();
+}
+}
+}
+
+public void close() {
+}
+}
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<h3 id="filtering-space-events">Filtering Space Events</h3>
+
+<p>You can choose which Space events (Take, Lease Expiration etc) are replicated. In the example below we define a filter that prevents the <code>DISCARD</code> and <code>LEASE_EXPIRATION</code> events to be replicated:</p>
+
+<p><div class="easyui-tabs" plain="true" data-options=""><div title="Source Space" style="padding:10px"><pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+xmlns:os-core=&quot;http://www.openspaces.org/schema/core&quot; xmlns:os-events=&quot;http://www.openspaces.org/schema/events&quot;
+xmlns:tx=&quot;http://www.springframework.org/schema/tx&quot; xmlns:os-remoting=&quot;http://www.openspaces.org/schema/remoting&quot;
+xmlns:os-gateway=&quot;http://www.openspaces.org/schema/core/gateway&quot;
+xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+http://www.openspaces.org/schema/core http://www.openspaces.org/schema/12.3/core/openspaces-core.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
+http://www.openspaces.org/schema/core/gateway http://www.openspaces.org/schema/12.3/core/gateway/openspaces-gateway.xsd
+http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/remoting/openspaces-remoting.xsd&quot;&gt;
+
+&lt;context:component-scan base-package=&quot;com.gigaspaces.demo&quot; /&gt;
+
+&lt;!-- Enables the usage of @GigaSpaceContext annotation based injection. --&gt;
+&lt;os-core:giga-space-context /&gt;
+
+&lt;context:annotation-config /&gt;
+&lt;!--&lt;tx:annotation-driven transaction-manager=&quot;transactionManager&quot; /&gt;--&gt;
+
+&lt;os-core:distributed-tx-manager id=&quot;transactionManager&quot; /&gt;
+
+&lt;!-- Enable support for @Polling annotation --&gt;
+&lt;os-events:annotation-support /&gt;
+
+&lt;!-- Bean to filter the take operations --&gt;
+&lt;bean id=&quot;XPIFilter&quot; class=&quot;com.gigaspaces.demo.XPIReplicationFilter&quot;/&gt;
+
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;wanSpaceAgency&quot; gateway-targets=&quot;gatewayTargets&quot;&gt;    
+&lt;os-core:space-replication-filter&gt;
+&lt;os-core:output-filter ref=&quot;XPIFilter&quot;/&gt;
+&lt;/os-core:space-replication-filter&gt;
+&lt;/os-core:space&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot; tx-manager=&quot;transactionManager&quot; /&gt;
+
+&lt;os-gateway:targets id=&quot;gatewayTargets&quot; local-gateway-name=&quot;XPI&quot;&gt;
+&lt;os-gateway:target name=&quot;IE&quot; /&gt;
+&lt;/os-gateway:targets&gt;
+&lt;/beans&gt;
+</code></pre>
+</div>
+<div title="Replication Filter" style="padding:10px"><pre><code class="language-java">package com.gigaspaces.demo;
+
+import com.j_spaces.core.cluster.*;
+import com.j_spaces.core.*;
+
+public class XPIReplicationFilter implements IReplicationFilter {
+
+public void init(IJSpace space, String paramUrl, ReplicationPolicy replicationPolicy) {
+}
+
+public void process(int direction, IReplicationFilterEntry replicationFilterEntry, String replicationTargetName) {
+
+switch ( replicationFilterEntry.getOperationType() )
+{
+case TAKE: replicationFilterEntry.discard(); break;
+case DISCARD: replicationFilterEntry.discard(); break;
+case LEASE_EXPIRATION: replicationFilterEntry.discard(); break;
+}
+}
+
+public void close() {
+}
+}
+</code></pre>
+</div>
+</div>
+
+
+
+
+</p>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

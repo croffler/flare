@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Administration</h1>
+<hr>
+
+
+<p>Administration and monitoring XAP can be done using the following tools:</p>
+
+<ul>
+<li>Command-line Interface (CLI),</li>
+<li>GigaSpaces Management Center (Desktop UI),</li>
+<li>Administration API (Admin API),</li>
+<li>Web Management Console (Web-UI),</li>
+<li>REST Manager API</li>
+</ul>
+
+<p>When XAP is secured, the interaction with each is first done by supplying credentials to allow proper authentication.</p>
+
+<h1 id="command-line-interface">Command-line Interface</h1>
+
+<p>The command-line interface can be used for script automation (e.g. deploy, undeploy, list, etc.)
+It has both an interactive and non-interactive modes that allow secure login.
+The non-interactive mode can be used for script automation.
+<a href="command-line-interface-cli-security.html">Read more&hellip;</a></p>
+
+<h1 id="gigaspaces-management-center">GigaSpaces Management Center</h1>
+
+<p>The desktop user-interface can be used to monitor and manage the grid services and data.
+It can also be used to manage users and roles, assign permissions, manage security using the directory manager extension.
+<a href="../admin/gigaspaces-management-center-ui-security.html">Read more&hellip;</a></p>
+
+<h1 id="administration-api">Administration API</h1>
+
+<p>The Administration API has the full power to manage and monitor the grid components using a Java API.
+To allow the discovery of secured components, it must authenticate with each.
+Un-authenticated components will not be listed in the API.
+<a href="administration-and-monitoring-api-security.html">Read more&hellip;</a></p>
+
+<h1 id="web-management-console">Web Management Console</h1>
+
+<p>The Web-based user-interface can be used to monitor and manage the grid services and data.
+The Web-UI server <em>must</em> be configured to allow the authentication using the login screen.
+<a href="securing-the-web-ui.html">Read more&hellip;</a></p>
+
+<h1 id="rest-manager-api">REST Manager API</h1>
+
+<p>The REST server, an integrated component of the <a href="../admin/xap-manager.html">XAP Manager</a>,
+performs authentication and checks for sufficient privileges when executing RESTful operations.
+Being an HTTP protocol, you must explicitly enable or disable SSL.
+<a href="securing-the-REST-manager.html">Read more&hellip;</a></p>
+
+<h1 id="auditing">Auditing</h1>
+
+<p>Auditing can be done for authentication requests to secured services, and also for Space operations.
+<a href="./auditing.html">Read more&hellip;</a></p>
+
+<h1 id="java-security-policy">Java Security Policy</h1>
+
+<p>You can use the default settings of the <code>java.security.policy</code> property,
+or customize them to suit your application and environment needs.
+<a href="./java-security-policy-file.html">Read more&hellip;</a></p>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

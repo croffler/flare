@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Migrating from Java EE to XAP</h1>
+<hr>
+
+
+<p>From a design and implementation perspective, XAP shares a lot of patterns with Java Enterprise Edition ecosystem. This section provides a mapping to help migrate your existing JavaEE application to GigaSpaces XAP.</p>
+
+<h1 id="java-ee-versus-xap">Java EE versus XAP</h1>
+
+<table>
+<thead>
+<tr>
+<th align="left">Component</th>
+<th align="left">JEE</th>
+<th align="left">XAP</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">Persistency</td>
+<td align="left">JPA</td>
+<td align="left"><a href="/xap/12.2/dev-java/hibernate-space-persistency.html">Hibernate</a>, <a href="/xap/12.2/dev-java/jpa-api.html">JPA</a></td>
+</tr>
+
+<tr>
+<td align="left">Messaging</td>
+<td align="left">JMS,MDB</td>
+<td align="left"><a href="/xap/12.2/dev-java/messaging-support.html">JMS</a><br>Polling Container <a href="/xap/12.2/dev-java/">Java version | </a>
+<a href="/xap/12.2/dev-dotnet/">.Net version</a>
+
+<br>Notify Container <a href="/xap/12.2/dev-java/">Java version | </a>
+<a href="/xap/12.2/dev-dotnet/">.Net version</a>
+
+<br> <a href="/xap/12.2/dev-java/session-based-messaging-api.html">Native Messaging API</a>, MDB <i class='fa fa-star'></i>
+
+
+
+</td>
+</tr>
+
+<tr>
+<td align="left">Security</td>
+<td align="left">JAAS, SSL</td>
+<td align="left"><a href="/xap/12.2/security/spring-security-bridge.html">Spring Security</a>, <a href="/xap/12.2/security/securing-the-transport-layer-using-ssl.html">SSL</a></td>
+</tr>
+
+<tr>
+<td align="left">Web Session Management</td>
+<td align="left">HttpSession</td>
+<td align="left"><a href="/xap/12.2/dev-java/global-http-session-sharing-overview.html">Global HttpSession sharing</a></td>
+</tr>
+
+<tr>
+<td align="left">Transaction Management</td>
+<td align="left">JTA</td>
+<td align="left"><a href="/xap/12.2/dev-java/transaction-overview.html">Spring Transaction via Jini Transaction Manager</a></td>
+</tr>
+
+<tr>
+<td align="left">Data Access</td>
+<td align="left">JDBC , Session Bean (Stateless or Stateful), Entity Bean</td>
+<td align="left"><a href="/xap/12.2/dev-java/jdbc-driver.html">JDBC</a>, <a href="/xap/12.2/dev-java/the-gigaspace-interface-overview.html">Space</a>, <a href="/xap/12.2/dev-java/jpa-api.html">JPA</a> , Session Bean(Stateless or Stateful) <i class='fa fa-star'></i>
+
+
+
+, Entity Bean <i class='fa fa-star'></i>
+
+
+
+</td>
+</tr>
+
+<tr>
+<td align="left">Remoting</td>
+<td align="left">EJB, IIOP, RMI</td>
+<td align="left"><a href="/xap/12.2/dev-java/executor-based-remoting.html">Spring remoting over LRMI</a> , EJB <i class='fa fa-star'></i>
+
+
+
+</td>
+</tr>
+
+<tr>
+<td align="left">Web</td>
+<td align="left">Servlet, JSP</td>
+<td align="left"><a href="/xap/12.2/dev-java/web-application-overview.html">Servlet, JSP via Jetty</a></td>
+</tr>
+
+<tr>
+<td align="left">Packaging and deployment</td>
+<td align="left">EAR , war</td>
+<td align="left"><a href="/xap/12.2/dev-java/the-processing-unit-structure-and-configuration.html">jar</a>, <a href="/xap/12.2/dev-java/web-application-overview.html">war</a> , EAR <i class='fa fa-star'></i>
+
+
+
+</td>
+</tr>
+
+<tr>
+<td align="left">Contexts and Dependency Injection</td>
+<td align="left">JSR 299</td>
+<td align="left">Spring IOC</td>
+</tr>
+
+<tr>
+<td align="left">System Management</td>
+<td align="left">JMX</td>
+<td align="left"><a href="/xap/12.2/dev-java/snmp-connectivity-via-alert-logging-gateway.html">JMX</a> , <a href="/xap/12.2/dev-java/snmp-connectivity-via-alert-logging-gateway.html">SNMP</a>, <a href="/xap/12.2/dev-java/administration-and-monitoring-overview.html">Native Admin API</a></td>
+</tr>
+
+<tr>
+<td align="left">Java Naming and Directory Service</td>
+<td align="left">JNDI</td>
+<td align="left"><a href="./about-jini.html">Jini Lookup Service</a></td>
+</tr>
+</tbody>
+</table>
+
+<p><i class='fa fa-star'></i>
+
+
+
+Available via <a href="http://www.easybeans.net/xwiki/bin/view/Main/WebHome">EasyBeans</a>, <a href="http://openejb.apache.org">openejb</a>, <a href="http://docs.jboss.org/ejb3/embedded/embedded.html">embedded jboss</a> or <a href="http://embedded-glassfish.java.net">embedded-glassfish</a>.</p>
+
+<h1 id="messaging-concepts-patterns">Messaging Concepts &amp; Patterns</h1>
+
+<table>
+<thead>
+<tr>
+<th align="left">Functionality</th>
+<th align="left">JEE</th>
+<th align="left">XAP</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">Queue</td>
+<td align="left">JMS Queue</td>
+<td align="left">Polling Container <a href="/xap/12.2/dev-java/polling-container-overview.html">Java version | </a>
+<a href="/xap/12.2/dev-dotnet/polling-container-overview.html">.Net version</a>
+
+</td>
+</tr>
+
+<tr>
+<td align="left">Topic</td>
+<td align="left">JMS Topic</td>
+<td align="left">Notify Container  <a href="/xap/12.2/dev-java/notify-container-overview.html">Java version | </a>
+<a href="/xap/12.2/dev-dotnet/notify-container-overview.html">.Net version</a>
+
+</td>
+</tr>
+
+<tr>
+<td align="left">Unit of Order</td>
+<td align="left">JMS UOO</td>
+<td align="left"><a href="/sbp/unit-of-work.html">XAP Unit Of Work</a></td>
+</tr>
+
+<tr>
+<td align="left">Queue Partitioning</td>
+<td align="left">JMS Service Activator Aggregator Strategy</td>
+<td align="left"><a href="/sbp/parallel-queue-pattern.html">XAP Parallel Queue</a></td>
+</tr>
+
+<tr>
+<td align="left">Distributed Priority Queue</td>
+<td align="left">JMS Quality of Service</td>
+<td align="left"><a href="/sbp/priority-based-queue.html">XAP Priority Based Queue</a></td>
+</tr>
+
+<tr>
+<td align="left">Compute Grid</td>
+<td align="left">MDB + Custom code</td>
+<td align="left"><a href="/sbp/master-worker-pattern.html">XAP Master-Worker</a></td>
+</tr>
+</tbody>
+</table>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

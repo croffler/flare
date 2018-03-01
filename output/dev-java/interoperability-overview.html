@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Platform Interoperability</h1>
+<hr>
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<p>Some of the features listed on this page are not part of the open-source edition, and are only available in the licensed editions (starting with XAP Premium).</p>
+</div>
+
+
+
+
+
+
+
+
+<p>XAP supports interoperability, which is the ability for organizations whose projects include a combination of Java, .NET and other platforms to communicate and access each other easily and efficiently, while also maintaining the benefits of the XAP scale-out application server:</p>
+
+<ul>
+<li><strong>Transparency</strong>: Use your native API in the Space transparently with minimum changes to existing assets. Objects are stored in the Space in the same manner regardless of the platform they are written from. For example, an object can be written to the space from a Java service, and a .NET service can receive the notification.</li>
+<li><strong>Performance</strong>: Communicate between platforms directly through the Space, without the need for adapters or XML translation.</li>
+<li><strong>SOA</strong>: All applications communicate using the Space, allowing each of them to exist as a loosely-coupled service.</li>
+</ul>
+
+<p><img src="../../attachment_files/interop.jpg" alt="interop.png" /></p>
+
+<p>To work with XAP interoperability, classes from the different platforms should meet the following criteria:</p>
+
+<ul>
+<li>The <strong>same fully qualified name</strong> (i.e. including package/namespace).</li>
+<li>The <strong>same hierarchy</strong> (i.e. same base/superclass structure).</li>
+<li>The <strong>same properties with the same names and matching types</strong>.</li>
+</ul>
+
+<p><div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For information about XAP.NET, refer to the <a href="../dev-dotnet/interoperability.html">interoperability</a> section in the XAP.NET guide.</p>
+
+</div> </p>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

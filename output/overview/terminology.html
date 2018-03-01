@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Terminology</h1>
+<hr>
+
+
+<h1 id="basic-components">Basic Components</h1>
+
+<span id="Space"></span>
+
+<h2 id="space">Space</h2>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_space.gif" alt="term_space.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>The GigaSpaces cache instance that holds data objects in memory.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<span id="Execute-Read-Write-Take-and-Notify"></span>
+
+<h2 id="execute-read-write-take-and-notify">Execute, Read, Write, Take and Notify</h2>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_verbs.jpg" alt="term_verbs.jpg" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>A set of methods used to read, write, take, and register for notification on objects that are stored in the space. Execute allows sending Tasks to be executed within the space. Read and Take criteria can be specified via a query or a template (an example object).</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<span id="Service"></span>
+
+<h2 id="service-bean">Service Bean</h2>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_service_bean.gif" alt="term_service_bean.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>An application component that interacts with the space (using the read, write, take and notify operations), and implements a certain functionality.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<span id="Processing"></span>
+
+<h1 id="processing-unit">Processing Unit</h1>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_empty_pu.gif" alt="term_empty_pu.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>A combination of service beans and/or an embedded space instance. This is the fundamental unit of deployment in GigaSpaces XAP. The Processing Unit itself runs within a <a href="#processing-unit-container">Processing Unit Container</a>, and is typically deployed onto the <a href="#service-grid">Service Grid</a>. Once a Processing Unit is deployed, a <strong>Processing Unit instance</strong> is the actual runtime entity.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<h2 id="processing-unit-configured-with-an-embedded-space">Processing Unit configured with an embedded space</h2>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_pu_with_space.gif" alt="term_pu_with_space.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>A deployable package which instantiates an embedded space instance, also called a data grid instance. A set of embedded space instances that run within the processing units typically form a <a href="#Data Grid">Data Grid</a>.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<h2 id="processing-unit-configured-with-one-or-more-services">Processing Unit configured with one or more services</h2>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_pu_with_bean.gif" alt="term_pu_with_bean.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>A deployable package containing one or more services. In the GigaSpaces context, it usually acts as a client that interacts with other Processing Units by utilizing the messaging capabilities of the space.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<h2 id="processing-unit-configured-with-embedded-space-and-embedded-services">Processing Unit configured with embedded space and embedded services</h2>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_pu_with_space_and_bean.gif" alt="term_pu_with_space_and_bean.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>A deployable, independent, scalable unit, which is the building block of <a href="./space-based-architecture.html">Space-Based Architecture</a>.
+Client application (which can also be other processing units) write objects to the space, and the processing unit which contains this space consumes these objects or is notified about them and triggers a related services.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<h1 id="data-grid">Data Grid</h1>
+
+<span id="Data"></span>
+
+<h2 id="in-memory-data-grid-imdg-or-enterprise-data-grid-edg">In Memory Data Grid - IMDG, or Enterprise Data Grid - EDG</h2>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_populated_data_grid.gif" alt="term_populated_data_grid.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>A set of space instances, typically running within their respective processing unit instances.
+The space instances are connected to each other to form a space cluster.
+The relations between the spaces define the <a href="#Data Grid Topology">Data Grid Topology</a>.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<span id="Data"></span>
+
+<h2 id="data-grid-topologies">Data Grid Topologies</h2>
+
+<span id="Primary"></span>
+
+<h3 id="primary-backup-data-grid">Primary Backup Data Grid</h3>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_primary_backup_text_data_grid.gif" alt="term_primary_backup_text_data_grid.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>A Data Grid with a primary instance and one or more backup instances.
+Destructive operations (write, update and take) are applied to the primary instance, and are replicated to the backup instance either synchronously or asynchronously.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<span id="Partitioned"></span>
+
+<h3 id="partitioned-data-grid">Partitioned Data Grid</h3>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_partitioned_data_grid.gif" alt="term_partitioned_data_grid.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>Each Data Grid instance (partition) holds a different subset of the objects in the Data Grid.
+When the objects are written to this Data Grid, they are routed to the proper partition, according to a predefined attribute in the object that acts as the <a href="#Routing">routing</a> index.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<span id="Routing"></span>
+
+<h3 id="routing">Routing</h3>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_routing.gif" alt="term_routing.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>The mechanism that is in charge of routing the objects into and out of the corresponding partitions.
+The routing is based on a designated attribute inside the objects that are written to the space, and is termed <em>Routing Index</em>.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<span id="Primary"></span>
+
+<h3 id="primary-backup-partitioned-data-grid">Primary Backup Partitioned Data Grid</h3>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_partitioned_primary_backup_data_grid.gif" alt="term_partitioned_primary_backup_data_grid.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>A <a href="#Partitioned Data Grid">partitioned Data Grid</a>, with one or more <a href="#Primary Backup Data Grid">backup</a> instances for each partition. Each of the Data Grid instances (partitions) holds a different subset of the objects in the Data Grid, and replicates this subset to its backup instance/s.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For details about scaling a running space cluster <strong>in runtime</strong>, refer to the <a href="/xap/12.2/dev-java/elastic-processing-unit-overview.html">Elastic Processing Unit</a> section.</p>
+
+</div> 
+
+<h1 id="runtime-components">Runtime Components</h1>
+
+<h2 id="processing-unit-container">Processing Unit Container</h2>
+
+<span id="Processing"></span>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_puc.gif" alt="term_puc.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>A container that hosts a <a href="#Processing Unit">Processing Unit</a>.
+The Processing Unit can run only inside a hosting Processing Unit Container.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<h2 id="types-of-processing-unit-containers">Types of Processing Unit Containers</h2>
+
+<h3 id="integrated-processing-unit-container">Integrated Processing Unit Container</h3>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_ipuc.gif" alt="term_ipuc.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>A container that runs the Processing Unit inside an IDE (e.g. IntelliJ IDEA, Eclipse).</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<span id="SGPUC"></span>
+
+<h3 id="service-grid-processing-unit-container-sla-driven-container">Service Grid Processing Unit Container (SLA Driven Container)</h3>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_gscnet.gif" alt="term_gscnet.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>A Processing Unit Container which runs within a <a href="#GSC">Grid Service Container</a>.
+It enables running the processing unit within a <a href="#service-grid">service grid</a>, which provides self-healing and SLA capabilities to components deployed on it.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<span id="Service"></span>
+
+<h3 id="service-grid">Service Grid</h3>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_empty_service_grid.gif" alt="term_empty_service_grid.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>A set of <a href="#gsc">GigaSpaces Containers (GSC)</a> managed by a <a href="#gsm">GigaSpaces Manager</a>.
+The containers host various deployments of <a href="#Processing Unit">Processing Units</a> and <a href="#Data Grid">Data Grids</a>.
+Each container can be run on a separate physical machine.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<span id="GSC"></span>
+
+<h3 id="gigaspaces-container-gsc">GigaSpaces Container (GSC)</h3>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_gsc.jpg" alt="term_gsc.jpg" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>A <a href="#service-grid">Service Grid</a> component which hosts <a href="#processing-unit">Processing Unit</a> instances.
+A machine can run one or more <a href="#gsc">GSC</a> processes. Each GSC communicates with a manager component <a href="#gsm">GSM</a>. The GSC receives requests to start/stop a processing unit instance, and sends information about the machine which runs it (OS, processor architecture, current memory and CPU stats), the software installed on it and the status of processing unit instances currently running on it.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<span id="GSM"></span>
+
+<h3 id="gigaspaces-manager-gsm">GigaSpaces Manager (GSM)</h3>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_gsm.gif" alt="term_gsm.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>The <a href="#gsm">GSM</a> is a <a href="#service-grid">Service Grid</a> component which manages a set of <a href="#gsc">GigaSpaces Containers (GSC)</a>.
+A GSM has an API for deploying/un deploying processing units. When a GSM is instructed to deploy a Processing Unit, it finds an appropriate, available GSC and tells that GSC to run an instance of that processing unit. It then continuously monitors that processing unit instance to verify that it&rsquo;s alive, and that the SLA is not breached.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+<span id="Management"></span>
+
+<h1 id="management-component">Management Component</h1>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p><img src="../../attachment_files/term_management_ui.gif" alt="term_management_ui.gif" /></p>
+</div>
+
+<div style='float:left;width:70%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><p>The GigaSpaces Management Center, also known as the GigaSpaces UI or GS-UI.
+A monitoring, management and deployment console.
+Enables the user to view and interact with the runtime components running in the network.</p>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Queue Provider</h1>
+<hr>
+
+
+<p>XAP&rsquo;s queue provider is equivalent to the Mule <a href="https://docs.mulesoft.com/">VM transport</a> and is used for internal communication between services managed by Mule based on the Space. By storing internal Mule messages in the Space using a virtualized queue, inter-service communication becomes highly available and fault-tolerant (in a primary-backup topology).</p>
+
+<p>When working with Mule and the OpenSpaces Mule integration, each Mule instance can participate in a Space cluster by starting an embedded Space which is a cluster member within the cluster. In this scenario, the queues are actually stored only in the relevant cluster member. In a primary-backup topology, this means that the queue content (the relevant messages that are passed between services) are backed up to the relevant cluster backup member.</p>
+
+<p>In this case, when the primary instance fails, the backup takes over and become primary, allowing services to continue and process messages without losing any data.</p>
+
+
+<div class='bs-callout bs-callout-warning'><p>In such a scenario, the backup services probably shouldn&rsquo;t run at all and should start processing only in case of failover. In order to configure the SEDA services to be aware of the current space state of the cluster member they are working against, see the <a href="./mule-seda-model.html">Mule SEDA Model</a> section.</p>
+</div>
+
+
+
+
+
+
+
+
+<p>In order to use the OpenSpaces queue provider, the following namespaces should be defined:</p>
+
+<pre><code class="language-xml">&lt;mule xmlns=&quot;
+...
+xmlns:os-queue=http://www.openspaces.org/schema/mule/os-queue
+
+xsi:schemaLocation=&quot;...
+http://www.openspaces.org/schema/mule/os-queue http://www.openspaces.org/schema/12.3/mule/3.7.0/mule-os-queue.xsd&quot;&gt;
+</code></pre>
+
+<h1 id="connector">Connector</h1>
+
+<p>The OpenSpaces queue connector is used to define the Space this queue transport works against. It uses OpenSpaces <code>GigaSpace</code> bean in order to interact with the Space. Here is an example of how it can be defined:</p>
+
+<pre><code class="language-xml">&lt;spring:beans&gt;
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;/&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot; /&gt;
+&lt;/spring:beans&gt;
+&lt;os-queue:connector name=&quot;queueConnector&quot; giga-space=&quot;gigaSpace&quot;  fifo=&quot;false&quot;  persistent=&quot;false&quot; /&gt;
+</code></pre>
+
+<p>The <code>giga-space</code> attribute is optional and is used if only one <code>GigaSpace</code> bean is defined in the Spring application context. The <code>fifo</code> flag defines whether the messages works in a FIFO mode or not. The <code>persistent</code> flag defines whether the messages are backed up to an external data source (if configured) using the Space.</p>
+
+
+<div class='bs-callout bs-callout-success'><p><strong>All objects that end up being written to the space must be Serializable objects</strong>
+For any adapters that wraps a non-Serializable object such as JMS , EMail, Servlet and anything that uses Streams make sure you use inbound transformer before serialization.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<h1 id="inbound-component">Inbound Component</h1>
+
+<p>The OpenSpaces queue inbound component is very simple once the queue connector is set. Here is an example:</p>
+
+<pre><code class="language-xml">&lt;model&gt;
+&lt;service name=&quot;Appender1&quot;&gt;
+
+&lt;inbound-router&gt;
+&lt;os-queue:inbound-endpoint path=&quot;test1&quot;/&gt;
+&lt;/inbound-router&gt;
+
+&lt;!-- outbound transport ... --&gt;
+&lt;/service&gt;
+&lt;/model&gt;
+</code></pre>
+
+<h1 id="outbound-component">Outbound Component</h1>
+
+<p>The OpenSpaces queue outbound component is very simple to configure once the queue connector is set. Here is an example:</p>
+
+<pre><code class="language-xml">&lt;model&gt;
+&lt;service name=&quot;Appender1&quot;&gt;
+
+&lt;!-- inbound transport ... --&gt;
+
+&lt;outbound-router&gt;
+&lt;outbound-pass-through-router&gt;
+&lt;os-queue:outbound-endpoint path=&quot;test2&quot;/&gt;
+&lt;/outbound-pass-through-router&gt;
+&lt;/outbound-router&gt;
+&lt;/service&gt;
+&lt;/model&gt;
+</code></pre>
+
+<h1 id="mule-messaging-styles-support">Mule Messaging Styles Support</h1>
+
+<p>The queue supports the mule messaging styles - request-response and one-way.
+The messaging style can be configured on the endpoints in the following way:</p>
+
+<pre><code class="language-xml">&lt;model&gt;
+&lt;service name=&quot;Appender1&quot;&gt;
+&lt;!-- inbound transport ... --&gt;
+&lt;outbound-router&gt;
+&lt;outbound-pass-through-router&gt;
+&lt;os-queue:outbound-endpoint path=&quot;test2&quot; exchange-pattern=&quot;request-response&quot;/&gt;
+&lt;/outbound-pass-through-router&gt;
+&lt;/outbound-router&gt;
+&lt;/service&gt;
+&lt;/model&gt;
+</code></pre>
+
+<p>By default the exchange-pattern is set to request-response.</p>
+
+<p>For further information see <a href="https://developer.mulesoft.com/" target="_blank" >Mulesoft <i class='fa fa-external-link'></i></a>.</p>
+
+<h1 id="transaction-support">Transaction Support</h1>
+
+<p>Operations performed on the Space when working with a virtualized queue are all performed using the <code>GigaSpace</code> bean. The <code>GigaSpace</code> bean supports <a href="./the-gigaspace-interface-overview.html#OpenSpacesCoreComponent-GigaSpace-DeclarativeTransactions">declarative transactions</a> when working with Spring transaction managers. Mule can be configured to work with Spring transaction managers as due to its built-in transaction management strategy, which allows you to use OpenSpaces with <a href="./transaction-overview.html">different transaction managers</a>, including XA.</p>
+
+<p>Here is an example of how to configure working with queues using the Distributed Transaction Manager:</p>
+
+<pre><code class="language-xml">&lt;spring:beans&gt;
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;/&gt;
+
+&lt;os-core:distributed-tx-manager id=&quot;transactionManager&quot; /&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot; tx-manager=&quot;transactionManager&quot;/&gt;
+
+&lt;spring:bean id=&quot;transactionFactory&quot;
+class=&quot;org.mule.extras.spring.transaction.SpringTransactionFactory&quot;&gt;
+&lt;spring:property name=&quot;manager&quot;&gt;
+&lt;spring:ref bean=&quot;transactionManager&quot;/&gt;
+&lt;/spring:property&gt;
+&lt;/spring:bean&gt;
+
+&lt;/spring:beans&gt;
+
+&lt;model&gt;
+&lt;service name=&quot;Appender1&quot;&gt;
+
+&lt;!-- inbound transport ... --&gt;
+
+&lt;outbound-router&gt;
+&lt;outbound-pass-through-router&gt;
+&lt;os-queue:outbound-endpoint path=&quot;test2&quot;/&gt;
+&lt;/outbound-pass-through-router&gt;
+&lt;/outbound-router&gt;
+&lt;/service&gt;
+&lt;/model&gt;
+</code></pre>
+
+<p>The above example defines a Mule <code>transactionFactory</code>, which is used to handle transactions within Mule. Since the <code>giga-space</code> bean is aware of it, any operations performed on it using the <code>os-queue</code> result in joining an existing transaction if one is in progress.</p>
+
+<h1 id="full-example">Full Example</h1>
+
+<p>The example below will uses two components: <code>Appender1</code> and <code>Appender2</code>. The 2 services that wrap the components use the OpenSpaces queue transport as both the inbound and outbound transports.</p>
+
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;mule xmlns=&quot;http://www.mulesoft.org/schema/mule/core&quot;
+xmlns:os-events=&quot;http://www.openspaces.org/schema/events&quot;
+xmlns:os-core=&quot;http://www.openspaces.org/schema/core&quot;
+xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+xmlns:spring=&quot;http://www.springframework.org/schema/beans&quot;
+xmlns:os-queue=&quot;http://www.openspaces.org/schema/mule/os-queue&quot;
+xmlns:stdio=&quot;http://www.mulesoft.org/schema/mule/stdio&quot;
+xsi:schemaLocation=&quot;http://www.openspaces.org/schema/core http://www.openspaces.org/schema/12.3/core/openspaces-core.xsd
+http://www.openspaces.org/schema/events http://www.openspaces.org/schema/12.3/events/openspaces-events.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.1/mule.xsd
+http://www.mulesoft.org/schema/mule/stdio http://www.mulesoft.org/schema/mule/stdio/3.1/mule-stdio.xsd
+http://www.openspaces.org/schema/mule/os-queue http://www.openspaces.org/schema/12.3/mule/3.1/mule-os-queue.xsd&quot;&gt;
+
+&lt;spring:beans&gt;
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;  lookup-groups=&quot;${user.name}&quot;/&gt;
+
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot; /&gt;
+&lt;/spring:beans&gt;
+
+&lt;!-- this connector must be declared ,in order to inject the  Spring appliction context --&gt;
+&lt;os-queue:connector name=&quot;queueConnector&quot; giga-space=&quot;gigaSpace&quot;   /&gt;
+
+&lt;model name=&quot;helloSample&quot;&gt;
+
+&lt;service name=&quot;Appender1&quot;&gt;
+
+&lt;inbound-router&gt;
+&lt;os-queue:inbound-endpoint path=&quot;test1&quot;/&gt;
+&lt;/inbound-router&gt;
+
+&lt;component class=&quot;test.EchoeComponentAppender&quot;/&gt;
+
+&lt;outbound-router&gt;
+&lt;outbound-pass-through-router&gt;
+&lt;os-queue:outbound-endpoint path=&quot;test2&quot;/&gt;
+&lt;/outbound-pass-through-router&gt;
+&lt;/outbound-router&gt;
+
+&lt;/service&gt;
+
+&lt;service name=&quot;Appender2&quot;&gt;
+&lt;inbound-router&gt;
+&lt;os-queue:inbound-endpoint path=&quot;test2&quot;/&gt;
+&lt;/inbound-router&gt;
+
+&lt;component class=&quot;test.EchoeComponentAppender&quot;/&gt;
+
+&lt;outbound-router&gt;
+&lt;outbound-pass-through-router&gt;
+&lt;os-queue:outbound-endpoint path=&quot;test3&quot;/&gt;
+&lt;/outbound-pass-through-router&gt;
+&lt;/outbound-router&gt;
+&lt;/service&gt;
+&lt;/model&gt;
+&lt;/mule&gt;
+</code></pre>
+
+<p>In order to complete the example, the <code>MuleClient</code> can be used to interact with the services.</p>
+
+<pre><code class="language-java">muleClient.dispatch(&quot;os-queue://test1&quot;, &quot;testme&quot;, null);
+
+MuleMessage message = muleClient.request(&quot;os-queue://test3&quot;, 5000);
+</code></pre>
+
+<p>The above code dispatches a message to a virtualized queue named <code>test1</code>. As a result, the <code>Appender1</code> service receives the message, processes it, and passes it to a virtualized queue named <code>test2</code>. In turn, the <code>Appender2</code> service receives the message, processes it, and sends it to a virtualized queue named <code>test3</code>. <code>muleClient</code> is used to receive a message from <code>test3</code> with a timeout of 5 seconds. This results in any receiving processed messages <code>Appender2</code> produces.</p>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Web Management Console</h1>
+<hr>
+
+
+<h1 id="enabling-security">Enabling Security</h1>
+
+<p>The Web Management Console (Web-UI) allows for a secured access when the security <code>enabled</code> property is set.
+This property should be configured using <code>EXT_JAVA_OPTIONS</code> in <code>setenv</code> script and is applied to all XAP <a href="securing-the-grid-services.html">Grid Components</a>.</p>
+
+<p>The property:</p>
+
+<pre><code class="language-java">-Dcom.gs.security.enabled=true
+</code></pre>
+
+<h1 id="security-properties-file">Security Properties File</h1>
+
+<p>The security properties file is used to configure the <code>SecurityManager</code>, that is responsible for the authentication and authorization process.
+The <code>security.properties</code> file is common to all components and is usually located under <code>&lt;XAP root&gt;/config/security/security.properties</code>.</p>
+
+<p>To only affect the Web-UI, use the <code>webui-security.properties</code> instead.</p>
+
+<p>The configuration file can be located anywhere in the classpath or in the classpath under <code>config/security</code>.</p>
+
+<p>Alternatively, a system property can be set to indicate the location of the properties file:</p>
+
+<pre><code class="language-java">-Dcom.gs.security.properties-file = my-security.properties
+</code></pre>
+
+<p>By setting <code>-Dcom.gs.security.properties-file</code> the property file will be located as a direct path (e.g. <code>~/home/user/my-security.properties</code>),
+a resource (e.g. &ldquo;my-security.properties&rdquo;) in the classpath or in the classpath under <code>config/security</code>.</p>
+
+<h1 id="custom-credentials">Custom Credentials</h1>
+
+<p>An authentication mechanism might require a different set of actions to be taken on the provided credentials (username/password).
+For that a custom extension can be provided - see <a href="custom-authentication.html">Credentials Provider</a> for more information.</p>
+
+<p>This credentials provider is configured as arguments to the command line of the Web-UI.
+Use <code>-user-details-provider</code> for the provider class name.
+Use <code>-user-details-properties</code> to provide additional properties. This argument is optional.</p>
+
+<p>Run the <code>gs-webui</code> script with these parameters:</p>
+
+<pre><code class="language-bash">gs-webui(.sh/bat) -user-details-provider com.demo.CustomCredentialsProvider -user-details-properties custom-security.server-address=myServer
+</code></pre>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Setting up your IDE</h1>
+<hr>
+
+
+<p> <span id="0"></span>
+Follow these steps to prepare your development environment:</p>
+
+<ul>
+<li><strong>Ensure you have a JDK installed</strong> - you will need version 7 or higher, latest Java 8 is recommended.</li>
+</ul>
+
+<h4 id="checking-your-jdk-version">Checking your JDK version</h4>
+
+<p>To check your installed Java version:</p>
+
+<ol>
+<li>Open a command line window.</li>
+<li>Run <code>set JAVA_HOME</code></li>
+<li>A response similar to this suggests you have a JDK installed:</li>
+</ol>
+
+<pre><code class="language-java">JAVA_HOME=C:\jdk1.6
+</code></pre>
+
+<p>To check the JDK version, run <code>%JAVA_HOME%\bin\java \-version</code>. A response like this from <code>Java</code> indicates you have a valid JDK installed:</p>
+
+<pre><code class="language-java">java version &quot;1.6.0_23&quot;
+Java(TM) SE Runtime Environment (build 1.6.0_23-b05)
+Java HotSpot(TM) Client VM (build 11.0-b16, mixed mode, sharing)
+</code></pre>
+
+<p>If your installed JDK version is lower then 1.5 or none is installed, see below on how to install one.</p>
+
+<h4 id="installing-a-proper-jdk-java-development-kit">Installing a proper JDK (Java Development Kit)</h4>
+
+<ul>
+<li>To install JDK 1.6, download and install <a href="http://java.sun.com/javase/downloads/index.jsp"><strong>JDK 6 Update X</strong></a></li>
+</ul>
+
+<span id="1"></span>
+
+<ul>
+<li><p><strong>Download and unzip the latest XAP release</strong> from the <a href="http://www.gigaspaces.com/LatestProductVersion">downloads page</a>.
+<span id="2"></span></p></li>
+
+<li><p><strong>Install a Java IDE</strong>: If you don&rsquo;t have an IDE installed, you can <a href="http://www.eclipse.org/downloads">download and unzip the Eclipse IDE for Java Developers</a>, or the <a href="http://www.jetbrains.com/idea/download/index.html">IntelliJ IDEA</a> IDE (we recommend the Ultimate Edition because of its excellent Spring framework support).
+If you&rsquo;re using Eclipse, it is also recommended to install the <a href="http://www.springsource.com/developer/sts">Spring Tool Suite plugin for Eclipse</a>.</p></li>
+</ul>
+
+<h1 id="steps-to-run-the-application-inside-eclipse-ide">Steps to run the application inside Eclipse IDE</h1>
+
+<ol>
+<li>Start Eclipse. A <strong>Workspace Launcher Dialog</strong> appears.</li>
+<li>Write a new workspace name or select one of your existing workspaces, and click the <strong>OK</strong> button.</li>
+<li>To import the project, select <strong>File &gt; Import &hellip;</strong> to open the import dialog</li>
+<li>Select <strong>Existing projects into workspace* and click *Next</strong> to open the import project dialog</li>
+<li>In the <strong>Select root directory* field click the *Browse</strong> button to open the browse dialog</li>
+<li>Select the folder <code>/examples/helloworld</code> and click <strong>OK</strong></li>
+<li>Make sure all 3 projects are selected: <strong>hello-common</strong>, <strong>hello-processor</strong> and <strong>hello-feeder</strong></li>
+<li>Click <strong>Finish</strong></li>
+
+<li><p>Create a new Eclipse environment variable called <strong>GS_HOME</strong>, and point it to your GigaSpaces installation Root folder</p></li>
+
+<li><p>Right Click on the <strong>hello-common</strong> project in the <strong>Package Explorer tab</strong> to open the <em>context menu</em></p></li>
+
+<li><p>Select <strong>Build Path &gt; Configure Build Path&hellip;</strong> to open the <em>Java Build Path dialog</em></p></li>
+
+<li><p>Select the <strong>Libraries tab* and click the *Add Variable&hellip;</strong> button to open the <em>New Variable Classpath Entry dialog</em></p></li>
+
+<li><p>Click the <strong>Configure Variables&hellip;</strong> button to open the <em>Classpath Variables dialog</em></p></li>
+
+<li><p>Click the <strong>New&hellip;</strong> button to open the <em>New Variable Entry</em> dialog</p></li>
+
+<li><p>In the <strong>Name</strong> field write <code>GS_HOME</code> to name the variable</p></li>
+
+<li><p>Click the <strong>Folder&hellip;</strong> button and browse to <strong>your GigaSpaces installation root folder</strong></p></li>
+
+<li><p>Select your <strong>GigaSpaces installation root folder</strong> and click <strong>OK</strong></p></li>
+
+<li><p>Click <strong>OK</strong> and <strong>OK</strong> again</p></li>
+
+<li><p>Click <strong>Yes</strong> to do full rebuild</p></li>
+
+<li><p>Close remaining dialogs</p></li>
+</ol>
+
+<h1 id="classpath">Classpath</h1>
+
+<p>XAP libraries are located under <code>XAP_HOME/lib</code>. There are three sub directories:</p>
+
+<ul>
+<li><code>lib/required</code> - jar files that are required for any GigaSpaces application.</li>
+<li><code>lib/optional</code> - jar files which enable additional capabilities, such as servlet api.</li>
+<li><code>lib/platform</code> - jar files which are used by the XAP platform only.</li>
+</ul>
+
+<h2 id="compilation">Compilation</h2>
+
+<p>In order to compile and run XAP applications, all the <code>jar</code> files under the <code>XAP_HOME/lib/required</code> directory should be included in your compile and run time classpaths. Additional jar files which you may need for development are located at <code>XAP_HOME/lib/optional</code>.</p>
+
+<h2 id="runtime-processing-unit">Runtime - Processing Unit</h2>
+
+<p>When an application is deployed as processing unit, there is no need to add XAP specific jar files to the processing unit classpath. If such are added under the processing unit&rsquo;s <code>lib</code> directory, the system will remove those jar files and will replace those with the systems jars for compatibility.</p>
+
+<h2 id="runtime-standalone">Runtime - Standalone</h2>
+
+<p>When running a standalone client which accesses XAP, please ensure that all the jars located under the <code>XAP_HOME/lib/required</code> directory are part of the JVM&rsquo;s classpath. This also holds true for remote Space clients which are used from another JVM (such as a standalone web container). In case your client is a JEE web application that is not running within the XAP runtime environment, or more specifically a GSC, you will have to include these jars in your application&rsquo;s <code>WEB-INF/lib</code> directory.</p>
+
+<h1 id="maven">Maven</h1>
+
+<p>XAP is Maven-friendly - it is built using maven and designed to be easily used by developers constructing XAP applications.</p>
+
+<p>The main dependency required to use XAP is <code>xap-openspaces</code></p>
+
+<pre><code class="language-xml"> &lt;dependency&gt;
+&lt;groupId&gt;org.gigaspaces&lt;/groupId&gt;
+&lt;artifactId&gt;xap-openspaces&lt;/artifactId&gt;
+&lt;version&gt;12.3.0-m18&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<p>Since XAP artifacts are currently not published in Maven Central Repo, you&rsquo;ll also need to configure a repository:</p>
+
+<pre><code class="language-xml"> &lt;repository&gt;
+&lt;id&gt;org.openspaces&lt;/id&gt;
+&lt;url&gt;http://maven-repository.openspaces.org&lt;/url&gt;
+&lt;/repository&gt;
+</code></pre>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

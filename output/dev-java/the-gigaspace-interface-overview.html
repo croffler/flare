@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >The Space Interface</h1>
+<hr>
+
+
+<p>A Space is a logical in-memory service, which can store entries of information. An entry is a domain object; In Java, an entry can be as simple a POJO or a SpaceDocument.</p>
+
+<p>When a client connects to a Space, a proxy is created that holds a connection, which implements the space API. All client interaction is performed through this proxy.</p>
+
+<p>The Space is accessed via a programmatic interface that supports the following main functions:</p>
+
+<ul>
+<li>Write - the semantics of writing a new entry of information to the Space.</li>
+<li>Read - read the contents of a stored entry into the client side.</li>
+<li>Take - get the value from the Space and delete its content.</li>
+<li>Notify - alert when the contents of an entry of interest have registered changes.</li>
+</ul>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For more information about Spaces, refer to <a href="./the-space-operations.html">The Space Operations</a>.</p>
+
+</div> 
+
+<h1 id="embedded-space">Embedded Space</h1>
+
+<p>A client communicating with a an embedded Space performs all its operations via local connection. There is no network overhead when using this approach.</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/embedded-space.jpg" alt="embedded-space.jpg" /></p>
+</div>
+
+
+
+
+
+<p>The following is an example of how to create an embedded Space. The <code>EmbeddedSpaceConfigurer</code> is used to configure the Space URL:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="Code" style="padding:10px"><pre><code class="language-java">GigaSpace gigaSpace = new GigaSpaceConfigurer(new EmbeddedSpaceConfigurer(&quot;mySpace&quot;)).gigaSpace();
+</code></pre>
+</div>
+
+<div title="Namespace" style="padding:10px"><pre><code class="language-xml">&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;/&gt;
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot;/&gt;
+</code></pre>
+</div>
+<div title="  Plain XML " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.EmbeddedSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;gigaSpace&quot; class=&quot;org.openspaces.core.GigaSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>The Embedded space can be used in a distributed architecture such as the replicated or partitioned clustered space:</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/replicated-space1.jpg" alt="replicated-space1.jpg" /></p>
+</div>
+
+
+
+
+
+<p>A simple way to use the embedded Space in a clustered architecture is by deploying a <a href="../admin/data-grid-clustering.html">clustered Space</a>, or packaging your application as a <a href="./the-processing-unit-overview.html">Processing Unit</a> and deploying it using the relevant SLA.</p>
+
+<h1 id="remote-space">Remote Space</h1>
+
+<p>A client communicating with a remote Space performs all its operations via a remote connection. The remote Space can be partitioned (with or without backups) or replicated (based on synchronous or asynchronous replication).</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/remote-space.jpg" alt="remote-space.jpg" /></p>
+</div>
+
+
+
+
+
+<p>The following is an example of how a client application can create a proxy for interacting with a remote Space:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Code " style="padding:10px"><pre><code class="language-java">GigaSpace gigaSpace = new GigaSpaceConfigurer(new SpaceProxyConfigurer(&quot;mySpace&quot;)).gigaSpace();
+</code></pre>
+</div>
+<div title="  Namespace " style="padding:10px"><pre><code class="language-xml">&lt;os-core:space-proxy  id=&quot;space&quot; space-name=&quot;mySpace&quot;/&gt;
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot;/&gt;
+</code></pre>
+</div>
+<div title="  Plain XML " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.SpaceProxyFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;gigaSpace&quot; class=&quot;org.openspaces.core.GigaSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>A full description of the Space URL Properties is available <a href="./the-space-configuration.html">here.</a>.</p>
+
+</div> 
+
+<h2 id="reconnection">Reconnection</h2>
+
+<p>When working with a <strong>remote Space</strong>, the Space may become unavailable (due to network problems, Processing Unit relocation, etc.). For information on how such disruptions are handled and configured, refer to <a href="../admin/tuning-proxy-connectivity.html">Proxy Connectivity</a>.</p>
+
+<h1 id="local-cache">Local Cache</h1>
+
+<p>XAP supports a <a href="./local-cache.html">local cache</a> (near cache) configuration. This provides a front-end, client-side cache that is used with the <code>read</code> operations implicitly. The local cache is loaded on demand or when you perform a <code>read</code> operation, and is updated implicitly by the Space.</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/local_cache.jpg" alt="local_cache.jpg" /></p>
+</div>
+
+
+
+
+
+<p>The following is an example of a <code>GigaSpace</code> construct with a local cache:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Code " style="padding:10px"><pre><code class="language-java">// Initialize remote space configurer:
+SpaceProxyConfigurer urlConfigurer = new SpaceProxyConfigurer(&quot;space&quot;);
+// Initialize local cache configurer
+LocalCacheSpaceConfigurer localCacheConfigurer = new LocalCacheSpaceConfigurer(urlConfigurer);
+
+// Create local cache:
+GigaSpace localCache = new GigaSpaceConfigurer(localCacheConfigurer).gigaSpace();
+</code></pre>
+</div>
+<div title="    Namespace   " style="padding:10px"><pre><code class="language-xml">&lt;os-core:space-proxy  id=&quot;space&quot; space-name=&quot;mySpace&quot;/&gt;
+&lt;os-core:local-cache id=&quot;localCacheSpace&quot; space=&quot;space&quot;/&gt;
+&lt;os-core:giga-space id=&quot;localCache&quot; space=&quot;localCacheSpace&quot;/&gt;
+</code></pre>
+</div>
+<div title="  Plain XML " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.SpaceProxyFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;localCacheSpace&quot;
+class=&quot;org.openspaces.core.space.cache.LocalCacheSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<h1 id="local-view">Local View</h1>
+
+<p>XAP supports a <a href="./local-view.html">local view</a> configuration. This provides a front-end, client-side cache that is used with any <code>read</code> or <code>readMultiple</code> operations implicitly. The local view is loaded on start, and is updated implicitly by the Space.</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/local_view.jpg" alt="local_view.jpg" /></p>
+</div>
+
+
+
+
+
+<p>Here is an example for a <code>GigaSpace</code> construct with a local cache:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Code " style="padding:10px"><pre><code class="language-java">// Initialize remote space configurer:
+SpaceProxyConfigurer configurer = new SpaceProxyConfigurer(&quot;space&quot;);
+
+// Initialize local view configurer
+LocalViewSpaceConfigurer localViewConfigurer = new LocalViewSpaceConfigurer(configurer)
+.addViewQuery(new SQLQuery&lt;Message&gt;(Message.class, &quot;processed = true&quot;))
+.addViewQuery(new SQLQuery&lt;Message&gt;(Message.class, &quot;priority &gt; 3&quot;));
+
+// Create local view:
+GigaSpace localView = new GigaSpaceConfigurer(localViewConfigurer).gigaSpace();
+</code></pre>
+</div>
+<div title="    Namespace   " style="padding:10px"><pre><code class="language-xml">&lt;os-core:space-proxy id=&quot;space&quot; space-name=&quot;mySpace&quot; /&gt;
+
+&lt;os-core:local-view id=&quot;localViewSpace&quot; space=&quot;space&quot;&gt;
+&lt;os-core:view-query class=&quot;Message&quot; where=&quot;processed = true&quot;/&gt;
+&lt;os-core:view-query class=&quot;Message&quot; where=&quot;priority &gt; 3&quot;/&gt;
+&lt;/os-core:local-view&gt;
+
+&lt;os-core:giga-space id=&quot;localView&quot; space=&quot;localViewSpace&quot;/&gt;
+</code></pre>
+</div>
+<div title="  Plain XML " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.SpaceProxyFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;viewSpace&quot; class=&quot;org.openspaces.core.space.cache.LocalViewSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;space&quot; ref=&quot;space&quot; /&gt;
+&lt;property name=&quot;localViews&quot;&gt;
+&lt;list&gt;
+&lt;bean class=&quot;com.j_spaces.core.client.view.View&quot;&gt;
+&lt;constructor-arg index=&quot;0&quot; value=&quot;com.example.Message1&quot; /&gt;
+&lt;constructor-arg index=&quot;1&quot; value=&quot;processed = true&quot; /&gt;
+&lt;/bean&gt;
+&lt;bean class=&quot;com.j_spaces.core.client.view.View&quot;&gt;
+&lt;constructor-arg index=&quot;0&quot; value=&quot;com.example.Message2&quot; /&gt;
+&lt;constructor-arg index=&quot;1&quot; value=&quot;priority &gt; 3&quot; /&gt;
+&lt;/bean&gt;
+&lt;/list&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<h1 id="resource-cleanup">Resource Cleanup</h1>
+
+<p>There are two types of resources associated with Space instances and Space clients that have to be released before shutting down your application.</p>
+
+<h2 id="thread-and-memory-resources">Thread and Memory Resources</h2>
+
+<p>If your Space client or embedded Space are running within a Spring-enabled environment (such as the XAP service grid or a standalone Spring application), and are configured in a Spring application context, these resources will be cleaned up automatically when the Spring application context is destroyed. However, if you start the Space client or Space instance programmatically, you must call the <code>UrlSpaceConfigurer destroy()</code> method when your application no longer uses the Space instance/Space client.</p>
+
+<p>Example:</p>
+
+<pre><code class="language-java">SpaceProxyConfigurer urlConfigurer = new SpaceProxyConfigurer(&quot;space&quot;);
+//....
+urlConfigurer.destroy();
+
+// Local cache
+LocalCacheSpaceConfigurer localCacheConfigurer = new LocalCacheSpaceConfigurer(urlConfigurer);
+localCacheConfigurer.destroy();
+
+// Local view
+LocalViewSpaceConfigurer localViewConfigurer = new LocalViewSpaceConfigurer(urlConfigurer);
+localViewConfigurer.destroy();
+</code></pre>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Local View and Cache</b><br>
+<p>When using LocalCache and LocalView. you need to call the <code>destroy()</code> method on their respective configurer.</p>
+</div>
+
+
+
+
+
+
+
+
+<h2 id="communication-resources">Communication Resources</h2>
+
+<p>All communication-related resources in XAP are shared between all the XAP components at the Java classloader level. If you&rsquo;re using the <a href="../admin/the-runtime-environment.html">XAP service grid</a> to run your XAP application, you do not need to handle the cleanup of communication resources explicitly.</p>
+
+<p>If your application runs in a standalone environment or another hosted environment (such as a JEE application server), you must explicitly clean up those resources. You have to shut down these resources explicitly when your application no longer uses the XAP components (for example, when it is undeployed from the application server). This is done by calling the static <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/com/gigaspaces/lrmi/LRMIManager.html">shutdown()</a> method on the LRMIManager.</p>
+
+<p>If the JVM process is shut down anyway, you don&rsquo;t have to explicitly shut down the communication resources.</p>
+
+<p>Example:</p>
+
+<pre><code class="language-java">SpaceProxyConfigurer urlConfigurer = new SpaceProxyConfigurer(&quot;space&quot;);
+//....
+urlConfigurer.destroy();
+
+LRMIManager.shutdown();
+</code></pre>
+
+<h1 id="security">Security</h1>
+
+<p>A secured Space should be configured with a security context so that it can be accessed (when connecting to it remotely). The following is an example of how this can be configured:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Namespace " style="padding:10px"><pre><code class="language-xml">&lt;os-core:space-proxy id=&quot;space&quot; space-name=&quot;mySpace&quot;&gt;
+&lt;os-core:security username=&quot;sa&quot; password=&quot;adaw@##$&quot; /&gt;
+&lt;/os-core:space-proxy&gt;
+</code></pre>
+</div>
+<div title="  Plain XML " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.SpaceProxyFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;property name=&quot;securityConfig&quot;&gt;
+&lt;bean class=&quot;org.openspaces.core.space.SecurityConfig&quot;&gt;
+&lt;property name=&quot;username&quot; value=&quot;sa&quot; /&gt;
+&lt;property name=&quot;password&quot; value=&quot;adaw@##$&quot; /&gt;
+&lt;/bean&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>The following is an example of how to define security with an embedded Space. In this case, we enable security and specify the username and password.</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Namespace " style="padding:10px"><pre><code class="language-xml">&lt;os-core:space-proxy  id=&quot;space&quot; space-name=&quot;mySpace&quot;&gt;
+&lt;os-core:security username=&quot;sa&quot; password=&quot;adaw@##$&quot; /&gt;
+&lt;/os-core:space-proxy&gt;
+</code></pre>
+</div>
+<div title="  Plain XML " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.EmbeddedSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;property name=&quot;securityConfig&quot;&gt;
+&lt;bean class=&quot;org.openspaces.core.space.SecurityConfig&quot;&gt;
+&lt;property name=&quot;username&quot; value=&quot;sa&quot; /&gt;
+&lt;property name=&quot;password&quot; value=&quot;adaw@##$&quot; /&gt;
+&lt;/bean&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>You can configure the Space to be secured using deploy-time properties (bean-level properties), without declaring the security element. The <code>security.username</code> and <code>security.password</code> can be provided, and the Spaces defined within the Processing Unit are automatically secured.</p>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>For more information about how to secure XAP components, refer to the <a href="../security/">Security</a> section of the Administrator guide.</p>
+
+</div> 
+
+<h1 id="persistency">Persistency</h1>
+
+<p>When constructing a Space, you can provide <a href="./space-persistency-overview.html">Space Persistency</a> extensions using Spring-based configuration instead of using the Space schema. The following is an example of how it can be defined:</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Namespace " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;dataSource&quot; class=&quot;org.apache.commons.dbcp.BasicDataSource&quot; destroy-method=&quot;close&quot;&gt;
+&lt;property name=&quot;driverClassName&quot; value=&quot;org.hsqldb.jdbcDriver&quot;/&gt;
+&lt;property name=&quot;url&quot; value=&quot;jdbc:hsqldb:hsql://localhost:9001&quot;/&gt;
+&lt;property name=&quot;username&quot; value=&quot;sa&quot;/&gt;
+&lt;property name=&quot;password&quot; value=&quot;&quot;/&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;sessionFactory&quot; class=&quot;org.springframework.orm.hibernate3.LocalSessionFactoryBean&quot;&gt;
+&lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot;/&gt;
+&lt;property name=&quot;mappingResources&quot;&gt;
+&lt;list&gt;
+&lt;value&gt;Person.hbm.xml&lt;/value&gt;
+&lt;/list&gt;
+&lt;/property&gt;
+&lt;property name=&quot;hibernateProperties&quot;&gt;
+&lt;props&gt;
+&lt;prop key=&quot;hibernate.dialect&quot;&gt;org.hibernate.dialect.HSQLDialect&lt;/prop&gt;
+&lt;prop key=&quot;hibernate.cache.provider_class&quot;&gt;org.hibernate.cache.NoCacheProvider&lt;/prop&gt;
+&lt;prop key=&quot;hibernate.cache.use_second_level_cache&quot;&gt;false&lt;/prop&gt;
+&lt;prop key=&quot;hibernate.cache.use_query_cache&quot;&gt;false&lt;/prop&gt;
+&lt;prop key=&quot;hibernate.hbm2ddl.auto&quot;&gt;update&lt;/prop&gt;
+&lt;/props&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;hibernateSpaceDataSource&quot; class=&quot;com.gigaspaces.datasource.hibernate.DefaultHibernateSpaceDataSource&quot;&gt;
+&lt;property name=&quot;sessionFactory&quot; ref=&quot;sessionFactory&quot;/&gt;
+&lt;/bean&gt;
+
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot; schema=&quot;persistent&quot; space-data-source=&quot;hibernateSpaceDataSource&quot; /&gt;
+</code></pre>
+</div>
+<div title="  Plain XML " style="padding:10px"><pre><code class="language-xml">&lt;bean id=&quot;dataSource&quot; class=&quot;org.apache.commons.dbcp.BasicDataSource&quot; destroy-method=&quot;close&quot;&gt;
+&lt;property name=&quot;driverClassName&quot; value=&quot;org.hsqldb.jdbcDriver&quot;/&gt;
+&lt;property name=&quot;url&quot; value=&quot;jdbc:hsqldb:hsql://localhost:9001&quot;/&gt;
+&lt;property name=&quot;username&quot; value=&quot;sa&quot;/&gt;
+&lt;property name=&quot;password&quot; value=&quot;&quot;/&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;sessionFactory&quot; class=&quot;org.springframework.orm.hibernate3.LocalSessionFactoryBean&quot;&gt;
+&lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot;/&gt;
+&lt;property name=&quot;mappingResources&quot;&gt;
+&lt;list&gt;
+&lt;value&gt;Person.hbm.xml&lt;/value&gt;
+&lt;/list&gt;
+&lt;/property&gt;
+&lt;property name=&quot;hibernateProperties&quot;&gt;
+
+&lt;props&gt;
+&lt;prop key=&quot;hibernate.dialect&quot;&gt;org.hibernate.dialect.HSQLDialect&lt;/prop&gt;
+&lt;prop key=&quot;hibernate.cache.provider_class&quot;&gt;org.hibernate.cache.NoCacheProvider&lt;/prop&gt;
+&lt;prop key=&quot;hibernate.cache.use_second_level_cache&quot;&gt;false&lt;/prop&gt;
+&lt;prop key=&quot;hibernate.cache.use_query_cache&quot;&gt;false&lt;/prop&gt;
+&lt;prop key=&quot;hibernate.hbm2ddl.auto&quot;&gt;update&lt;/prop&gt;
+&lt;/props&gt;
+&lt;/property&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;hibernateSpaceDataSource&quot; class=&quot;com.gigaspaces.datasource.hibernate.DefaultHibernateSpaceDataSource&quot;&gt;
+&lt;property name=&quot;sessionFactory&quot; ref=&quot;sessionFactory&quot;/&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;space&quot; class=&quot;org.openspaces.core.space.EmbeddedSpaceFactoryBean&quot;&gt;
+&lt;property name=&quot;name&quot; value=&quot;space&quot; /&gt;
+&lt;property name=&quot;schema&quot; value=&quot;persistent&quot; /&gt;
+&lt;property name=&quot;spaceDataSource&quot; ref=&quot;hibernateSpaceDataSource&quot; /&gt;
+&lt;/bean&gt;
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>The above example uses Spring built-in support for configuring both a custom JDBC <code>DataSource</code> and a Hibernate <code>SessionFactory</code> to define and use the XAP built-in <code>HibernateSpaceDataSource</code>. The XAP data source is then injected into the
+Space construction (note the specific schema change), and causes the Space to use it.</p>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<p>This configuration can also be used with the XAP <a href="./asynchronous-persistency-with-the-mirror.html">Mirror Service</a> deployed as a Processing Unit.</p>
+</div>
+
+
+
+
+
+
+
+
+<h1 id="additional-resources">Additional Resources</h1>
+
+<div class="container-fluid">
+<div class='row'>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><div class="row">
+<div style="float:left; width:170px;height=140px; padding-left:15px;padding-right:0px;position:relative;margin-left:0px;margin-right:0px;">
+<p><a href="http://www.youtube.com/watch?v=k2zGdUi_ntU" data-width="853" data-title="Custom Change API" data-height="480" data-toggle="lightbox"> <img src="http://img.youtube.com/vi/k2zGdUi_ntU/0.jpg" class="img-responsive img-rounded">Custom Change API</a></p>
+</div>
+</div>
+</div>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'><div class="row">
+<div style="float:left; width:170px;height=140px; padding-left:15px;padding-right:0px;position:relative;margin-left:0px;margin-right:0px;">
+<p><a href="http://www.youtube.com/watch?v=H22qPux8Fh8" data-width="853" data-title="Aggregations" data-height="480" data-toggle="lightbox"> <img src="http://img.youtube.com/vi/H22qPux8Fh8/0.jpg" class="img-responsive img-rounded">Aggregations</a></p>
+</div>
+</div>
+</div>
+
+<div style='float:left;width:30%;padding-left:0px;padding-right:10px;position:relative;margin-left:0px;margin-right:0px;'></div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

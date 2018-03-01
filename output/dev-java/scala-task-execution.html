@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Task Execution</h1>
+<hr>
+
+
+<p>A wrapper around the <code>XAP</code> API provides some sugaring on top of the <code>GigaSpace#execute</code> methods.</p>
+
+<h1 id="usage">Usage</h1>
+
+<p>Import the following into scope to use the methods demonstrated below.</p>
+
+<p>import com.gigaspaces.async.AsyncResult
+import org.openspaces.scala.core.ScalaGigaSpacesImplicits.ScalaEnhancedGigaSpaceWrapper</p>
+
+<p>Some examples:</p>
+
+<pre><code class="language-scala">/** Import GigaSpace implicits into scope */
+import com.gigaspaces.async.AsyncResult
+import org.openspaces.scala.core.ScalaGigaSpacesImplicits._
+
+...
+val gsm = admin.getGridServiceManagers.waitForAtLeastOne
+gsm.deploy(new org.openspaces.admin.space.SpaceDeployment(&quot;mySpace&quot;))
+val Some(gigaSpace) = getGigaSpace(&quot;mySpace&quot;)
+case class Data @SpaceClassConstructor() ( @BeanProperty @SpaceId @SpaceProperty(nullValue = &quot;-1&quot;) id: Long = -1, @BeanProperty @SpaceRouting @SpaceProperty(nullValue = &quot;-1&quot;) routing: Long = -1, @BeanProperty data: String = null )
+...
+
+gigaSpace write Data(id = 1, routing = 2, data = &quot;some data&quot;)
+gigaSpace write Data(id = 2, routing = 3, data = &quot;some other data&quot;)
+
+val asyncFuture1 = gigaSpace.execute { gigaSpace: GigaSpace =&gt;
+gigaSpace.readById(classOf[Data], 1l)
+}
+
+println(&quot;Execute1 result: &quot; + asyncFuture1.get())
+
+val asyncFuture2 = gigaSpace.execute(
+{ gigaSpace: GigaSpace =&gt; gigaSpace.read(Data()).data } /* map */,
+{ results: Seq[AsyncResult[String]] =&gt; results.map { _.getResult() }.mkString } /* reduce */
+)
+
+println(&quot;Map reduce result: &quot; + asyncFuture2.get())
+</code></pre>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

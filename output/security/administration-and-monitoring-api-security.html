@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Admin API</h1>
+<hr>
+
+
+<p>The <a href="../dev-java/administration-and-monitoring-overview.html">Administration and Monitoring API</a> provides a way to administer and monitor all on XAP services and components using a simple API. The API, amongst others, provides the ability to operate on the currently running GigaSpaces Agents, XAP Managers, XAP Containers, Lookup Services, Processing Units and Spaces.</p>
+
+<h1 id="constructing-the-admin-instance">Constructing the Admin instance</h1>
+
+<p>When using a secured Service Grid, the <code>Admin</code> instance needs to be constructed with a <em>principal</em> which is granted sufficient privileges based on the operations being performed using the administration API. For example, grant <code>Manage Grid</code> to start a Grid Service Manager (GSM) and grant <code>Provision PU</code> to deploy a processing unit.</p>
+
+<p>The following creates an <code>Admin</code> instance with the user &ldquo;user/password&rdquo;.</p>
+
+<pre><code class="language-java">Admin admin = new AdminFactory().addGroup(&quot;gigaspaces&quot;).credentials(&quot;user&quot;, &quot;password&quot;).createAdmin();
+</code></pre>
+
+<p>For security other than username/password see [Custom Authentication]</p>
+
+<h1 id="space-deployment">Space Deployment</h1>
+
+<p>Deploying a secured Space:</p>
+
+<pre><code class="language-java">...
+admin.getGridServiceManagers().deploy(new SpaceDeployment(&quot;mySpace&quot;).secured(true));
+</code></pre>
+
+<p>Deploying a secured Space with credentials supplied. These credentials propagate to internal services, such as Space Filters.</p>
+
+<pre><code class="language-java">...
+admin.getGridServiceManagers().deploy(new SpaceDeployment(&quot;mySpace&quot;).userDetails(&quot;myUser&quot;, &quot;myPassword&quot;));
+</code></pre>
+
+<h1 id="processing-unit-deployment">Processing Unit Deployment</h1>
+
+<p>Deploying a secured Processing Unit. This will deploy a Processing Unit with a secured embedded Space.</p>
+
+<pre><code class="language-java">...
+admin.getGridServiceManagers().deploy(new ProcessingUnitDeployment(&quot;myPu&quot;).secured(true));
+</code></pre>
+
+<p>Deploying a secured Processing Unit with credentials supplied. With this approach, credentials do not need to be hardcoded in the <code>pu.xml</code> declaration. These credential propagate to all the beans which require a proxy to the space.</p>
+
+<pre><code class="language-java">...
+admin.getGridServiceManagers().deploy(new ProcessingUnitDeployment(&quot;myPu&quot;).userDetails(&quot;myUser&quot;, &quot;myPassword&quot;));
+</code></pre>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

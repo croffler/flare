@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >System Configuration</h1>
+<hr>
+
+
+<p>GigaSpaces XAP.NET offers a collection of system properties which can be used to tweak the system&rsquo;s behavior. For a list of system properties refer to <a href="../admin/system-properties.html">System Properties List</a>. This page discusses various options of defining and overriding system properties configuration.</p>
+
+<h1 id="using-application-configuration-file">Using Application Configuration File</h1>
+
+<p>Like most .NET libraries, GigaSpaces XAP.NET configuration is based on <a href="http://msdn.microsoft.com/en-us/library/ms229689.aspx" target="_blank" >Application Configuration Files <i class='fa fa-external-link'></i></a>. To set system properties via the configuration file:</p>
+
+<p>Step 1. Add an Application Configuration File to your project (if your project already contains such a file skip this step):</p>
+
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+&lt;configuration&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<p>Step 2. Add a definition for GigaSpaces configuration section:</p>
+
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+&lt;configuration&gt;
+&lt;configSections&gt;
+&lt;section name=&quot;GigaSpaces&quot; type=&quot;GigaSpaces.Core.Configuration.GigaSpacesCoreConfiguration, GigaSpaces.Core&quot;/&gt;
+&lt;/configSections&gt;
+&lt;GigaSpaces&gt;
+&lt;!-- GigaSpaces Configuration settings are placed here --&gt;
+&lt;/GigaSpaces&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<p>Step 3. To add a system property, define a <code>SystemProperties</code> section in <code>GigaSpaces</code> section and add the desired properties names and values. The following example sets <code>com.gs.zones</code> to &ldquo;foo&rdquo;:</p>
+
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+&lt;configuration&gt;
+&lt;configSections&gt;
+&lt;section name=&quot;GigaSpaces&quot; type=&quot;GigaSpaces.Core.Configuration.GigaSpacesCoreConfiguration, GigaSpaces.Core&quot;/&gt;
+&lt;/configSections&gt;
+&lt;GigaSpaces&gt;
+&lt;SystemProperties&gt;
+&lt;add Name=&quot;com.gs.zones&quot; Value=&quot;foo&quot;/&gt;
+&lt;/SystemProperties&gt;
+&lt;/GigaSpaces&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<h1 id="reading-and-changing-configuration-at-runtime">Reading and changing configuration at runtime</h1>
+
+<p>The Xml configuration is mapped to a .NET Object model, which can be viewed and changed at runtime. This can be useful for logging the configuration settings, setting a specific configuration based on some business logic, etc.</p>
+
+<p>The configuration is loaded into <code>GigaSpacesFactory.Configuration</code>. If there&rsquo;s no application configuration file the default configuration is loaded. The following example reads and modifies the configuration:</p>
+
+<pre><code class="language-java">String zones = GigaSpacesFactory.Configuration.SystemProperties.GetPropertyValue(&quot;com.gs.zones&quot;);
+if (zones == &quot;foo&quot;)
+GigaSpacesFactory.Configuration.SystemProperties.SetPropertyValue(&quot;com.gs.zones&quot;, &quot;bar&quot;);
+</code></pre>
+
+
+<div class='bs-callout bs-callout-info'><p>Using <code>GigaSpacesFactory.Configuration</code> requires a reference to the <code>System.Configuration</code> assembly, which is not referenced by default.</p>
+</div>
+
+
+
+
+
+<p>Configuration changes must be made <strong>before</strong> XAP.NET is initialized. Changes made afterwards will not affect the system, and may cause an exception. The <code>GigaSpacesFactory.IsInitialized</code> property can be used to determine if XAP.NET is initialized or not. For example:</p>
+
+<pre><code class="language-java">String zones = GigaSpacesFactory.Configuration.SystemProperties.GetPropertyValue(&quot;com.gs.zones&quot;);
+if (zones == &quot;foo&quot;)
+{
+if (GigaSpacesFactory.IsInitialized)
+Console.WriteLine(&quot;Cannot change configuration because GigaSpaces is already initialized.&quot;);
+else
+GigaSpacesFactory.Configuration.SystemProperties.SetPropertyValue(&quot;com.gs.zones&quot;, &quot;bar&quot;);
+}
+</code></pre>
+
+<p>In addition, the <code>GigaSpacesFactory.Initialize()</code> method can be used to initialize XAP.NET explicitly and finalize changes (this is optional - if not called explicitly, this method will be called implicitly by GigaSpaces automatically when needed).</p>
+
+<h1 id="macros">Macros</h1>
+
+<p>Continuing the previous example, say we have not one but five applications which we want to configure with the same zones. We want to be able to change the zones in a single place which affects all those applications. This is where  macros are useful.</p>
+
+<p>Macros are similar to system environment variables: a macro is a key-value pair which functions as a dynamic value, i.e. the key can be expanded/replaced by the value. This allows us to use the key in several places while the value is defined in a single place.</p>
+
+<p>Macros are defined in the main settings file - <code>&lt;XapNetFolder&gt;\Config\Settings.xml</code>.</p>
+
+<p>Let&rsquo;s edit the <code>Settings.xml</code> file, define a new macro for our app called MyApp.Zones, and set its value to foo:</p>
+
+<pre><code class="language-xml">&lt;Settings&gt;
+&lt;!-- Out-of-the-box macros were omitted for brevity.  --&gt;
+&lt;MyApp.Zones&gt;foo&lt;/MyApp.Zones&gt;
+&lt;/Settings&gt;
+</code></pre>
+
+<p>Next we&rsquo;ll edit the application configuration file to use the macro instead of the static value:</p>
+
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+&lt;configuration&gt;
+&lt;configSections&gt;
+&lt;section name=&quot;GigaSpaces&quot; type=&quot;GigaSpaces.Core.Configuration.GigaSpacesCoreConfiguration, GigaSpaces.Core&quot;/&gt;
+&lt;/configSections&gt;
+&lt;GigaSpaces&gt;
+&lt;SystemProperties&gt;
+&lt;add Name=&quot;com.gs.zones&quot; Value=&quot;$(MyApp.Zones)&quot;/&gt;
+&lt;/SystemProperties&gt;
+&lt;/GigaSpaces&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<p>GigaSpaces automatically scans property values for macros and replaces them with macro values.</p>
+
+<h1 id="base-configuration-files">Base Configuration Files</h1>
+
+<p>Continuing the previous example, say we want to add more system properties to be shared by all applications. Instead of having to edit each application configuration file, we prefer a single configuration file which contains shared settings. This is where Base Configuration Files come handy.</p>
+
+<p>The <code>GigaSpaces</code> configuration section contains a <code>BaseConfigFile</code> settings, which can be used to specify the location of a configuration file using the same schema which contains additional configuration that should be loaded. For example, We could put a configuration file called MyApp.config in a shared folder on a server which looks like this:</p>
+
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+&lt;configuration&gt;
+&lt;configSections&gt;
+&lt;section name=&quot;GigaSpaces&quot; type=&quot;GigaSpaces.Core.Configuration.GigaSpacesCoreConfiguration, GigaSpaces.Core&quot;/&gt;
+&lt;/configSections&gt;
+&lt;GigaSpaces&gt;
+&lt;SystemProperties&gt;
+&lt;add Name=&quot;com.gs.zones&quot; Value=&quot;$(MyApp.Zones)&quot;/&gt;
+&lt;add Name=&quot;someProperty1&quot; Value=&quot;SomeValue1&quot;/&gt;
+&lt;add Name=&quot;someProperty2&quot; Value=&quot;SomeValue2&quot;/&gt;
+&lt;/SystemProperties&gt;
+&lt;/GigaSpaces&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<p>And then change the application configuration files to look like this:</p>
+
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+&lt;configuration&gt;
+&lt;configSections&gt;
+&lt;section name=&quot;GigaSpaces&quot; type=&quot;GigaSpaces.Core.Configuration.GigaSpacesCoreConfiguration, GigaSpaces.Core&quot;/&gt;
+&lt;/configSections&gt;
+&lt;GigaSpaces&gt;
+&lt;BaseConfigFile Path=&quot;MyServer\MyAppSharedFolder\MyApp.config&quot; /&gt;
+&lt;/GigaSpaces&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<h3 id="overriding-settings-from-a-base-configuration">Overriding settings from a base configuration</h3>
+
+<p>Suppose that we have five applications using this base configuration file, and now we want to add a sixth application with one small difference - the property &lsquo;SomeProperty&rsquo; should be &lsquo;OtherValue&rsquo; and not &lsquo;SomeValue1&rsquo;. What do we do?</p>
+
+<p>The mechanism that merges the base configuration with the current configuration is smart enough to detect such overrides - if a property with the same name is defined both in the configuration file and in the base configuration file, the value from the base configuration is ignored, or overridden. This means we can use it to define common values and override them in specific cases.</p>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

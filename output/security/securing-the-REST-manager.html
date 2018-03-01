@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >REST Manager API</h1>
+<hr>
+
+
+<h1 id="enabling-security">Enabling Security</h1>
+
+<p>The REST Manager API allows for secured access and operations when the security <code>enabled</code> property is set.
+This property should be configured using <code>EXT_JAVA_OPTIONS</code> in <code>setenv</code> script and is applied to all XAP <a href="securing-the-grid-services.html">Grid Components</a>.</p>
+
+<p>The property:</p>
+
+<pre><code class="language-java">-Dcom.gs.security.enabled=true
+</code></pre>
+
+<p>By default, to get you up and running, if nothing was configured the fallback security implementation
+uses a local file to save credentials (see <a href="../security/default-file-based-security-implementation-ext.html">File-Based Security</a>.</p>
+
+<p>When security is enabled, the REST Manager API performs basic authentication and checks if the user has sufficient privileges
+to execute the operation.</p>
+
+<h1 id="ssl-configuration">SSL Configuration</h1>
+
+
+<div class='bs-callout bs-callout-warning'>
+<b style="">Note</b><br>
+<p>Basic authentication does not encrypt user credentials, so running a XAP Manager in a secure environment without SSL is a security hazard;
+The system detects this and aborts. You must <strong>explicitly</strong> enable or disable the SSL by setting the system property <code>com.gs.manager.rest.ssl.enabled</code>.</p>
+</div>
+
+
+
+
+
+
+
+
+<p>You can either:</p>
+
+<ul>
+<li>Disable SSL explicitly (not recommended).</li>
+<li>Enable SSL, and the system will generate a certificate for you.</li>
+<li>Enable SSL and provide a trusted certificate that you own.</li>
+</ul>
+
+<p>An auto-generated certificate provides reasonable security, but if your enterprise security guidelines are more
+strict you can provide your own certificate.</p>
+
+<p>Finally, if you need to configure something that we don’t expose (we use Jetty under the hood to host the web app),
+you can provide your own jetty.xml file via a system property.</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Port</th>
+<th align="left">System Property</th>
+<th align="left">Default</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">Enable/disable</td>
+<td align="left">com.gs.manager.rest.ssl.enabled</td>
+<td align="left">must be explicitly set</td>
+</tr>
+
+<tr>
+<td align="left">Keystore path</td>
+<td align="left">com.gs.manager.rest.ssl.keystore-path</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">Keystore password</td>
+<td align="left">com.gs.manager.rest.ssl.keystore-password</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">Custom config</td>
+<td align="left">com.gs.manager.rest.jetty.config</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="security-properties-file">Security Properties File</h1>
+
+<p>The security properties file is used to configure the <code>SecurityManager</code>, that is responsible for the authentication and authorization process.
+The <code>security.properties</code> file is common to all components and is usually located under <code>&lt;XAP root&gt;/config/security/security.properties</code>.</p>
+
+<p>The REST component is part of the XAP Grid components.
+To only affect the Grid components, use the <code>grid-security.properties</code> instead.</p>
+
+<p>The configuration file can be located anywhere in the classpath or in the classpath under <code>config/security</code>.</p>
+
+<p>Alternatively, a system property can be set to indicate the location of the properties file:</p>
+
+<pre><code class="language-java">-Dcom.gs.security.properties-file = my-security.properties
+</code></pre>
+
+<p>By setting <code>-Dcom.gs.security.properties-file</code> the property file will be located as a direct path (e.g. <code>~/home/user/my-security.properties</code>),
+a resource (e.g. &ldquo;my-security.properties&rdquo;) in the classpath or in the classpath under <code>config/security</code>.</p>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

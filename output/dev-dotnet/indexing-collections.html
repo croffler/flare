@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Collection Index</h1>
+<hr>
+
+
+<p>An index can be defined on a Collection property (such as List). Setting such an index means that each of the Collection&rsquo;s items is indexed.</p>
+
+<p>Setting an index on a Collection is done using the SpaceIndex.Path attribute where a Collection property should be followed by &ldquo;[*]&ldquo;.</p>
+
+<p>The following example shows how to define an index on a List of Integers:</p>
+
+<pre><code class="language-csharp">[SpaceClass]
+public class CollectionIndexingExample
+{
+private Integer id;
+private List&lt;int&gt; numbers;
+
+// Getter and setter methods...
+
+// This means that each Integer in the List is indexed.
+[SpaceIndex(Path=&quot;[*]&quot;)]
+public List&lt;int&gt; Numbers { get; set; }
+
+}
+</code></pre>
+
+<p>The following query shows how to take advantage of the defined index:</p>
+
+<pre><code class="language-csharp">SqlQuery&lt;CollectionIndexingExample&gt; sqlQuery =
+new SqlQuery&lt;CollectionIndexingExample&gt;(&quot;Numbers[*] = 30&quot;);
+CollectionIndexingExample[] result = spaceProxy.ReadMultiple(sqlQuery);
+</code></pre>
+
+<h1 id="nested-property-within-a-collection">Nested property within a Collection</h1>
+
+<p>Its also possible to index a nested property within a collection.</p>
+
+<p>The following example shows how to define an index on a Book.id property, which resides in a Collection property in Author:</p>
+
+<pre><code class="language-csharp">[SpaceClass]
+public class Author
+{
+// Properties...
+
+// This means that each Book.Id in the Collection is indexed.
+[SpaceIndex(Path = &quot;[*].Id&quot;)]
+[SpaceProperty(StorageType = StorageType.Document)]
+public List&lt;Book&gt; Books{ get; set; }
+}
+
+public class Book
+{
+// Properties...
+
+public int? Id{ get; set; }
+}
+</code></pre>
+
+<p>The following query shows how to take advantage of the defined index:</p>
+
+<pre><code class="language-csharp">SqlQuery&lt;Author&gt; sqlQuery = new SqlQuery&lt;Author&gt;(&quot;Books[*].Id = 57&quot;);
+Author result = spaceProxy.Read(sqlQuery);
+</code></pre>
+
+<p>Setting an index on a Collection within a nested property is also accepted:</p>
+
+<pre><code class="language-csharp">[SpaceClass]
+public class Employee
+{
+// Properties...
+
+[SpaceIndex(Path = &quot;PhoneNumbers[*]&quot;)]
+[SpaceProperty(StorageType = StorageType.Document)]
+public Information Information{ get; set; }
+}
+
+public class Information
+{
+// Properties...
+public List&lt;String&gt; PhoneNumbers{ get; set; }
+}
+</code></pre>
+
+
+<div class='bs-callout bs-callout-info'><p>Both <code>[SpaceIndex(Type=SpaceIndexType.Basic)]</code> and <code>[SpaceIndex(Type=SpaceIndexType.Extended)]</code> are supported.</p>
+</div>
+
+
+
+
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

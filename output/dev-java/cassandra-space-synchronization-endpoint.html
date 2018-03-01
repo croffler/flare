@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Synchronization Endpoint</h1>
+<hr>
+
+
+<p>A Cassandra based implementation of the <a href="./space-synchronization-endpoint-api.html">Space Synchronization Endpoint</a>.</p>
+
+<h1 id="library-dependencies">Library dependencies</h1>
+
+<p>The Cassandra Space Synchronization Endpoint uses the <a href="http://hector-client.github.com/hector/build/html/index.html" target="_blank" >Hector Library <i class='fa fa-external-link'></i></a> For communicating with the Cassandra cluster.
+Include the following in your <code>pom.xml</code></p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  hector using log4j " style="padding:10px"><pre><code class="language-xml">&lt;dependency&gt;
+&lt;groupId&gt;org.apache.cassandra&lt;/groupId&gt;
+&lt;artifactId&gt;cassandra-clientutil&lt;/artifactId&gt;
+&lt;version&gt;1.1.6&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+&lt;groupId&gt;org.apache.cassandra&lt;/groupId&gt;
+&lt;artifactId&gt;cassandra-thrift&lt;/artifactId&gt;
+&lt;version&gt;1.1.6&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+&lt;groupId&gt;org.hectorclient&lt;/groupId&gt;
+&lt;artifactId&gt;hector-core&lt;/artifactId&gt;
+&lt;version&gt;1.1-2&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+</div>
+<div title="  hector using java.util.logging " style="padding:10px"><pre><code class="language-xml">&lt;dependency&gt;
+&lt;groupId&gt;org.apache.cassandra&lt;/groupId&gt;
+&lt;artifactId&gt;cassandra-clientutil&lt;/artifactId&gt;
+&lt;version&gt;1.1.6&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+&lt;groupId&gt;org.apache.cassandra&lt;/groupId&gt;
+&lt;artifactId&gt;cassandra-thrift&lt;/artifactId&gt;
+&lt;version&gt;1.1.6&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+&lt;groupId&gt;org.hectorclient&lt;/groupId&gt;
+&lt;artifactId&gt;hector-core&lt;/artifactId&gt;
+&lt;version&gt;1.1-2&lt;/version&gt;
+&lt;exclusions&gt;
+&lt;exclusion&gt;
+&lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+&lt;artifactId&gt;slf4j-log4j12&lt;/artifactId&gt;
+&lt;/exclusion&gt;
+&lt;/exclusions&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+&lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+&lt;artifactId&gt;slf4j-api&lt;/artifactId&gt;
+&lt;version&gt;1.6.6&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+&lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+&lt;artifactId&gt;slf4j-jdk14&lt;/artifactId&gt;
+&lt;version&gt;1.6.6&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<h1 id="setup">Setup</h1>
+
+<p>An example of how the Cassandra Space Synchronization Endpoint can be configured within a mirror.</p>
+
+<div class="easyui-tabs" plain="true" data-options=""><div title="  Spring " style="padding:10px"><pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+xmlns:os-core=&quot;http://www.openspaces.org/schema/core&quot;
+xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+http://www.openspaces.org/schema/core http://www.openspaces.org/schema/12.3/core/openspaces-core.xsd&quot;&gt;
+
+&lt;bean id=&quot;propertiesConfigurer&quot;
+class=&quot;org.springframework.beans.factory.config.PropertyPlaceholderConfigurer&quot;/&gt;
+
+&lt;bean id=&quot;hectorClient&quot;
+class=&quot;org.openspaces.persistency.cassandra.HectorCassandraClientFactoryBean&quot;&gt;
+
+&lt;!-- comma separated seed list --&gt;
+&lt;property name=&quot;hosts&quot; value=&quot;${cassandra.host}&quot; /&gt;
+
+&lt;!-- cassandra rpc communication port --&gt;
+&lt;property name=&quot;port&quot; value=&quot;${cassandra.port}&quot; /&gt;
+
+&lt;!-- keyspace name to work with --&gt;
+&lt;property name=&quot;keyspaceName&quot; value=&quot;${cassandra.keyspace}&quot; /&gt;
+
+&lt;/bean&gt;
+
+&lt;bean id=&quot;cassandraSpaceSyncEndpoint&quot;
+class=&quot;org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpointFactoryBean&quot;&gt;
+
+&lt;!-- configured above --&gt;
+&lt;property name=&quot;hectorClient&quot; ref=&quot;hectorClient&quot; /&gt;
+
+&lt;/bean&gt;
+
+&lt;os-core:mirror id=&quot;mirror&quot; name=&quot;mirror-service&quot;
+space-sync-endpoint=&quot;cassandraSpaceSyncEndpoint&quot;&gt;
+&lt;os-core:source-space name=&quot;space&quot; partitions=&quot;${numOfPartitiones}&quot; backups=&quot;${numOfBackups}&quot;/&gt;
+&lt;/os-core:mirror&gt;
+
+&lt;/beans&gt;
+</code></pre>
+</div>
+<div title="  Code " style="padding:10px"><pre><code class="language-java">HectorCassandraClient hectorClient = new HectorCassandraClientConfigurer()
+.clusterName(cluster)
+.hosts(cassandraHosts)
+.port(cassandraPort)
+.keyspaceName(cassandraKeyspaceName)
+.create();
+
+SpaceSynchronizationEndpoint syncEndpoint = new CassandraSpaceSynchronizationEndpointConfigurer()
+.hectorClient(hectorClient)
+.create();
+
+IJSpace mirror = new EmbeddedSpaceConfigurer(&quot;mirror-service&quot;)
+.schema(&quot;mirror&quot;)
+.spaceSynchronizationEndpoint(syncEndpoint)
+.addProperty(&quot;space-config.mirror-service.cluster.name&quot;, &quot;space&quot;)
+.addProperty(&quot;space-config.mirror-service.cluster.partitions&quot;, String.valueOf(numOfPartitiones))
+.addProperty(&quot;space-config.mirror-service.cluster.backups-per-partition&quot;, String.valueOf(numOfBackups))
+.create();
+</code></pre>
+</div>
+</div>
+
+
+
+
+
+
+<p>For more details about different configurations see <a href="./space-persistency-overview.html">Space Persistency</a>.</p>
+
+<h2 id="cassandraspacesynchronizationendpoint-properties">CassandraSpaceSynchronizationEndpoint Properties</h2>
+
+<table>
+<thead>
+<tr>
+<th align="left">Property</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">hectorClient</td>
+<td align="left">A configured <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/index.html?org/openspaces/persistency/cassandra/HectorCassandraClient.html">HectorCassandraClient</a> bean. see <a href="./cassandra-hector-client.html">Hector Cassandra Client</a>.</td>
+</tr>
+
+<tr>
+<td align="left">fixedPropertyValueSerializer</td>
+<td align="left">see <a href="#property-value-serializer">Property Value Serializer</a>.</td>
+</tr>
+
+<tr>
+<td align="left">dynamicPropertyValueSerializer</td>
+<td align="left">see <a href="#property-value-Serializer">Property Value Serializer</a>.</td>
+</tr>
+
+<tr>
+<td align="left">flattenedPropertiesFilter</td>
+<td align="left">see <a href="#flattened-properties-filter">Flattened Properties Filter</a>.</td>
+</tr>
+
+<tr>
+<td align="left">columnFamilyNameConverter</td>
+<td align="left">see <a href="#column-family-name-converter">Column Family Name Converter</a>.</td>
+</tr>
+</tbody>
+</table>
+
+<span id="Property-Value-Serializer"></span>
+
+<h3 id="property-value-serializer">Property Value Serializer</h3>
+
+<p>By default when serializing object/document properties to column values, the following serialization logic is applied:</p>
+
+<p>For fixed properties:</p>
+
+<ul>
+<li>If the type of the value to be serialized matches a primitive type in Cassandra it will be serialized as defined by the Cassandra primitive type serialization protocol.</li>
+<li>Otherwise, the value will be serialized using standard java Object serialization mechanism.</li>
+</ul>
+
+<p>For dynamic properties:</p>
+
+<ul>
+<li>All values will be serialized using the default dynamic property value serializer implementation: <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/index.html?org/openspaces/persistency/cassandra/meta/types/dynamic/DynamicPropertyValueSerializer.html">DynamicPropertyValueSerializer</a></li>
+</ul>
+
+<p>It is possible to override this default behavior by providing a custom implementation of <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/index.html?org/openspaces/persistency/cassandra/meta/types/dynamic/PropertyValueSerializer.html">PropertyValueSerializer</a>.
+This interface is defined by these 2 methods:</p>
+
+<pre><code class="language-java">ByteBuffer toByteBuffer(Object value);
+Object fromByteBuffer(ByteBuffer byteBuffer);
+</code></pre>
+
+<p>The behavior of overriding the serialization logic is different for fixed properties and dynamic properties:</p>
+
+<ul>
+<li>Fixed properties will only be serialized by the custom serializer if their type does not match a primitive type in Cassandra.</li>
+<li>Dynamic properties will always be serialized using the provided implementation. This means that they should be able to handle primitive types such as Integer, Long, etc&hellip;</li>
+</ul>
+
+
+<div class='bs-callout bs-callout-warning'><p>Overriding the property value serializers in the <code>Cassandra Space Synchronization Endpoint</code> must be followed by overriding the same serializers in the <code>Cassandra Space Data Source</code>. Failure to do so will prevent the <code>Cassandra Space Data Source</code> from properly deserializing values read from Cassandra.</p>
+</div>
+
+
+
+
+
+
+
+
+<span id="Flattened-Properties-Filter"></span>
+
+<h2 id="flattened-properties-filter">Flattened Properties Filter</h2>
+
+<h3 id="introduction">Introduction</h3>
+
+<p>When a type is introduced to the <code>Cassandra Space Synchronzation Endpoint</code>, the type&rsquo;s fixed properties will be introspected and the final result will be a mapping from this type&rsquo;s nested properties to column family columns.
+The default behavior of this mapping is explained in the following example.
+Consider the following simple POJO (could also be a <code>SpaceDocument</code>&rsquo;s fixed properties):</p>
+
+<pre><code class="language-java">// implementation omitted for brevity
+@SpaceClass
+public class Person {
+
+@SpaceId
+public Long getId() ...
+
+public String getName() ...
+
+public Address getAddress() ...
+
+...
+
+}
+
+public class Address {
+
+public String getStreetName() ...
+
+public Long getStreetNumber() ...
+
+}
+</code></pre>
+
+<p>By default, the fixed properties will be mapped to the <code>Person</code> column family in Cassandra like this:</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Property</th>
+<th align="left">Column Name (and type)</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">person.id</td>
+<td align="left">(row key) (type: <code>Long</code>)</td>
+</tr>
+
+<tr>
+<td align="left">person.name</td>
+<td align="left">name (type: <code>UTF8</code>)</td>
+</tr>
+
+<tr>
+<td align="left">person.address.streetName</td>
+<td align="left">address.streetName (type: <code>UTF8</code>)</td>
+</tr>
+
+<tr>
+<td align="left">person.address.streetNumber</td>
+<td align="left">address.streetNumber (type: <code>Long</code>)</td>
+</tr>
+</tbody>
+</table>
+
+<p>Notice how the <code>address</code> property was flattened and its properties are flattened as columns.</p>
+
+<p>Now suppose that a <code>Person</code> is written to the space as a <code>SpaceDocument</code> which also includes these dynamic properties:</p>
+
+<ul>
+<li><code>String newName</code></li>
+<li><code>Address newAddress</code></li>
+</ul>
+
+<p>By default, dynamic properties are not flattened and are written as is to Cassandra. Moreover, their static type is not updated in the <code>Column Family</code> metadata and they are serialized using a custom serializer. (see <a href="./cassandra-space-synchronization-endpoint.html#property-value-serializer">Property Value Serializer</a>).</p>
+
+<p>This is how they will be written to Cassandra:</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Property</th>
+<th align="left">Column Name (and type)</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">person.newName</td>
+<td align="left">newName (type: Bytes)</td>
+</tr>
+
+<tr>
+<td align="left">person.newAddress</td>
+<td align="left">newAddress (type: Bytes)</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="customization">Customization</h2>
+
+<p>It is possible to override the above behavior by providing a <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/index.html?org/openspaces/persistency/cassandra/meta/mapping/filter/FlattenedPropertiesFilter.html">FlattenedPropertiesFilter</a> implementation.
+The implementations is used during type introspection when a type is first introduced to the synchronization endpoint and whenever an entry of that type is written which contains dynamic properties.</p>
+
+<p>The interface is defined by a single method:</p>
+
+<pre><code class="language-java">boolean shouldFlatten(PropertyContext propertyContext);
+</code></pre>
+
+<p>The return value indicates whether the current introspected property should be serialized as is or should its nested properties be introspected as well.
+As for the above example, the default implementation <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/index.html?org/openspaces/persistency/cassandra/meta/mapping/filter/DefaultFlattenedPropertiesFilter.html">DefaultFlattenedPropertiesFilter</a> returns <code>true</code> if and only if the property is fixed and the current introspection nesting level does not exceed 10.</p>
+
+<p>The <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/index.html?org/openspaces/persistency/cassandra/meta/mapping/filter/PropertyContext.html">PropertyContext</a> contains the following details about the current introspected property:</p>
+
+<pre><code class="language-java">String getPath();
+String getName();
+Class&lt;?&gt; getType();
+boolean isDynamic();
+int getCurrentNestingLevel();
+</code></pre>
+
+<span id="Column-Family-Name-Converter"></span>
+
+<h2 id="column-family-name-converter">Column Family Name Converter</h2>
+
+<p>Due to implementation details of Cassandra regarding Column Families there are certain limitations when converting a type name (e.g: <code>com.example.data.Person</code>) to a column family name. Among these limitations is a 48 characters max length limitation and invalid characters in the name (such as &lsquo;.&rsquo;).
+The behavior for converting a type name to a column family name when creating a column family is defined by the interface <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/index.html?org/openspaces/persistency/cassandra/meta/conversion/ColumnFamilyNameConverter.html">ColumnFamilyNameConverter</a>.
+This interface is defined by 1 method:</p>
+
+<pre><code class="language-java">String toColumnFamilyName(String typeName);
+</code></pre>
+
+<p>The default implementation is: <a href="https://resources.gigaspaces.com/api/xap/12.3.0/java
+/index.html?org/openspaces/persistency/cassandra/meta/conversion/DefaultColumnFamilyNameConverter.html">DefaultColumnFamilyNameConverter</a>.</p>
+
+<h1 id="considerations">Considerations</h1>
+
+<ul>
+<li>Collections and Maps are not flattened and are serialized as blobs using java object serialization mechanism.</li>
+<li>Writing entries that only have their id property set is not supported, these entries will not be written to Cassandra.</li>
+</ul>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

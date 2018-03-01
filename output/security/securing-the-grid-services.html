@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Securing the Grid Services</h1>
+<hr>
+
+
+<h1 id="enabling-security">Enabling Security</h1>
+
+<p>XAP security is enabled by setting a system property.
+Append the following system property to <code>EXT_JAVA_OPTIONS</code> in <code>setenv</code> script.</p>
+
+<pre><code class="language-java">-Dcom.gs.security.enabled=true
+</code></pre>
+
+<p>This property affects the GSA, GSM, GSC.
+Actually it affects also a standalone PU instance (with a space).</p>
+
+<h1 id="grid-service-agent">Grid Service Agent</h1>
+
+<p>The <a href="../overview/the-runtime-environment.html#gsa">Grid Service Agent (GSA)</a> acts as a process manager that can spawn and manage Service Grid processes (GSM, GSC, etc.). When GSA is secured, a spawned GSM/GSC will also be secured. To <em>start</em>, <em>kill</em>, <em>restart</em> a process you need <strong>Manage Grid</strong> privileges.</p>
+
+<h1 id="grid-service-manager">Grid Service Manager</h1>
+
+<p>The <a href="../overview/the-runtime-environment.html#gsm">Grid Service Manager (GSM)</a> is responsible for managing Processing Units and Grid Service Containers. The GSM accepts deployment and un-deployment requests of Processing Units, and provisions them to GSCs. To <em>deploy</em>, <em>un-deploy</em> you need <strong>Provision PU</strong> privileges.</p>
+
+<p>A secured GSM can <strong>only</strong> connect to another secured GSM. This means that a Processing Unit managed by a secured GSM can be recoverable upon failover only by another secured GSM.</p>
+
+<h1 id="xap-manager">XAP Manager</h1>
+
+<p>The <a href="../admin/xap-manager.html">XAP Manager</a> is a component which stacks together the LUS and GSM along with ZooKeeper and a <a href="../admin/xap-manager-rest.html">RESTful Management API</a>.
+The privileges of the GSM are the same as if it were standalone. For each REST operation, we list the required privilege in the yaml file, also viewable in the Swagger tool (see <a href="../admin/xap-manager-rest.html">RESTful API</a>).
+For example, starting a container would require <strong>Manage Grid</strong> privileges. Deploying a Space or a Processing Unit would require <strong>Provision PU</strong> privileges.
+For more information about using the RESTful API with security, refer to <a href="securing-the-REST-manager.html">REST Manager API - Security</a></p>
+
+<h2 id="elastic-processing-units">Elastic Processing Units</h2>
+
+<p>When an <a href="../dev-java/elastic-processing-unit-overview.html">Elastic Processing Unit</a> is deployed, the GSM performs the initial provisioning and the <em>ESM</em> monitors it to ensure the elastic requirements are met. This means that when the service grid is secured, the ESM requires credentials with <em>Manage PU</em> and <em>Manage Grid</em> permissions to monitor and manage the elastic processing units. This is done using the <code>com.gs.esm.username</code> and <code>com.gs.esm.password</code> system properties.</p>
+
+<h1 id="grid-service-container">Grid Service Container</h1>
+
+<p>A <a href="../overview/the-runtime-environment.html#gsc">Grid Service Container (GSC)</a> is a container which hosts deployed Processing Unit Instances, and reports its status to the GSM. In general, operations on the GSC are routed to the managing GSM of the processing unit. To <em>scale up/down</em>, <em>relocate</em>, <em>restart PU instance</em>, <em>destroy PU instance</em> you need <strong>Manage PU</strong> privileges.</p>
+
+<p>A secured GSC can <strong>only</strong> connect to a secured GSM. This means that a Processing Unit managed by a secured GSM can only be provisioned to a secured GSC.</p>
+
+<p><strong>Note:</strong> Security of a GSC does not enforce any security on the deployed Processing Unit. i.e., a secured GSC can contain a Processing unit with a non-secured space, and a non-secured GSC can contain a Processing Unit with a secured space.</p>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

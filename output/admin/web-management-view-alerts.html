@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Viewing Alerts</h1>
+<hr>
+
+
+<p>You can view alerts in the Web Management Console Alerts panel, displayed by XAP Alert groups (alerts are grouped by correlation key), and also generate an alert dump for specific grid components.</p>
+
+
+<div class='bs-callout bs-callout-info'>
+<b style="">Info</b><br>
+<p>The Web-UI server utilizes the <code>&lt;XAP Root&gt;/config/alerts/alerts.xml</code> configuration file. These configurations apply to any client connecting to the Web-UI at the specified host and port.</p>
+</div>
+
+
+
+
+
+<p>Alerts are grouped together by type, such as CPU, Memory, etc. When an alert is raised, it is aggregated with other consecutive alerts of the same type. Previous alerts from the aggregation get &ldquo;pushed&rdquo; down (circled in red). A resolved alert &ldquo;closes&rdquo; the aggregation (circled in green). A new alert of the same type will trigger a new aggregation.</p>
+
+<p>Sort the &lsquo;status&rsquo; column in ascending order to show the latest unresolved alerts.</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/web-console/alerts.jpg" alt="hosts1.jpg" /></p>
+</div>
+
+
+
+
+
+<h1 id="generating-an-alert-dump">Generating an Alert Dump</h1>
+
+<p>A logs dump can be retrieved for the alert&rsquo;s related grid components. This can be done by opening the Alert Actions menu and clicking &ldquo;Generate dump&rdquo;, after which, a window will appear providing configuration of the dump:</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/web-console/generate_dump.png" alt="generate_dump.png" /></p>
+</div>
+
+
+
+
+
+<p>Select the desired components for the dump and click &ldquo;Generate&rdquo;, and a zip file will be downloaded containing log files for each of the selected components.</p>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

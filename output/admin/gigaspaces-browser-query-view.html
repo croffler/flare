@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Query View</h1>
+<hr>
+<p>Used to query the space using SQL statements and view the resulting data set in tabular format.</p>
+
+<p>The Query view allows you to query the space using SQL statements and to get the full resulting data set in tabular format.</p>
+
+<div style="text-align:center"><p><img src="../../attachment_files/query_view.gif" alt="query_view.gif" /></p>
+</div>
+
+
+
+
+
+<p>The Query view includes the following options:</p>
+
+<ul>
+<li>Result set table &ndash; the query results are displayed in a table at the lower part of the <strong>Service View</strong>, where each row represents Entry data, and each column represents class attribute data. Non-native types&rsquo; attribute data is displayed using the <code>toString</code> returned value.</li>
+</ul>
+
+
+<div class='bs-callout bs-callout-info'><p>Make sure that the space includes the non-native attribute classes as part of its classpath, and that the relevant application has the correct codebase, so that the the query result set table can display non-native type attribute data correctly.</p>
+</div>
+
+
+
+
+
+<ul>
+<li>Exporting result set data into HTML, XML or CSV &ndash; to export the restored result set data, click the export button (<img src="../../attachment_files/query_export.gif" alt="query_export.gif" />). This displays the export dialog, which requires you to follow 2 simple steps, and then save the file to disk.</li>
+<li>Entry UID is displayed for each object data &ndash; when the SQL query includes the UID as part of the select statement (<code>select uid,\* from person</code>), the first column in the result set table displays the Entry UID.</li>
+
+<li><p>Space classes list query &ndash; to query the space for the classes it stores run the following query:</p>
+
+<p>SELECT * FROM SYSTABLES</p></li>
+
+<li><p>Class meta data information &ndash; to get the class meta data information, click the meta data button (<img src="../../attachment_files/query_metadata.gif" alt="query_metadata.gif" />). This displays a table in which each row includes information about the table column&rsquo;s meta data. This displays a translation of the relevant class attribute type into its SQL equivalent:</p></li>
+</ul>
+
+<p><img src="../../attachment_files/query_metadata_test.jpg" alt="query_metadata_test.jpg" /></p>
+
+<p>Scroll right to see more attributes:</p>
+
+<p><img src="../../attachment_files/query_metadata_2.jpg" alt="query_metadata_2.jpg" /></p>
+
+<p><img src="../../attachment_files/query_metadata_3.jpg" alt="query_metadata_3.jpg" /></p>
+
+<ul>
+<li>SQL queries can be saved to a file. Right-click the top of the <strong>Service View</strong> panel and click <strong>Save to file</strong>:</li>
+</ul>
+
+<div style="text-align:center"><p><img src="../../attachment_files/query_options.gif" alt="query_options.gif" /></p>
+</div>
+
+
+
+
+
+<span id="1"></span>
+
+<ul>
+<li>Inspecting objects using the <a href="./gigaspaces-browser-object-inspector.html">Object Inspector</a> or the <a href="./gigaspaces-browser-object-inspector.html">Object Snapshot Inspector</a>.</li>
+</ul>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

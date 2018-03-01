@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >XAP.NET in 5 Minutes</h1>
+<hr>
+
+
+<p>This tutorial explains how to deploy and use an XAP <a href="../overview/the-in-memory-data-grid.html">Data Grid</a> from a .NET client application.</p>
+
+<p><strong>Download and Install XAP</strong><br>
+GigaSpaces XAP.NET is packaged as a standard Windows Installer package (.msi file). After you have downloaded the latest version of XAP from the <a href="http://www.gigaspaces.com/xap-download" target="_blank" >downloads page <i class='fa fa-external-link'></i></a>, start the installation by double-click the msi file, and the installation wizard will pop up and guide you through the installation process.</p>
+
+<p>Once you accept the licence agreement, you will be asked to choose a setup type. Select &lsquo;Complete&rsquo; to install all the features in the default path (C:\GigaSpaces\XAP.NET X.x.x). Selecting &lsquo;Custom&rsquo; will allow you to customize the installation path, which features will be installed, and more.</p>
+
+<h1 id="starting-a-service-grid">Starting a Service Grid</h1>
+
+<p>A Data Grid requires a <a href="../overview/the-in-memory-data-grid.html">Service Grid</a> to host it. A service grid is composed of one or more machines (service grid nodes) running a <a href="../overview/the-runtime-environment.html#gsa">Service Grid Agent</a> (or <code>GSA</code>), and provides a framework to deploy and monitor applications on those machines, in our case the Data Grid.</p>
+
+<p>In this tutorial you&rsquo;ll launch a single node service grid on your machine. To start the service grid, simply run the <code>Gs-agent.exe</code> from the product&rsquo;s <code>bin</code> folder.</p>
+
+
+<div class='bs-callout bs-callout-success'>
+<b style="">Optional - The Web Console </b><br>
+<p>XAP provides a web-based tool for monitoring and management. From the <code>bin</code> folder start <code>Gs-webui.exe</code>, then browse to <code>http://localhost:8099</code>. Click the &lsquo;Login&rsquo; button and take a look at the <em>Dashboard</em> and <em>Hosts</em> tabs - you&rsquo;ll see the service grid components created on your machine.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<h1 id="deploying-the-data-grid">Deploying the Data Grid</h1>
+
+<p>The Data grid can be deployed from command line, from the web management tool or via an Administration API. In this tutorial we&rsquo;ll use the command line.</p>
+
+<p>Start a command line, navigate to the product&rsquo;s <code>bin</code> folder and run the following command:</p>
+
+<pre><code class="language-bash">gs-cli deploy-space -cluster total_members=2,1 myDataGrid
+</code></pre>
+
+<p>This command deploys a Data Grid (aka space) called <strong>myDataGrid</strong> with 2 partitions and 1 backup per partition (hence the <code>2,1</code> syntax).</p>
+
+<p>If you&rsquo;re using the web console mentioned above to see what&rsquo;s going on, you&rsquo;ll see the data grid has been deployed.</p>
+
+<h1 id="interacting-with-the-data-grid">Interacting with the Data Grid</h1>
+
+<h3 id="setting-up-your-ide">Setting up your IDE</h3>
+
+<p>Launch Visual Studio, create a new C# <em>Console Application</em> and add a reference to <strong>GigaSpaces.Core.dll</strong> from <code>C:\GigaSpaces\XAP.NET-12.3.0-x64\NET v4.0\Bin</code>. If you&rsquo;re new to Visual Studio and .NET, follow these instructions:</p>
+
+<div class="row"><div class="easyui-accordion" data-options="selected:'-1'" plain="true" style="margin-left:15px;margin-right:15px;height:auto;"><div title="How to create a XAP.NET Project in Visual Studio" style="padding:10px;"><ol>
+<li>Open Microsoft Visual Studio. From the <strong>File</strong> menu select <strong>New &gt; Project</strong>. The <strong>New Project</strong> dialog appears.</li>
+<li>In the <strong>Project types</strong> tree, select <strong>Visual C#</strong>, then select <strong>Console Application</strong> in the <strong>Templates</strong> list.</li>
+<li>In the <strong>Name</strong> test box, type <strong>XapDemo</strong>. If you wish, change the default location to a path you prefer.</li>
+<li>Select <strong>OK</strong> to continue. Visual Studio creates the project and opens the automatically generated <code>program.cs</code> file.</li>
+<li>From the <strong>Project</strong> menu, select <strong>Add Reference</strong>. The <strong>Add Reference</strong> dialog appears.</li>
+<li>Select the <strong>Browse</strong> tab, navigate to the XAP.NET installation folder (e.g. <strong>C:\GigaSpaces\XAP.NET-12.3.0-x64\NET v4.0</strong>). Go into the <strong>Bin</strong> folder, select <strong>GigaSpaces.Core.dll</strong>, and click <strong>OK</strong>.</li>
+<li>In the <strong>Solution Explorer</strong>, make sure you see <strong>GigaSpaces.Core</strong> in the project references. There&rsquo;s no need to reference any other assembly.</li>
+</ol>
+</div>
+
+</div></div>
+
+
+
+
+<div class='bs-callout bs-callout-danger'>If you&rsquo;re using XAP.NET x64, note that the <a href="http://connect.microsoft.com/VisualStudio/feedback/details/455103/new-c-console-application-targets-x86-by-default" target="_blank" >default platform for Console Applications is x86 <i class='fa fa-external-link'></i></a>, and you must <a href="http://msdn.microsoft.com/en-us/library/ms185328.aspx" target="_blank" >change it to x64 <i class='fa fa-external-link'></i></a>.</div>
+
+
+
+<h3 id="implementing-a-pono">Implementing a PONO</h3>
+
+<p>Any PONO can be stored in the space, so long as it has a default constructor and an ID property. For this tutorial let&rsquo;s define a <code>Person</code> class with the following properties:</p>
+
+<pre><code class="language-csharp">using GigaSpaces.Core.Metadata;
+
+public class Person
+{
+[SpaceID]
+public int? Ssn {get; set;}
+public String FirstName {get; set;}
+public String LastName  {get; set;}
+}
+</code></pre>
+
+<p>Note that we&rsquo;ve annotated the <code>Ssn</code> property with a custom XAP.NET attribute (<code>[SpaceID]</code>) to mark it as the entries ID.</p>
+
+<h3 id="interacting-with-the-grid">Interacting with the grid</h3>
+
+<p>First, let&rsquo;s establish a connection to the data grid we&rsquo;ve deployed:</p>
+
+<pre><code class="language-csharp">ISpaceProxy spaceProxy = new SpaceProxyFactory(&quot;myDataGrid&quot;).Create();
+</code></pre>
+
+<p>Now that we have a proxy connected to the data grid, we can store entries in the grid using the <code>Write()</code> method and read them using various <code>Read()</code> methods:</p>
+
+<pre><code class="language-csharp">Console.WriteLine(&quot;Write (store) a couple of entries in the data grid:&quot;);
+spaceProxy.Write(new Person {Ssn=1, FirstName=&quot;Vincent&quot;, LastName=&quot;Chase&quot;});
+spaceProxy.Write(new Person {Ssn=2, FirstName=&quot;Johnny&quot;, LastName=&quot;Drama&quot;});
+
+Console.WriteLine(&quot;Read (retrieve) an entry from the grid by its id:&quot;);
+Person result1 = spaceProxy.ReadById&lt;Person&gt;(1);
+
+Console.WriteLine(&quot;Read an entry from the grid using LINQ:&quot;);
+var query = from p in spaceProxy.Query&lt;Person&gt;()
+where p.FirstName == &quot;Johnny&quot;
+select p;
+Person result2 = spaceProxy.Read&lt;Person&gt;(query.ToSpaceQuery());
+
+Console.WriteLine(&quot;Read all entries of type Person from the grid:&quot;);
+Person[] results = spaceProxy.ReadMultiple(new Person());
+</code></pre>
+
+<p>If you&rsquo;re using the web console mentioned above to see what&rsquo;s going on, you&rsquo;ll see two entries stored in the grid, one in each partition.</p>
+
+<h3 id="hahahugoshortcode-6hbhb-full-source-code"> <span id="source"></span> Full Source Code</h3>
+
+<div class="row"><div class="easyui-accordion" data-options="selected:'-1'" plain="true" style="margin-left:15px;margin-right:15px;height:auto;"><div title="Program.cs" style="padding:10px;"><pre><code class="language-csharp">using System;
+using System.Linq;
+using GigaSpaces.Core;
+using GigaSpaces.Core.Linq;
+
+namespace XapDemo
+{
+class Program
+{
+static void Main(string[] args)
+{
+Console.WriteLine(&quot;Connecting to data grid...&quot;);
+ISpaceProxy spaceProxy = new SpaceProxyFactory(&quot;myDataGrid&quot;).Create();
+
+Console.WriteLine(&quot;Write (store) a couple of entries in the data grid:&quot;);
+spaceProxy.Write(new Person { Ssn = 1, FirstName = &quot;Vincent&quot;, LastName = &quot;Chase&quot; });
+spaceProxy.Write(new Person { Ssn = 2, FirstName = &quot;Johnny&quot;, LastName = &quot;Drama&quot; });
+
+Console.WriteLine(&quot;Read (retrieve) an entry from the grid by its id:&quot;);
+Person result1 = spaceProxy.ReadById&lt;Person&gt;(1);
+Console.WriteLine(&quot;Result: &quot; + result1);
+
+Console.WriteLine(&quot;Read an entry from the grid using LINQ:&quot;);
+var query = from p in spaceProxy.Query&lt;Person&gt;()
+where p.FirstName == &quot;Johnny&quot;
+select p;
+Person result2 = spaceProxy.Read&lt;Person&gt;(query.ToSpaceQuery());
+Console.WriteLine(&quot;Result: &quot; + result2);
+
+Console.WriteLine(&quot;Read all entries of type Person from the grid:&quot;);
+Person[] results = spaceProxy.ReadMultiple(new Person());
+Console.WriteLine(&quot;Result: &quot; + String.Join&lt;Person&gt;(&quot;,&quot;, results));
+
+Console.WriteLine(&quot;Demo completed - press ENTER to exit&quot;);
+Console.ReadLine();
+}
+}
+}
+</code></pre>
+</div>
+
+</div></div>
+
+
+
+<div class="row"><div class="easyui-accordion" data-options="selected:'-1'" plain="true" style="margin-left:15px;margin-right:15px;height:auto;"><div title="Person.cs" style="padding:10px;"><pre><code class="language-csharp">using System;
+using GigaSpaces.Core.Metadata;
+
+namespace XapDemo
+{
+public class Person
+{
+[SpaceId(AutoGenerate=false)]
+public int? Ssn { get; set; }
+
+[SpaceIndex(Type=SpaceIndexType.Basic)]
+public String FirstName { get; set; }
+
+public String LastName { get; set; }
+
+public override string ToString()
+{
+return &quot;Person #&quot; + Ssn + &quot;: &quot; + FirstName + &quot; &quot; + LastName;
+}
+}
+}
+</code></pre>
+</div>
+
+</div></div>
+
+
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

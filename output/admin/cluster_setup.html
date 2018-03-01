@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Cluster Setup for InsightEdge</h1>
+<hr>
+
+
+<p>In this tutorial, you will learn how to install and run the InsightEdge on a cluster.</p>
+
+<p>Please refer to <a href="../started/insightedge-script.html">InsightEdge Script</a> page for more info about the commands that will be used in this page.</p>
+
+<h1 id="starting-the-whole-cluster">Starting the whole cluster</h1>
+
+<p>Your cluster should consist of one master and a bunch of slaves:</p>
+
+<ul>
+<li>Master nodes usually have the Spark master and the Data Grid management running</li>
+<li>Slave nodes have Spark workers and Data Grid cluster members running on them</li>
+</ul>
+
+<p>The master nodes start XAP Manager along with Zookeeper for high availability. Therefore you need to configure the <code>XAP_MANAGER_SERVERS</code> in each machine. Please refer to the <a href="../admin/xap-manager.html">XAP Manager</a> page for more information.</p>
+
+<p>In addition, it is recommended to set the XAP_LOOKUP_GROUPS property that is used for discovering XAP component across the network.
+Please refer to the <a href="../started/common-environment-variables.html">Environment Variables</a> page for more advanced configurations.</p>
+
+<p>These configuration can be set in the <code>&lt;XAP_HOME&gt;/bin/setenv-overrides.sh/bar</code> file.</p>
+
+<h2 id="starting-master-nodes">Starting Master Nodes</h2>
+
+<p>Master nodes are consisted of XAP Manager and a Spark Master.</p>
+
+<p>On each Master node run the following:</p>
+
+<pre><code class="language-bash">insightedge run --master
+</code></pre>
+
+<h2 id="starting-worker-nodes">Starting Worker Nodes</h2>
+
+<p>Worker nodes are consisted of XAP Containers and a Spark Worker</p>
+
+<p>On each Worker node run the following:</p>
+
+<p>Use <code>--containers=n</code> if you wish to have XAP containers on the specific machine. If not specified, no XAP containers will be started</p>
+
+<pre><code class="language-bash">insightedge run --worker [--containers=n]
+</code></pre>
+
+<p>After installation you can verify that Spark slaves are up and running on the Spark master web UI at <code>http://your-master-ip-here:8080</code>.</p>
+
+<h1 id="deploying-empty-data-grid-space">Deploying empty Data Grid space</h1>
+
+<pre><code class="language-bash">#   topology 2,1 starts 2 primary partitions with 1 backup partition for each primary
+insightedge deploy-space --partitions=2 --backups insightedge-space
+</code></pre>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>

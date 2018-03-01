@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../css/prism.css"/><title></title>
+</head>
+<body>
+<h1 >Configuration</h1>
+<hr>
+
+
+<p>The processing unit&rsquo;s configuration is expressed using a number of configuration files, namely <code>pu.xml, sla.xml</code> and <code>pu.properties</code>, which are typically located under the <code>META-INF/spring</code> directory within the processing unit jar file.</p>
+
+<p>Each file is used to configure separate aspects of the processing unit. The <code>pu.xml</code> file is used to configure the actual elements that the processing unit contains, e.g. space and space proxies, event handles and remote service. Generally speaking, it contains of the application specific components of the processing unit.</p>
+
+<h1 id="the-pu-xml-file">The pu.xml file</h1>
+
+<p>This file is a <a href="http://www.springframework.org" target="_blank" >Spring framework <i class='fa fa-external-link'></i></a> XML configuration file. It leverages the Spring framework <a href="http://static.springframework.org/spring/docs/2.5.x/reference/beans.html" target="_blank" >IoC container <i class='fa fa-external-link'></i></a> and extends it by using the Spring <a href="http://static.springframework.org/spring/docs/2.5.x/reference/extensible-xml.html" target="_blank" >custom namespace mechanism <i class='fa fa-external-link'></i></a>.</p>
+
+<div class='bs-callout bs-callout-primary'>
+<b style="">See also:</b><br>
+<p>It is recommended (although not mandatory) that you familiarize yourself with the Spring XML configuration basics. A good place to start is <a href="http://static.springframework.org/spring/docs/2.5.x/reference/beans.html" target="_blank" >here <i class='fa fa-external-link'></i></a></p>
+
+</div> 
+
+<h1 id="pu-xml-contents">pu.xml Contents</h1>
+
+<p>The definitions in the <code>pu.xml</code> file are divided into 2 major categories:</p>
+
+<ul>
+<li><p>GigaSpaces specific components, such as <a href="./the-space-configuration.html#proxy">space</a>, <a href="./the-gigaspace-interface-overview.html">GigaSpace</a>, <a href="./messaging-support.html">event containers</a> or <a href="./space-based-remoting-overview.html">remote service exporters</a>.</p></li>
+
+<li><p>User defined beans, which define instances of user classes to be used by the processing unit. For example, user defined event handlers to which the event containers delegate events as those are received.</p></li>
+</ul>
+
+
+<div class='bs-callout bs-callout-info'>
+<b style="">SLA (Service Level Agreement) definitions </b><br>
+<p>the <code>pu.xml</code> may also contain <a href="../admin/the-sla-overview.html">SLA definitions</a>. In previous releases, this was the recommended way to define your processing unit&rsquo;s SLA. As of version 7.0, the recommended way to do it is to use a separate sla.xml file, which separates this deployment and runtime aspect from the the processing unit&rsquo;s components. This enables better modularization and reuse of the processing unit.</p>
+</div>
+
+
+
+
+
+<p>This section focuses on the overall structure of the <code>pu.xml</code> file. The various GigaSpaces components that can be included in the <code>pu.xml</code> (such as <a href="./messaging-support.html">event containers</a>, <a href="./space-based-remoting-overview.html">remote services</a> and others) are covered in detail in their respective sections in the programmer&rsquo;s guide.</p>
+
+<h1 id="multiple-configuration-options">Multiple Configuration Options</h1>
+
+<p>In recent versions (2.0 and 2.5), the Spring framework has introduced two additional ways to configure your Spring application.</p>
+
+<ul>
+<li><p>Extensive support for <a href="http://static.springframework.org/spring/docs/2.5.x/reference/beans.html#beans-annotation-config" target="_blank" >configuration through Java 5 annotations <i class='fa fa-external-link'></i></a> to simplify many of the configuration tasks a bring the configuration closer to the code</p></li>
+
+<li><p><a href="http://static.springframework.org/spring/docs/2.5.x/reference/extensible-xml.html" target="_blank" >Extensible XML schema <i class='fa fa-external-link'></i></a> through the use of custom namespaces and namespace handlers. This allows for products like GigaSpaces (or even Spring itself) to create their own XML elements for simplifying the configuration of their specific components instead of using the plain Spring XML syntax
+Naturally, GigaSpaces XAP also leverages the extensibility of the above two mechanisms and enables users to configure the processing unit through GigaSpaces-specific XML elements and Java 5 annotations.</p></li>
+</ul>
+
+<p>Throughout this guide, every configuration example will be provided in all of the supported forms (plain Spring, custom namespace element and annotations). See below for an example pu.xml configuration file.</p>
+
+<h1 id="sample-pu-xml-configuration">Sample pu.xml Configuration</h1>
+
+<p>Here&rsquo;s a sample <code>pu.xml</code> configuration file. Note the comments in the file which describe the various elements that appear in it.</p>
+
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!--
+top level element of the Spring configuration. Note the multiple namespace definition for both
+GigaSpaces and Spring. You can simply copy and paste this portion of the pu.xml file
+--&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+xmlns:os-core=&quot;http://www.openspaces.org/schema/core&quot;
+xmlns:os-events=&quot;http://www.openspaces.org/schema/events&quot;
+xmlns:os-remoting=&quot;http://www.openspaces.org/schema/remoting&quot;
+xmlns:os-sla=&quot;http://www.openspaces.org/schema/sla&quot;
+xsi:schemaLocation=&quot;
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+http://www.openspaces.org/schema/core http://www.openspaces.org/schema/12.3/core/openspaces-core.xsd
+http://www.openspaces.org/schema/events http://www.openspaces.org/schema/12.3/events/openspaces-events.xsd
+http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/12.3/remoting/openspaces-remoting.xsd
+http://www.openspaces.org/schema/sla http://www.openspaces.org/schema/12.3/sla/openspaces-sla.xsd&quot;&gt;
+
+&lt;!-- Enables to configure Spring beans through annotations   --&gt;
+&lt;context:annotation-config /&gt;
+
+&lt;!-- Enable @PostPrimary and others annotation support. --&gt;
+&lt;os-core:annotation-support /&gt;
+
+&lt;!-- Enables using @Polling and @Notify annotations to creating polling and notify containers  --&gt;
+&lt;os-events:annotation-support /&gt;
+
+&lt;!-- Enables using @RemotingService and other remoting related annotations   --&gt;
+&lt;os-remoting:annotation-support /&gt;
+
+&lt;!--
+A bean representing a Space. Here we configure an embedded space. Note
+that we do not specify here the cluster topology of the Space. It is
+declared by the os-sla:sla element of this pu.xml file.
+--&gt;
+&lt;os-core:embedded-space id=&quot;space&quot; space-name=&quot;mySpace&quot;/&gt;
+
+&lt;!-- Defines a distributed transaction manager.--&gt;
+&lt;os-core:distributed-tx-manager id=&quot;transactionManager&quot; /&gt;
+
+&lt;!-- Define the GigaSpace instance that the application will use to access the space  --&gt;
+&lt;os-core:giga-space id=&quot;gigaSpace&quot; space=&quot;space&quot; tx-manager=&quot;transactionManager&quot;/&gt;
+
+&lt;/beans&gt;
+</code></pre>
+
+<h1 id="importing-xml-files-into-the-pu-xml">Importing xml files into the pu.xml</h1>
+
+<p>To import one more more xml files into your pu.xml you can use the following:</p>
+
+<pre><code class="language-xml">&lt;import resource=&quot;classpath*:/applicationContext-component.xml&quot; /&gt;
+&lt;import resource=&quot;classpath*:/applicationContext-matching.xml&quot;/&gt;
+&lt;import resource=&quot;classpath*:/applicationContext-services.xml&quot;/&gt;
+&lt;import resource=&quot;classpath*:/applicationContext-jmx.xml&quot; /&gt;
+&lt;import resource=&quot;classpath*:/applicationContext-containers.xml&quot;/&gt;
+</code></pre>
+
+</body>
+<script src="../../js/prism.js"></script>
+</html>
